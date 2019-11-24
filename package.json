@@ -1,0 +1,34 @@
+{
+  "name": "made-blog",
+  "version": "1.0.0",
+  "description": "Simple blog software for developers.",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "bootstrap": "^4.3.1",
+    "jquery": "^3.4.1",
+    "lazysizes": "^5.2.0-beta1",
+    "popper.js": "^1.16.0",
+    "small-module-js": "^1.0.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^9.7.2",
+    "cssnano": "^4.1.10",
+    "del": "^5.1.0",
+    "gulp": "^4.0.2",
+    "gulp-concat": "^2.6.1",
+    "gulp-imagemin": "^6.2.0",
+    "gulp-minify": "^3.1.0",
+    "gulp-postcss": "^8.0.0",
+    "gulp-rename": "^1.4.0",
+    "gulp-responsive": "^3.0.1",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.5",
+    "minimist": "^1.2.0",
+    "node-sass": "^4.13.0"
+  },
+  "private": true
+}

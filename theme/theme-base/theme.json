@@ -1,0 +1,105 @@
+{
+  "__comment__": "The 'src', 'dest' and 'del' paths are relative to the root directory! Some are not (when part of the configuration for a special gulp extension).",
+  "style": {
+    "src": "./theme/theme-base/asset/style/main.scss",
+    "dest": "./public/asset/style",
+    "map": "./map",
+    "del": "./public/asset/style/**"
+  },
+  "script": {
+    "add": [
+      "./node_modules/jquery/dist/jquery.js",
+      "./node_modules/popper.js/dist/umd/popper.js",
+      "./node_modules/bootstrap/dist/js/bootstrap.js",
+      "./node_modules/lazysizes/lazysizes.js",
+      "./node_modules/lazysizes/plugins/bgset/ls.bgset.js",
+      "./node_modules/small-module-js/src/main.js"
+    ],
+    "src": "./theme/theme-base/asset/script/*.js",
+    "dest": "./public/asset/script",
+    "map": "./map",
+    "rename": {
+      "concat": "main.js",
+      "src": ".js",
+      "min": ".min.js"
+    },
+    "del": "./public/asset/script/**"
+  },
+  "image": {
+    "src": "./theme/theme-base/asset/image/**/*.{png,jpg,jpeg,gif,svg}",
+    "dest": "./public/asset/image",
+    "del": "./public/asset/image/**",
+    "responsive": {
+      "src": [
+        "./theme/theme-base/asset/image/**/*.{png,jpg}",
+        "!./theme/theme-base/asset/image/responsive"
+      ],
+      "dest": "./theme/theme-base/asset/image/responsive",
+      "del": "./theme/theme-base/asset/image/responsive/**",
+      "config": {
+        "*.png": [
+          {
+            "width": 540,
+            "rename": {
+              "suffix": "-540"
+            }
+          },
+          {
+            "width": 720,
+            "rename": {
+              "suffix": "-720"
+            }
+          },
+          {
+            "width": 960,
+            "rename": {
+              "suffix": "-960"
+            }
+          },
+          {
+            "width": 1140,
+            "rename": {
+              "suffix": "-1140"
+            }
+          },
+          {
+            "rename": {
+              "suffix": "-original"
+            }
+          }
+        ],
+        "*.jpg": [
+          {
+            "width": 540,
+            "rename": {
+              "suffix": "-540"
+            }
+          },
+          {
+            "width": 720,
+            "rename": {
+              "suffix": "-720"
+            }
+          },
+          {
+            "width": 960,
+            "rename": {
+              "suffix": "-960"
+            }
+          },
+          {
+            "width": 1140,
+            "rename": {
+              "suffix": "-1140"
+            }
+          },
+          {
+            "rename": {
+              "suffix": "-original"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

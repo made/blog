@@ -1,0 +1,12 @@
+# Project
+
+.idea/
+
+# Library
+
+node_modules/
+
+# Asset
+
+asset/image/responsive
+!asset/image/responsive/.gitignore

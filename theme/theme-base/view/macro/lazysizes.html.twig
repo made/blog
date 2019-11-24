@@ -1,0 +1,32 @@
+{%- macro srcset(src) -%}
+    {%- set src_part = (src|split('/')) -%}
+
+    {%- set src_path = src_part[:-1] -%}
+    {%- set src_path = src_path|join('/') ~ '/responsive' -%}
+
+    {%- set src_file = src_part[-1:] -%}
+    {%- set src_file = src_file|first -%}
+
+    {%- set src_file_part = src_file|split('.') -%}
+
+    {%- set src_file_name = src_file_part[:-1] -%}
+    {%- set src_file_name = src_file_name|join('.') -%}
+    {%- set src_file_extension = src_file_part[-1:] -%}
+    {%- set src_file_extension = src_file_extension|first -%}
+
+    {%- if src_file_extension == 'jpg' -%}
+        {%- set src_file_extension = 'jpeg' -%}
+    {%- endif -%}
+
+    {%- set list = [
+        'original',
+        540,
+        720,
+        960,
+        1140,
+    ] -%}
+
+    {%- for item in list -%}
+        {{- (src_path) ~ '/' ~ (src_file_name ~ '-' ~ item ~ '.' ~ src_file_extension) ~ (item == 'original' ? '' : (' ' ~ item ~ 'w')) ~ (loop.last ? '' : ', ') -}}
+    {%- endfor -%}
+{%- endmacro -%}

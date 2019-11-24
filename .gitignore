@@ -1,0 +1,34 @@
+# Project
+
+.idea/
+
+# Library
+
+node_modules/
+vendor/
+
+# Content
+
+/content/*
+!/content/.gitignore
+
+# Temporary
+
+/var/*
+!/var/.gitignore
+
+!/var/log
+/var/log/*
+!/var/log/.gitignore
+
+!/var/cache
+/var/cache/*
+!/var/cache/.gitignore
+
+!/var/cache/twig
+/var/cache/twig/*
+!/var/cache/twig/.gitignore
+
+# Public
+
+/public/asset
