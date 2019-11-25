@@ -17,10 +17,12 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+use App\Package;
 use Pimple\Container;
 use Pimple\Psr11\Container as Psr11Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\App;
 use Slim\Factory\AppFactory;
 
 // The php built-in web-server's version of rewrites...
@@ -53,6 +55,13 @@ $app = AppFactory::create();
 // Add Routing Middleware.
 $app->addRoutingMiddleware();
 
+// TODO: Find a better solution (give $app to package instead of putting it directly into the container).
+$container[App::class] = $app;
+
+$container->register(new \Made\Blog\Engine\Package());
+// TODO: Change namespace.
+$container->register(new Package());
+
 /*
  * Add Error Handling Middleware.
  *
@@ -63,10 +72,6 @@ $app->addRoutingMiddleware();
  * Note: This middleware should be added last. It will not handle any exceptions/errors for middleware added after it.
  */
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
-
-$container->register(new \Made\Blog\Engine\Package());
-// TODO: Change namespace.
-$container->register(new \App\Package());
 
 // TODO: Move to another file if needed.
 $app->get('/{slug:.*}', function (Request $request, Response $response, array $args) {

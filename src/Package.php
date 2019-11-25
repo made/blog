@@ -22,6 +22,9 @@ namespace App;
 
 use Made\Blog\Engine\Package\PackageAbstract;
 use Pimple\Container;
+use Slim\App;
+use Slim\Views\Twig;
+use Slim\Views\TwigMiddleware;
 
 /**
  * Class Package
@@ -39,5 +42,23 @@ class Package extends PackageAbstract
     public function register(Container $pimple): void
     {
         // TODO: Implement register() method.
+
+        $this->register3rdPartyDependency($pimple);
+    }
+
+    private function register3rdPartyDependency(Container $container)
+    {
+        $this->registerService($container, Twig::class, function (Container $container) {
+            // TODO: Register and use configuration.
+            $path = dirname(__DIR__) . '/theme/theme-base/view';
+
+            return Twig::create($path, [
+                'cache' => false,
+            ]);
+        });
+
+        // TODO: Clean up this mess:
+        $app = $container[App::class];
+        $app->add(TwigMiddleware::createFromContainer($app, Twig::class));
     }
 }
