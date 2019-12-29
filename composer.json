@@ -5,7 +5,7 @@
     "license": "MIT",
     "minimum-stability": "stable",
     "require": {
-        "php": "^7.3",
+        "php": ">=7.1 <7.4",
         "slim/slim": "^4.0",
         "erusev/parsedown": "^1.7",
         "slim/twig-view": "^3.0.0-dev",
