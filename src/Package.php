@@ -46,7 +46,10 @@ class Package extends PackageAbstract
         $this->register3rdPartyDependency($pimple);
     }
 
-    private function register3rdPartyDependency(Container $container)
+    /**
+     * @param Container $container
+     */
+    private function register3rdPartyDependency(Container $container): void
     {
         $this->registerService($container, Twig::class, function (Container $container) {
             // TODO: Register and use configuration.
