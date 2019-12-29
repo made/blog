@@ -81,6 +81,8 @@ class Package extends PackageAbstract
         });
 
         $this->app->add(TwigMiddleware::createFromContainer($this->app, Twig::class));
+
+        // TODO: monolog!
     }
 
     /**
