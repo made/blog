@@ -84,10 +84,9 @@ option = (function (option) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// TODO: Use configuration from the json file.
-//const configuration = require('./app/configuration.json');
+const configuration = require('./app/configuration.json');
 
-const path = require('./theme/theme-base/theme.json');
+const path = require(`./theme/${configuration.engine.theme}/theme`);
 
 // Configuration format:
 // const path = {
