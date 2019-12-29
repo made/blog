@@ -1,0 +1,14 @@
+{
+    "name": "made/task-chain",
+    "description": "Small library for the task chain pattern.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "GameplayJDK",
+            "email": "github@gameplayjdk.de"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
