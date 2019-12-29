@@ -36,9 +36,18 @@ class Package extends PackageAbstract
      * It should not get services.
      *
      * @param Container $pimple A container instance
+     * @throws Exception\PackageException
      */
     public function register(Container $pimple): void
     {
-        // TODO: Implement register() method.
+        if (!$this->hasConfigurationSupport($pimple)) {
+            $this->addConfigurationSupport($pimple);
+        }
+
+        $this->registerConfiguration($pimple, 'engine', [
+            'foo' => 'bar',
+            'z' => false
+        ]);
+
     }
 }
