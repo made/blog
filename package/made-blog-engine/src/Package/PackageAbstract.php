@@ -21,9 +21,9 @@
 
 namespace Made\Blog\Engine\Package;
 
-use Made\Blog\Engine\Exception\PackageException;
 use ArrayObject;
 use Closure;
+use Made\Blog\Engine\Exception\PackageException;
 use Pimple\Container;
 
 /**
@@ -93,7 +93,7 @@ abstract class PackageAbstract implements PackageInterface
      * @return bool
      * @throws PackageException
      */
-    private function hasTagSupport(Container $container, bool $shouldThrow = false): bool
+    protected function hasTagSupport(Container $container, bool $shouldThrow = false): bool
     {
         $tagSupport = (isset($container[static::SERVICE_NAME_TAG]) && ($container[static::SERVICE_NAME_TAG] instanceof ArrayObject));
 
@@ -152,7 +152,7 @@ abstract class PackageAbstract implements PackageInterface
      * @return bool
      * @throws PackageException
      */
-    private function hasConfigurationSupport(Container $container, bool $shouldThrow = false): bool
+    protected function hasConfigurationSupport(Container $container, bool $shouldThrow = false): bool
     {
         $configurationSupport = (isset($container[static::SERVICE_NAME_CONFIGURATION])) && (is_array($container[static::SERVICE_NAME_CONFIGURATION]));
 

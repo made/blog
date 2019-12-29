@@ -18,11 +18,11 @@
  */
 
 use App\Package;
+use Made\Blog\Engine\Service\ConfigurationService;
 use Pimple\Container;
 use Pimple\Psr11\Container as Psr11Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\App;
 use Slim\Factory\AppFactory;
 
 // The php built-in web-server's version of rewrites...
@@ -41,7 +41,14 @@ if (PHP_SAPI == 'cli-server') {
 
 require __DIR__ . '/../vendor/autoload.php';
 
-$container = new Container();
+// ToDo: Currently there are exception thrown in this loader. Maybe come up with a generic solution for all exceptions.
+$configuration = ConfigurationService::loadConfiguration(dirname(__DIR__));
+
+//$configuration[Package::SERVICE_NAME_CONFIGURATION] = json_decode(file_get_contents(__DIR__ . '/configuration.json'), true);
+//
+//$configuration['base_dir'] = dirname(__DIR__);
+
+$container = new Container($configuration);
 AppFactory::setContainer(new Psr11Container($container));
 
 /**
@@ -51,7 +58,6 @@ AppFactory::setContainer(new Psr11Container($container));
  * choice e.g.: Slim PSR-7 and a supported ServerRequest creator (included with Slim PSR-7).
  */
 $app = AppFactory::create();
-
 // Add Routing Middleware.
 $app->addRoutingMiddleware();
 
