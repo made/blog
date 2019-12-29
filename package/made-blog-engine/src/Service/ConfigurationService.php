@@ -49,9 +49,10 @@ class ConfigurationService
             throw new InvalidFormatException('Unfortunately the configuration.json is empty or has invalid values.');
         }
 
+        $configFile['root_directory'] = $rootDirectory;
+
         $configuration = [];
         $configuration[Package::SERVICE_NAME_CONFIGURATION] = $configFile;
-        $configuration[Package::SERVICE_NAME_CONFIGURATION]['root_directory'] = $rootDirectory;
 
         return $configuration;
     }
