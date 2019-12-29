@@ -1,7 +1,7 @@
 {
   "__comment__": "TODO: use this configuration inside the gulpfile.",
-  "theme": "theme-base",
   "engine": {
+    "theme": "theme-base",
     "foo": "baz"
   }
 }

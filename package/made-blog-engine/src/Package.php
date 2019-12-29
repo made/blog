@@ -19,6 +19,7 @@
 
 namespace Made\Blog\Engine;
 
+use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\PackageAbstract;
 use Pimple\Container;
 
@@ -29,6 +30,8 @@ use Pimple\Container;
  */
 class Package extends PackageAbstract
 {
+    protected const SERVICE_NAME = 'engine';
+
     /**
      * Registers services on the given container.
      *
@@ -44,10 +47,17 @@ class Package extends PackageAbstract
             $this->addConfigurationSupport($pimple);
         }
 
-        $this->registerConfiguration($pimple, 'engine', [
-            'foo' => 'bar',
-            'z' => false
+        $this->registerConfiguration($pimple, static::SERVICE_NAME, [
+            'theme' => 'theme-base',
         ]);
 
+        $configuration = $pimple[static::SERVICE_NAME_CONFIGURATION];
+
+        $this->registerService($pimple, static::SERVICE_NAME, function (Container $container) use ($configuration): Configuration {
+            $settings = $configuration['engine'];
+            return (new Configuration())
+                ->setRootDirectory($configuration['root_directory'])
+                ->setTheme($settings['theme']);
+        });
     }
 }
