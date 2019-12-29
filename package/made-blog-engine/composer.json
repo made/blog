@@ -1,9 +1,15 @@
 {
-    "name": "made/task-chain",
-    "description": "Small library for the task chain pattern.",
+    "name": "made/blog-engine",
+    "description": "Blog engine library for made/blog.",
     "type": "library",
     "license": "MIT",
     "minimum-stability": "stable",
+    "require": {
+        "psr/log": "^1.1",
+        "pimple/pimple": "^3.2",
+        "twig/twig": "^3.0",
+        "erusev/parsedown": "^1.7"
+    },
     "authors": [
         {
             "name": "GameplayJDK",
@@ -14,10 +20,9 @@
             "email": "dennis@dennzo.com"
         }
     ],
-    "require": {},
     "autoload": {
         "psr-4": {
-            "Made\\TaskChain\\": "src/"
+            "Made\\Blog\\Engine\\": "src/"
         }
     }
 }

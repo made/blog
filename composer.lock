@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "652cf6ecff65add9f430b9fb131af0c9",
+    "content-hash": "2cf6d7c9d7d04acaa7ecfca3f8b9ba23",
     "packages": [
         {
             "name": "erusev/parsedown",
@@ -101,6 +101,70 @@
                 "response"
             ],
             "time": "2018-11-19T16:19:58+00:00"
+        },
+        {
+            "name": "made/blog-engine",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "package/made-blog-engine",
+                "reference": "62d3660ea75bf63b378c8df3916d1c1537a129ee"
+            },
+            "require": {
+                "erusev/parsedown": "^1.7",
+                "pimple/pimple": "^3.2",
+                "psr/log": "^1.1",
+                "twig/twig": "^3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Made\\Blog\\Engine\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "GameplayJDK",
+                    "email": "github@gameplayjdk.de"
+                },
+                {
+                    "name": "Dennis Barlowe",
+                    "email": "dennis@dennzo.com"
+                }
+            ],
+            "description": "Blog engine library for made/blog."
+        },
+        {
+            "name": "made/task-chain",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "package/made-task-chain",
+                "reference": "abae0f25f554896f19bdee9f57600bbfbb00aa94"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Made\\TaskChain\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "GameplayJDK",
+                    "email": "github@gameplayjdk.de"
+                },
+                {
+                    "name": "Dennis Barlowe",
+                    "email": "dennis@dennzo.com"
+                }
+            ],
+            "description": "Small library for the task chain pattern."
         },
         {
             "name": "nikic/fast-route",
@@ -454,6 +518,53 @@
                 "response"
             ],
             "time": "2018-10-30T17:12:04+00:00"
+        },
+        {
+            "name": "psr/log",
+            "version": "1.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/log.git",
+                "reference": "446d54b4cb6bf489fc9d75f55843658e6f25d801"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/446d54b4cb6bf489fc9d75f55843658e6f25d801",
+                "reference": "446d54b4cb6bf489fc9d75f55843658e6f25d801",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Log\\": "Psr/Log/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for logging libraries",
+            "homepage": "https://github.com/php-fig/log",
+            "keywords": [
+                "log",
+                "psr",
+                "psr-3"
+            ],
+            "time": "2019-11-01T11:05:21+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -901,11 +1012,15 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "made/blog-engine": 20,
+        "made/task-chain": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.1 <7.4"
+        "php": ">=7.1 <7.4",
+        "ext-json": "*"
     },
     "platform-dev": []
 }

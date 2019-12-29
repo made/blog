@@ -7,18 +7,35 @@
     "require": {
         "php": ">=7.1 <7.4",
         "ext-json": "*",
-        "pimple/pimple": "~3.0",
         "slim/slim": "^4.0",
         "slim/psr7": "^0.6.0",
-        "slim/twig-view": "3.0",
-        "twig/twig": "^3.0",
-        "erusev/parsedown": "^1.7"
+        "slim/twig-view": "^3.0",
+        "made/blog-engine": "dev-master",
+        "made/task-chain": "dev-master"
     },
+    "authors": [
+        {
+            "name": "GameplayJDK",
+            "email": "github@gameplayjdk.de"
+        },
+        {
+            "name": "Dennis Barlowe",
+            "email": "dennis@dennzo.com"
+        }
+    ],
     "autoload": {
         "psr-4": {
-            "App\\": "src/",
-            "Made\\Blog\\Engine\\": "package/made-blog-engine/src/",
-            "Made\\TaskChain\\": "package/made-task-chain/src/"
+            "App\\": "src/"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "package/made-blog-engine"
+        },
+        {
+            "type": "path",
+            "url": "package/made-task-chain"
+        }
+    ]
 }

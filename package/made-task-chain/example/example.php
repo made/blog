@@ -18,7 +18,7 @@
  *
  */
 
-require __DIR__ . '/../../../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 use Made\TaskChain\TaskChain;
 use Made\TaskChain\TaskInterface;

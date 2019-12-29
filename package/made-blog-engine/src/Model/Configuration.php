@@ -36,7 +36,9 @@ class Configuration
      */
     private $rootDirectory;
 
-
+    /**
+     * @return bool
+     */
     public function hasTheme(): bool
     {
         return !empty($this->theme);

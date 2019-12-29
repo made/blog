@@ -65,6 +65,8 @@ class Package extends PackageAbstract
     private function register3rdPartyDependency(Container $container): void
     {
         $this->registerService($container, Twig::class, function (Container $container) {
+            // TODO: Use FilesystemLoader#addPath() instead of constructing twig inside another class.
+
             return (new ThemeLoadingService($container['engine']))
                 ->loadTheme();
         });
