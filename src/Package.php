@@ -32,6 +32,20 @@ use Slim\Views\TwigMiddleware;
 class Package extends PackageAbstract
 {
     /**
+     * @var App
+     */
+    private $app;
+
+    /**
+     * Package constructor.
+     * @param App $app
+     */
+    public function __construct(App $app)
+    {
+        $this->app = $app;
+    }
+
+    /**
      * Registers services on the given container.
      *
      * This method should only be used to configure services and parameters.
@@ -60,8 +74,6 @@ class Package extends PackageAbstract
             ]);
         });
 
-        // TODO: Clean up this mess:
-        $app = $container[App::class];
-        $app->add(TwigMiddleware::createFromContainer($app, Twig::class));
+        $this->app->add(TwigMiddleware::createFromContainer($this->app, Twig::class));
     }
 }

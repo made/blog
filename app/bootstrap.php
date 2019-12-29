@@ -55,12 +55,9 @@ $app = AppFactory::create();
 // Add Routing Middleware.
 $app->addRoutingMiddleware();
 
-// TODO: Find a better solution (give $app to package instead of putting it directly into the container).
-$container[App::class] = $app;
-
 $container->register(new \Made\Blog\Engine\Package());
 // TODO: Change namespace.
-$container->register(new Package());
+$container->register(new Package($app));
 
 /*
  * Add Error Handling Middleware.
