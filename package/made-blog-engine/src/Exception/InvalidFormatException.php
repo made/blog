@@ -17,66 +17,11 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Model;
+namespace Made\Blog\Engine\Exception;
 
-/**
- * Class Configuration
- *
- * @package Made\Blog\Engine\Model
- */
-class Configuration
+use Exception;
+
+class InvalidFormatException extends Exception
 {
-    /**
-     * @var string
-     */
-    private $theme;
 
-    /**
-     * @var string
-     */
-    private $rootDirectory;
-
-
-    public function hasTheme(): bool
-    {
-        return !empty($this->theme);
-    }
-
-    /** generated methods */
-
-    /**
-     * @return string
-     */
-    public function getTheme(): string
-    {
-        return $this->theme;
-    }
-
-    /**
-     * @param string $theme
-     * @return Configuration
-     */
-    public function setTheme(string $theme): Configuration
-    {
-        $this->theme = $theme;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRootDirectory(): string
-    {
-        return $this->rootDirectory;
-    }
-
-    /**
-     * @param string $rootDirectory
-     * @return Configuration
-     */
-    public function setRootDirectory(string $rootDirectory): Configuration
-    {
-        $this->rootDirectory = $rootDirectory;
-        return $this;
-    }
 }
