@@ -23,12 +23,13 @@ use Made\Blog\Engine\Exception\ThemeNotFoundException;
 use Made\Blog\Engine\Model\Configuration;
 use Slim\Views\Twig;
 use Twig\Error\LoaderError;
+use Twig\Loader\FilesystemLoader;
 
 /**
  * Class ThemeLoadingService
  * @package Made\Blog\Engine\Service
  */
-class ThemeLoadingService
+class ThemeService
 {
     /**
      * ToDo: Put this in the config object which is stored in the container
@@ -48,39 +49,58 @@ class ThemeLoadingService
     protected const THEME_CONFIGURATION_NAME = 'theme';
 
     /**
+     * @var Twig
+     */
+    private $twig;
+
+    /**
      * @var Configuration
      */
     protected $configuration;
 
+
+
     /**
      * ThemeLoadingService constructor.
+     * @param Twig $twig
      * @param Configuration $configuration
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(Twig $twig, Configuration $configuration)
     {
+        $this->twig = $twig;
         $this->configuration = $configuration;
     }
 
+    // TODO: Load all themes.
+
     /**
-     * @return Twig
+     * @return ThemeService
      * @throws LoaderError
      * @throws ThemeNotFoundException
      */
-    public function loadTheme()
+    public function loadTheme(): ThemeService
     {
         if (!$this->configuration->hasTheme()) {
             throw new ThemeNotFoundException('No configured theme has been found in the configuration.');
         }
 
-        // ToDo: Path cleaner
+        // ToDo: Path cleaner.
         $path = $this->configuration->getRootDirectory() . '/' . static::THEME_BASE_DIRECTORY . '/' . $this->configuration->getTheme() . '/' . static::THEME_VIEW_DIRECTORY;
 
         if (!is_dir($path)) {
             throw new ThemeNotFoundException('Unfortunately there is no theme called ' . $this->configuration->getTheme() . '. Please check your configuration.');
         }
 
-        return Twig::create($path, [
-            'cache' => false, // ToDo: Caching should be configurable - due to development it is deactived for now
-        ]);
+        // TODO: Negotiate template namespace name.
+        $loader = $this->twig->getLoader();
+
+        if (!($loader instanceof FilesystemLoader)) {
+            throw new ThemeNotFoundException('Themes are only supported using the twig filesystem loader.');
+        }
+
+        /** @var FilesystemLoader $loader */
+        $loader->addPath($path);
+
+        return $this;
     }
 }

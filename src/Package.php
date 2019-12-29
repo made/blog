@@ -20,8 +20,9 @@
 
 namespace App;
 
+use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\PackageAbstract;
-use Made\Blog\Engine\Service\ThemeLoadingService;
+use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
 use Slim\App;
 use Slim\Views\Twig;
@@ -57,6 +58,8 @@ class Package extends PackageAbstract
     public function register(Container $pimple): void
     {
         $this->register3rdPartyDependency($pimple);
+
+        $this->registerThemeUtilities($pimple);
     }
 
     /**
@@ -67,10 +70,35 @@ class Package extends PackageAbstract
         $this->registerService($container, Twig::class, function (Container $container) {
             // TODO: Use FilesystemLoader#addPath() instead of constructing twig inside another class.
 
-            return (new ThemeLoadingService($container['engine']))
-                ->loadTheme();
+            // TODO: THIS DOES NOT WORK. Null IS NO VALID VALUE. use $themeService->getThemePath()
+            $twig = Twig::create(null, [
+                'cache' => false, // ToDo: Caching should be configurable - due to development it is deactived for now
+            ]);
+
+//            $themeService->loadAllThemes($tiwg) or something
+
+            return $twig;
         });
 
         $this->app->add(TwigMiddleware::createFromContainer($this->app, Twig::class));
+    }
+
+    /**
+     *
+     * TODO: Call before the other, so the getThemePath()
+     *
+     * @param Container $container
+     */
+    private function registerThemeUtilities(Container $container): void
+    {
+        $this->registerService($container, ThemeService::class, function (Container $container): ThemeService {
+            /** @var Twig $twig */
+            $twig = $container[Twig::class]; // TODO: no argument, use as function parameter instead
+            /** @var Configuration $engine */
+            $engine = $container['engine'];
+
+            return (new ThemeService($twig, $engine))
+                ->loadTheme();
+        });
     }
 }
