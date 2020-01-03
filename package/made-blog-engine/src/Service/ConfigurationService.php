@@ -1,7 +1,7 @@
 <?php
 /**
  * The MIT License (MIT)
- * Copyright (c) 2019 Made
+ * Copyright (c) 2020 Made
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -19,41 +19,91 @@
 
 namespace Made\Blog\Engine\Service;
 
-use App\Package;
-use Made\Blog\Engine\Exception\FileNotFoundException;
-use Made\Blog\Engine\Exception\InvalidFormatException;
+use Made\Blog\Engine\Exception\ConfigurationException;
+use Made\Blog\Engine\Help\File;
+use Made\Blog\Engine\Help\Json;
+use Made\Blog\Engine\Help\Path;
+use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Package\PackageAbstract;
 
 /**
  * Class ConfigurationService
+ *
  * @package Made\Blog\Engine\Service
  */
 class ConfigurationService
 {
-    private const FILE_NAME_CONFIGURATION = '/app/configuration.json';
+    // This class has potential to use the strategy pattern for loading of configuration. Keep that in mind.
 
     /**
-     * @param string $rootDirectory
-     * @return array
-     * @throws FileNotFoundException
-     * @throws InvalidFormatException
+     * Path to the configuration file relative to the root directory.
      */
-    public static function loadConfiguration(string $rootDirectory): array
+    const PATH_CONFIGURATION = '/app/configuration.json';
+
+    /**
+     * @var string
+     */
+    private $path;
+
+    /**
+     * ConfigurationService constructor.
+     * @param string $path
+     */
+    public function __construct(string $path)
     {
-        if (!file_exists($rootDirectory . static::FILE_NAME_CONFIGURATION)) {
-            throw new FileNotFoundException('Unfortunately the configuration.json file is not found in ' . $rootDirectory . '/app/');
+        $this->path = $path;
+    }
+
+    /**
+     * @param bool $shouldThrow
+     * @return array
+     * @throws ConfigurationException
+     */
+    public function getConfiguration(bool $shouldThrow = false): array
+    {
+        $content = $this->getContent();
+        if (empty($content) && $shouldThrow) {
+            // TODO: Add proper exception message.
+            throw new ConfigurationException();
         }
 
-        $configFile = json_decode(file_get_contents($rootDirectory . static::FILE_NAME_CONFIGURATION), true);
-
-        if (!$configFile) {
-            throw new InvalidFormatException('Unfortunately the configuration.json is empty or has invalid values.');
-        }
-
-        $configFile['root_directory'] = $rootDirectory;
+        $content[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY] = $this->path;
 
         $configuration = [];
-        $configuration[Package::SERVICE_NAME_CONFIGURATION] = $configFile;
+        $configuration[PackageAbstract::SERVICE_NAME_CONFIGURATION] = $content;
 
         return $configuration;
+    }
+
+    /**
+     * @return array
+     */
+    private function getContent(): array
+    {
+        $path = $this->getConfigurationPath();
+
+        $content = File::read($path);
+        return Json::decode($content);
+    }
+
+    /**
+     * @return string
+     */
+    private function getConfigurationPath(): string
+    {
+        return Path::join(...[
+            $this->path,
+            static::PATH_CONFIGURATION,
+        ]);
+    }
+
+    /** generated methods */
+
+    /**
+     * @return string
+     */
+    public function getPath(): string
+    {
+        return $this->path;
     }
 }

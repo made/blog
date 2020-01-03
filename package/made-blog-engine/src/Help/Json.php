@@ -2,6 +2,7 @@
 /**
  * The MIT License (MIT)
  * Copyright (c) 2020 Made
+ * Written by GameplayJDK
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,77 +18,65 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Model;
+namespace Made\Blog\Engine\Help;
 
 /**
- * Class Configuration
+ * Class Json
  *
- * @package Made\Blog\Engine\Model
+ * TODO: Move static helper classes to package gameplayjdk/static-help.
+ *
+ * @package Help
  */
-class Configuration
+final class Json
 {
-    const CONFIGURATION_NAME = 'engine';
-
-    const CONFIGURATION_NAME_THEME = 'theme';
-    const CONFIGURATION_NAME_ROOT_DIRECTORY = 'root_directory';
-
     /**
-     * 'root_directory'
+     * Encode an array to a json string naively. That means, the php and json type are assumed.
      *
-     * @var string
-     */
-    private $rootDirectory;
-
-    /**
-     * 'theme'
-     *
-     * @var string
-     */
-    private $theme;
-
-    /**
-     * @return bool
-     */
-    public function hasTheme(): bool
-    {
-        return !empty($this->theme);
-    }
-
-    /** generated methods */
-
-    /**
+     * @param array $var
+     * @param bool $pretty
      * @return string
      */
-    public function getRootDirectory(): string
+    public static function encode(array $var, bool $pretty = false): string
     {
-        return $this->rootDirectory;
+        $result = json_encode($var, ($pretty ? JSON_PRETTY_PRINT : 0));
+
+        if (false === $result || !is_string($result)) {
+            $result = '';
+        }
+
+        return $result;
     }
 
     /**
-     * @param string $rootDirectory
-     * @return Configuration
+     * Decode a json string to an array naively. That means, the php and json type are assumed.
+     *
+     * @param string $var
+     * @return array
      */
-    public function setRootDirectory(string $rootDirectory): Configuration
+    public static function decode(string $var): array
     {
-        $this->rootDirectory = $rootDirectory;
-        return $this;
+        $result = json_decode($var, true);
+
+        if (null === $result || !is_array($result)) {
+            $result = [];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return int
+     */
+    public static function getError(): int
+    {
+        return json_last_error();
     }
 
     /**
      * @return string
      */
-    public function getTheme(): string
+    public static function getErrorMessage(): string
     {
-        return $this->theme;
-    }
-
-    /**
-     * @param string $theme
-     * @return Configuration
-     */
-    public function setTheme(string $theme): Configuration
-    {
-        $this->theme = $theme;
-        return $this;
+        return json_last_error_msg() ?: '';
     }
 }

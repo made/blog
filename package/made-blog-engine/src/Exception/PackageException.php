@@ -2,7 +2,7 @@
 
 /**
  * The MIT License (MIT)
- * Copyright (c) 2019 Made
+ * Copyright (c) 2020 Made
  * Written by GameplayJDK
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
@@ -25,6 +25,8 @@ use Exception;
 
 /**
  * Class PackageException
+ *
+ * TODO: Move pimple package utility classes to package gameplayjdk/pimple-package-utility.
  *
  * @package Made\Blog\Engine\Exception
  */

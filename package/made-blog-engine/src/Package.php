@@ -1,7 +1,7 @@
 <?php
 /**
  * The MIT License (MIT)
- * Copyright (c) 2019 Made
+ * Copyright (c) 2020 Made
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -21,6 +21,7 @@ namespace Made\Blog\Engine;
 
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\PackageAbstract;
+use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
 
 /**
@@ -30,8 +31,6 @@ use Pimple\Container;
  */
 class Package extends PackageAbstract
 {
-    protected const SERVICE_NAME = 'engine';
-
     /**
      * Registers services on the given container.
      *
@@ -47,17 +46,45 @@ class Package extends PackageAbstract
             $this->addConfigurationSupport($pimple);
         }
 
-        $this->registerConfiguration($pimple, static::SERVICE_NAME, [
-            'theme' => 'theme-base',
+        $this->registerEngineConfiguration($pimple);
+
+        $this->registerThemeUtility($pimple);
+    }
+
+    /**
+     * @param Container $container
+     * @throws Exception\PackageException
+     */
+    private function registerEngineConfiguration(Container $container): void
+    {
+        $this->registerConfiguration($container, Configuration::CONFIGURATION_NAME, [
+            // TODO: Find a way to detect the correct root directory.
+            Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => null,
+            Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
         ]);
 
-        $configuration = $pimple[static::SERVICE_NAME_CONFIGURATION];
+        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
 
-        $this->registerService($pimple, static::SERVICE_NAME, function (Container $container) use ($configuration): Configuration {
-            $settings = $configuration['engine'];
+        $this->registerService($container, Configuration::class, function (Container $container) use ($configuration): Configuration {
+            /** @var array $settings */
+            $settings = $configuration[Configuration::CONFIGURATION_NAME];
+
             return (new Configuration())
-                ->setRootDirectory($configuration['root_directory'])
-                ->setTheme($settings['theme']);
+                ->setRootDirectory($configuration[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
+                ->setTheme($settings[Configuration::CONFIGURATION_NAME_THEME]);
+        });
+    }
+
+    /**
+     * @param Container $container
+     */
+    private function registerThemeUtility(Container $container): void
+    {
+        $this->registerService($container, ThemeService::class, function (Container $container): ThemeService {
+            /** @var Configuration $engine */
+            $engine = $container[Configuration::class];
+
+            return new ThemeService($engine);
         });
     }
 }
