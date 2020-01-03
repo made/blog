@@ -21,6 +21,9 @@ namespace Made\Blog\Engine;
 
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\PackageAbstract;
+use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
+use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
+use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
 
@@ -42,20 +45,26 @@ class Package extends PackageAbstract
      */
     public function register(Container $pimple): void
     {
+        if (!$this->hasTagSupport($pimple)) {
+            $this->addTagSupport($pimple);
+        }
+
         if (!$this->hasConfigurationSupport($pimple)) {
             $this->addConfigurationSupport($pimple);
         }
 
-        $this->registerEngineConfiguration($pimple);
+        $this->registerConfigurationClass($pimple);
 
-        $this->registerThemeUtility($pimple);
+        $this->registerDataLayer($pimple);
+
+        $this->registerThemeService($pimple);
     }
 
     /**
      * @param Container $container
      * @throws Exception\PackageException
      */
-    private function registerEngineConfiguration(Container $container): void
+    private function registerConfigurationClass(Container $container): void
     {
         $this->registerConfiguration($container, Configuration::CONFIGURATION_NAME, [
             // TODO: Find a way to detect the correct root directory.
@@ -69,6 +78,7 @@ class Package extends PackageAbstract
             /** @var array $settings */
             $settings = $configuration[Configuration::CONFIGURATION_NAME];
 
+            // TODO: Check if this should be done inside the configuration service.
             return (new Configuration())
                 ->setRootDirectory($configuration[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
                 ->setTheme($settings[Configuration::CONFIGURATION_NAME_THEME]);
@@ -77,14 +87,34 @@ class Package extends PackageAbstract
 
     /**
      * @param Container $container
+     * @throws Exception\PackageException
      */
-    private function registerThemeUtility(Container $container): void
+    private function registerDataLayer(Container $container): void
+    {
+        // TODO: Completely implement this.
+
+        $this->registerServiceWithTag($container, ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepository::class, function (Container $container): ThemeRepositoryInterface {
+            // TODO: Move this into a separate service declaration.
+            $themeMapper = new ThemeMapper();
+
+            return new ThemeRepository($themeMapper);
+        });
+
+        $this->registerAlias($container, ThemeRepository::class, ThemeRepositoryInterface::class);
+    }
+
+    /**
+     * @param Container $container
+     */
+    private function registerThemeService(Container $container): void
     {
         $this->registerService($container, ThemeService::class, function (Container $container): ThemeService {
-            /** @var Configuration $engine */
-            $engine = $container[Configuration::class];
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
+            /** @var ThemeRepositoryInterface $themeRepository */
+            $themeRepository = $container[ThemeRepositoryInterface::class];
 
-            return new ThemeService($engine);
+            return new ThemeService($configuration, $themeRepository);
         });
     }
 }

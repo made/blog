@@ -19,11 +19,13 @@
 
 namespace Made\Blog\Engine\Service;
 
-use Made\Blog\Engine\Exception\ThemeNotFoundException;
+use Made\Blog\Engine\Exception\ThemeException;
+use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
-use Slim\Views\Twig;
+use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Twig\Error\LoaderError;
 use Twig\Loader\FilesystemLoader;
+use Twig\Loader\LoaderInterface;
 
 /**
  * Class ThemeLoadingService
@@ -32,75 +34,60 @@ use Twig\Loader\FilesystemLoader;
 class ThemeService
 {
     /**
-     * ToDo: Put this in the config object which is stored in the container
-     * Name of the directory in which the themes are stored.
+     * Path to the base view folder relative to the root directory.
      */
-    protected const THEME_BASE_DIRECTORY = '/theme/';
-
-    /**
-     * ToDo: Put this in the config object which is stored in the container
-     * Name of the directory in which the views are stored.
-     */
-    protected const THEME_VIEW_DIRECTORY = '/view/';
-
-    /**
-     * Name of the configuration node in the configuration.json
-     */
-    protected const THEME_CONFIGURATION_NAME = 'theme';
+    const PATH_VIEW = '/view';
 
     /**
      * @var Configuration
      */
-    protected $configuration;
+    private $configuration;
 
     /**
-     * ThemeLoadingService constructor.
-     * @param Configuration $configuration
+     * @var ThemeRepositoryInterface
      */
-    public function __construct(Configuration $configuration)
+    private $themeRepository;
+
+    /**
+     * ThemeService constructor.
+     * @param Configuration $configuration
+     * @param ThemeRepositoryInterface $themeRepository
+     */
+    public function __construct(Configuration $configuration, ThemeRepositoryInterface $themeRepository)
     {
         $this->configuration = $configuration;
+        $this->themeRepository = $themeRepository;
     }
-
-    // TODO: Load all themes.
 
     /**
-     * @return ThemeService
-     * @throws LoaderError
-     * @throws ThemeNotFoundException
+     * @return string
      */
-    public function loadTheme(): ThemeService
+    public function getViewPath(): string
     {
-        if (!$this->configuration->hasTheme()) {
-            throw new ThemeNotFoundException('No configured theme has been found in the configuration.');
-        }
-
-        // ToDo: Path cleaner.
-        $path = $this->configuration->getRootDirectory() . '/' . static::THEME_BASE_DIRECTORY . '/' . $this->configuration->getTheme() . '/' . static::THEME_VIEW_DIRECTORY;
-
-        if (!is_dir($path)) {
-            throw new ThemeNotFoundException('Unfortunately there is no theme called ' . $this->configuration->getTheme() . '. Please check your configuration.');
-        }
-
-        // TODO: Negotiate template namespace name.
-        $loader = $this->twig->getLoader();
-
-        if (!($loader instanceof FilesystemLoader)) {
-            throw new ThemeNotFoundException('Themes are only supported using the twig filesystem loader.');
-        }
-
-        /** @var FilesystemLoader $loader */
-        $loader->addPath($path);
-
-        return $this;
+        return Path::join(...[
+            $this->configuration->getRootDirectory(),
+            static::PATH_VIEW,
+        ]);
     }
 
-    public function getMainPath(): string
+    /**
+     * @param LoaderInterface $twigLoader
+     * @throws LoaderError
+     * @throws ThemeException
+     */
+    public function updateLoader(LoaderInterface $twigLoader): void
     {
-    }
+        if (!($twigLoader instanceof FilesystemLoader)) {
+            // TODO: Add proper exception message.
+            throw new ThemeException();
+        }
 
-    public function updateLoader(Twig $twig)
-    {
+        /** @var FilesystemLoader $twigLoader */
 
+        $themeList = $this->themeRepository->getAll();
+        foreach ($themeList as $theme) {
+            // The name is used as the namespace.
+            $twigLoader->addPath($theme->getPath(), $theme->getName());
+        }
     }
 }

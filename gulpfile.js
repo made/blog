@@ -86,7 +86,15 @@ option = (function (option) {
 
 const configuration = require('./app/configuration.json');
 
-const path = require(`./theme/${configuration.engine.theme}/theme`);
+let path = require(`./theme/${configuration.engine.theme}/theme`);
+
+if (path && path['configuration']) {
+    path = path['configuration'];
+} else {
+    console.error('Unable to load theme configuration.');
+
+    return;
+}
 
 // Configuration format:
 // const path = {

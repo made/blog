@@ -3,5 +3,8 @@
   "engine": {
     "root_directory": null,
     "theme": "theme-base"
+  },
+  "twig": {
+    "cache": false
   }
 }

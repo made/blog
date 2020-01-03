@@ -17,10 +17,48 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Exception;
+namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Exception;
+use Made\Blog\Engine\Model\Theme;
+use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
+use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 
-class ThemeNotFoundException extends Exception
+/**
+ * Class ThemeRepository
+ *
+ * @package Made\Blog\Engine\Repository\Implementation\File
+ */
+class ThemeRepository implements ThemeRepositoryInterface
 {
+    /**
+     * @var ThemeMapper
+     */
+    private $themeMapper;
+
+    /**
+     * ThemeRepository constructor.
+     * @param ThemeMapper $themeMapper
+     */
+    public function __construct(ThemeMapper $themeMapper)
+    {
+        $this->themeMapper = $themeMapper;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAll(): array
+    {
+        // TODO: Implement getAll() method.
+        return [];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getOneByName(string $name): ?Theme
+    {
+        // TODO: Implement getOneByName() method.
+        return null;
+    }
 }

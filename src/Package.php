@@ -20,7 +20,7 @@
 
 namespace App;
 
-use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Exception\PackageException;
 use Made\Blog\Engine\Package\PackageAbstract;
 use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
@@ -54,6 +54,7 @@ class Package extends PackageAbstract
      * It should not get services.
      *
      * @param Container $pimple A container instance
+     * @throws PackageException
      */
     public function register(Container $pimple): void
     {
@@ -62,21 +63,35 @@ class Package extends PackageAbstract
 
     /**
      * @param Container $container
+     * @throws PackageException
      */
     private function register3rdPartyDependency(Container $container): void
     {
-        $this->registerService($container, Twig::class, function (Container $container) {
-            // TODO: Use FilesystemLoader#addPath() instead of constructing twig inside another class.
+        // TODO: Use a constant for the service name.
+        $this->registerConfiguration($container, 'twig', [
+            // TODO: Complete option list with defaults.
+            'cache' => false,
+        ]);
+
+        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
+
+        // TODO: This could be done inside a function in the abstract class called "registerConfigurationAlias" or something along that line.
+        //  This makes the configuration available under the class name. Not yet sure if that practice should be continued or if normal strings should be used instead.
+        $this->registerConfiguration($container, Twig::class, $configuration['twig']);
+        //  Same goes with this, as the configuration array is not handled by reference.
+        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
+
+        $this->registerService($container, Twig::class, function (Container $container) use ($configuration): Twig {
+            /** @var array $settings */
+            $settings = $configuration[Twig::class];
 
             /** @var ThemeService $themeService */
             $themeService = $container[ThemeService::class];
 
-            // TODO: THIS DOES NOT WORK. Null IS NO VALID VALUE. use $themeService->getThemePath()
-            $twig = Twig::create($themeService->getMainPath(), [
-                'cache' => false, // ToDo: Caching should be configurable - due to development it is deactived for now
-            ]);
+            $twig = Twig::create($themeService->getViewPath(), $settings);
+            $themeService->updateLoader($twig->getLoader());
 
-            return $themeService->updateLoader($twig);
+            return $twig;
         });
 
         $this->app->add(TwigMiddleware::createFromContainer($this->app, Twig::class));

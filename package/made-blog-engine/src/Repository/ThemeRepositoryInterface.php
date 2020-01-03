@@ -1,7 +1,7 @@
 <?php
 /**
  * The MIT License (MIT)
- * Copyright (c) 2019 Made
+ * Copyright (c) 2020 Made
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -17,11 +17,27 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Exception;
+namespace Made\Blog\Engine\Repository;
 
-use Exception;
+use Made\Blog\Engine\Model\Theme;
 
-class FileNotFoundException extends Exception
+/**
+ * Interface ThemeRepositoryInterface
+ *
+ * @package Made\Blog\Engine\Repository
+ */
+interface ThemeRepositoryInterface
 {
+    const TAG_THEME_REPOSITORY = 'repository.theme';
 
+    /**
+     * @return array|Theme[]
+     */
+    public function getAll(): array;
+
+    /**
+     * @param string $name
+     * @return Theme|null
+     */
+    public function getOneByName(string $name): ?Theme;
 }
