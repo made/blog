@@ -20,10 +20,10 @@
 
 namespace App;
 
-use Made\Blog\Engine\Exception\PackageException;
-use Made\Blog\Engine\Package\PackageAbstract;
 use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
+use Pimple\Package\Exception\PackageException;
+use Pimple\Package\PackageAbstract;
 use Slim\App;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
@@ -44,6 +44,8 @@ class Package extends PackageAbstract
      */
     public function __construct(App $app)
     {
+        parent::__construct(null);
+
         $this->app = $app;
     }
 
@@ -53,11 +55,15 @@ class Package extends PackageAbstract
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
+     * Make sure the parent is called when overriding this function.
+     *
      * @param Container $pimple A container instance
      * @throws PackageException
      */
     public function register(Container $pimple): void
     {
+        parent::register($pimple);
+
         $this->register3rdPartyDependency($pimple);
     }
 
@@ -68,7 +74,7 @@ class Package extends PackageAbstract
     private function register3rdPartyDependency(Container $container): void
     {
         // TODO: Use a constant for the service name.
-        $this->registerConfiguration($container, 'twig', [
+        $this->registerConfiguration('twig', [
             // TODO: Complete option list with defaults.
             'cache' => false,
         ]);
@@ -77,24 +83,25 @@ class Package extends PackageAbstract
 
         // TODO: This could be done inside a function in the abstract class called "registerConfigurationAlias" or something along that line.
         //  This makes the configuration available under the class name. Not yet sure if that practice should be continued or if normal strings should be used instead.
-        $this->registerConfiguration($container, Twig::class, $configuration['twig']);
+        $this->registerConfiguration(Twig::class, $configuration['twig']);
         //  Same goes with this, as the configuration array is not handled by reference.
         $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
 
-        $this->registerService($container, Twig::class, function (Container $container) use ($configuration): Twig {
+        $this->registerService(Twig::class, function (Container $container) use ($configuration): Twig {
             /** @var array $settings */
             $settings = $configuration[Twig::class];
 
             /** @var ThemeService $themeService */
             $themeService = $container[ThemeService::class];
 
-            $twig = Twig::create($themeService->getViewPath(), $settings);
+            $twig = Twig::create($themeService->getPath(), $settings);
             $themeService->updateLoader($twig->getLoader());
 
             return $twig;
         });
 
-        $this->app->add(TwigMiddleware::createFromContainer($this->app, Twig::class));
+        $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
+        $this->app->add($twigMiddleware);
 
         // TODO: monolog!
     }

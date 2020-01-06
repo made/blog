@@ -17,68 +17,59 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Service;
+namespace Made\Blog\Engine\Service\Configuration\Strategy\File;
 
-use Made\Blog\Engine\Exception\ConfigurationException;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
-use Made\Blog\Engine\Package\PackageAbstract;
+use Made\Blog\Engine\Service\Configuration\Strategy\ConfigurationStrategyInterface;
 
 /**
- * Class ConfigurationService
+ * Class FileConfigurationStrategy
  *
- * @package Made\Blog\Engine\Service
+ * @package Made\Blog\Engine\Service\Configuration\Strategy\File
  */
-class ConfigurationService
+class FileConfigurationStrategy implements ConfigurationStrategyInterface
 {
-    // This class has potential to use the strategy pattern for loading of configuration. Keep that in mind.
-
     /**
      * Path to the configuration file relative to the root directory.
      */
     const PATH_CONFIGURATION = '/app/configuration.json';
 
     /**
-     * @var string
+     * @var string|null
      */
-    private $path;
+    protected static $rootDirectoryPath;
 
     /**
-     * ConfigurationService constructor.
-     * @param string $path
+     * @param string|null $rootDirectoryPath
      */
-    public function __construct(string $path)
+    public static function setRootDirectoryPath(?string $rootDirectoryPath): void
     {
-        $this->path = $path;
-    }
-
-    /**
-     * @param bool $shouldThrow
-     * @return array
-     * @throws ConfigurationException
-     */
-    public function getConfiguration(bool $shouldThrow = false): array
-    {
-        $content = $this->getContent();
-        if (empty($content) && $shouldThrow) {
-            // TODO: Add proper exception message.
-            throw new ConfigurationException();
-        }
-
-        $content[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY] = $this->path;
-
-        $configuration = [];
-        $configuration[PackageAbstract::SERVICE_NAME_CONFIGURATION] = $content;
-
-        return $configuration;
+        self::$rootDirectoryPath = $rootDirectoryPath;
     }
 
     /**
      * @return array
      */
-    private function getContent(): array
+    public function initialize(): array
+    {
+        // Set the path if it is not yet set.
+        self::$rootDirectoryPath = self::$rootDirectoryPath ?: $this->findConfigurationPath();
+
+        // Get the content.
+        $content = $this->getConfigurationContent();
+        // Add the root directory. This is required!
+        $content[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY] = self::$rootDirectoryPath;
+
+        return $content;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getConfigurationContent(): array
     {
         $path = $this->getConfigurationPath();
 
@@ -89,21 +80,22 @@ class ConfigurationService
     /**
      * @return string
      */
-    private function getConfigurationPath(): string
+    protected function getConfigurationPath(): string
     {
         return Path::join(...[
-            $this->path,
+            self::$rootDirectoryPath,
             static::PATH_CONFIGURATION,
         ]);
     }
 
-    /** generated methods */
-
     /**
+     * TODO: Proper implementation. Go up until the PATH_CONFIGURATION exists relative to that directory.
+     *
      * @return string
      */
-    public function getPath(): string
+    protected function findConfigurationPath(): string
     {
-        return $this->path;
+        // We need to go up 8 levels from vendor folder and 7 levels from (current) package folder.
+        return dirname(__DIR__, 8);
     }
 }

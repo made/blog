@@ -1,42 +1,37 @@
 {
-    "name": "made/blog",
-    "description": "Simple blog software for developers.",
-    "type": "project",
-    "license": "MIT",
-    "minimum-stability": "stable",
-    "require": {
-        "php": ">=7.1 <7.4",
-        "ext-json": "*",
-        "slim/slim": "^4.0",
-        "slim/psr7": "^0.6.0",
-        "slim/twig-view": "^3.0",
-        "made/blog-engine": "dev-master",
-        "made/task-chain": "dev-master",
-        "monolog/monolog": "^2.0"
+  "name": "made/blog",
+  "description": "Simple blog software for developers.",
+  "type": "project",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "require": {
+    "php": ">=7.1 <7.4",
+    "ext-json": "*",
+    "slim/slim": "^4.0",
+    "slim/psr7": "^0.6.0",
+    "slim/twig-view": "^3.0",
+    "monolog/monolog": "^2.0",
+    "made/blog-engine": "dev-master"
+  },
+  "authors": [
+    {
+      "name": "GameplayJDK",
+      "email": "github@gameplayjdk.de"
     },
-    "authors": [
-        {
-            "name": "GameplayJDK",
-            "email": "github@gameplayjdk.de"
-        },
-        {
-            "name": "Dennis Barlowe",
-            "email": "dennis@dennzo.com"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "App\\": "src/"
-        }
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "package/made-blog-engine"
-        },
-        {
-            "type": "path",
-            "url": "package/made-task-chain"
-        }
-    ]
+    {
+      "name": "Dennis Barlowe",
+      "email": "dennis@dennzo.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "package/made-blog-engine"
+    }
+  ]
 }

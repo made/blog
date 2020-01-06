@@ -19,13 +19,20 @@
 
 namespace Made\Blog\Engine;
 
+use ArrayObject;
+use Made\Blog\Engine\Exception\ConfigurationException;
 use Made\Blog\Engine\Model\Configuration;
-use Made\Blog\Engine\Package\PackageAbstract;
+use Made\Blog\Engine\Package\TagResolverTrait;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
+use Made\Blog\Engine\Service\Configuration\ConfigurationService;
+use Made\Blog\Engine\Service\Configuration\Strategy\ConfigurationStrategyInterface;
+use Made\Blog\Engine\Service\Configuration\Strategy\File\FileConfigurationStrategy;
 use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
+use Pimple\Package\Exception\PackageException;
+use Pimple\Package\PackageAbstract;
 
 /**
  * Class Package
@@ -34,26 +41,32 @@ use Pimple\Container;
  */
 class Package extends PackageAbstract
 {
+    use TagResolverTrait;
+
     /**
      * Registers services on the given container.
      *
      * This method should only be used to configure services and parameters.
      * It should not get services.
      *
+     * Make sure the parent is called when overriding this function.
+     *
      * @param Container $pimple A container instance
-     * @throws Exception\PackageException
+     * @throws PackageException
      */
     public function register(Container $pimple): void
     {
-        if (!$this->hasTagSupport($pimple)) {
-            $this->addTagSupport($pimple);
+        parent::register($pimple);
+
+        if (!$this->hasTagSupport(false)) {
+            $this->addTagSupport();
         }
 
-        if (!$this->hasConfigurationSupport($pimple)) {
-            $this->addConfigurationSupport($pimple);
+        if (!$this->hasConfigurationSupport(false)) {
+            $this->addConfigurationSupport();
         }
 
-        $this->registerConfigurationClass($pimple);
+        $this->registerConfigurationStuff($pimple);
 
         $this->registerDataLayer($pimple);
 
@@ -62,11 +75,31 @@ class Package extends PackageAbstract
 
     /**
      * @param Container $container
-     * @throws Exception\PackageException
+     * @throws PackageException
      */
-    private function registerConfigurationClass(Container $container): void
+    private function registerConfigurationStuff(Container $container): void
     {
-        $this->registerConfiguration($container, Configuration::CONFIGURATION_NAME, [
+        $this->registerTagAndService(ConfigurationStrategyInterface::TAG_CONFIGURATION_STRATEGY, FileConfigurationStrategy::class, function (Container $container): ConfigurationStrategyInterface {
+            return new FileConfigurationStrategy();
+        });
+
+        // TODO: Currently this is set statically to use the file configuration strategy. The extra tagging is needed so the resolver can find the alias.
+        $this->registerServiceAlias(ConfigurationStrategyInterface::class, FileConfigurationStrategy::class);
+        $this->registerTag(ConfigurationStrategyInterface::TAG_CONFIGURATION_STRATEGY, ConfigurationStrategyInterface::class);
+
+        $this->registerService(ConfigurationService::class, function (Container $container): ConfigurationService {
+            /** @var array|ConfigurationStrategyInterface[] $configurationStrategyArray */
+            $configurationStrategyArray = $this->resolveTag(ConfigurationStrategyInterface::TAG_CONFIGURATION_STRATEGY, ConfigurationStrategyInterface::class);
+            /** @var ConfigurationStrategyInterface $configurationStrategy */
+            $configurationStrategy = $configurationStrategyArray[ConfigurationStrategyInterface::class];
+
+            return new ConfigurationService($configurationStrategy);
+        });
+
+        // Initialize the configuration.
+        $this->initializeConfiguration($container);
+
+        $this->registerConfiguration(Configuration::CONFIGURATION_NAME, [
             // TODO: Find a way to detect the correct root directory.
             Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => null,
             Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
@@ -74,33 +107,60 @@ class Package extends PackageAbstract
 
         $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
 
-        $this->registerService($container, Configuration::class, function (Container $container) use ($configuration): Configuration {
+        $this->registerService(Configuration::class, function (Container $container) use ($configuration): Configuration {
             /** @var array $settings */
             $settings = $configuration[Configuration::CONFIGURATION_NAME];
 
-            // TODO: Check if this should be done inside the configuration service.
             return (new Configuration())
+                // The root directory is expected to be at the top level of the configuration array and has to be placed
+                // there explicitly by the used configuration strategy.
                 ->setRootDirectory($configuration[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
                 ->setTheme($settings[Configuration::CONFIGURATION_NAME_THEME]);
         });
     }
 
     /**
+     * Initialize the configuration. As of now, this method will replace all existing configuration with the newly
+     * initialized one.
+     *
+     * TODO: Make this method use an array_merge() or something.
+     *
      * @param Container $container
-     * @throws Exception\PackageException
+     * @throws PackageException
+     */
+    private function initializeConfiguration(Container $container): void
+    {
+        /** @var ConfigurationService $configurationService */
+        $configurationService = $container[ConfigurationService::class];
+
+        try {
+            $container[static::SERVICE_NAME_CONFIGURATION] = $configurationService->getConfigurationArray(true);
+        } catch (ConfigurationException $ex) {
+            throw new PackageException('Configuration exception.');
+        }
+    }
+
+    /**
+     * @param Container $container
+     * @throws PackageException
      */
     private function registerDataLayer(Container $container): void
     {
-        // TODO: Completely implement this.
+        // First register mapper.
+        $this->registerService(ThemeMapper::class, function (Container $container): ThemeMapper {
+            return new ThemeMapper();
+        });
 
-        $this->registerServiceWithTag($container, ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepository::class, function (Container $container): ThemeRepositoryInterface {
-            // TODO: Move this into a separate service declaration.
-            $themeMapper = new ThemeMapper();
+        // Then repository.
+        $this->registerTagAndService(ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepository::class, function (Container $container): ThemeRepositoryInterface {
+            /** @var ThemeMapper $themeMapper */
+            $themeMapper = $container[ThemeMapper::class];
 
             return new ThemeRepository($themeMapper);
         });
 
-        $this->registerAlias($container, ThemeRepository::class, ThemeRepositoryInterface::class);
+        $this->registerServiceAlias(ThemeRepositoryInterface::class, ThemeRepository::class);
+        $this->registerTag(ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepositoryInterface::class);
     }
 
     /**
@@ -108,7 +168,7 @@ class Package extends PackageAbstract
      */
     private function registerThemeService(Container $container): void
     {
-        $this->registerService($container, ThemeService::class, function (Container $container): ThemeService {
+        $this->registerService(ThemeService::class, function (Container $container): ThemeService {
             /** @var Configuration $configuration */
             $configuration = $container[Configuration::class];
             /** @var ThemeRepositoryInterface $themeRepository */

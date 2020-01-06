@@ -60,17 +60,30 @@ class ThemeService
     }
 
     /**
+     * @param string $path
      * @return string
      */
-    public function getViewPath(): string
+    private function getViewPath(string $path): string
     {
         return Path::join(...[
-            $this->configuration->getRootDirectory(),
+            $path,
             static::PATH_VIEW,
         ]);
     }
 
     /**
+     * @return string
+     */
+    public function getPath(): string
+    {
+        $path = $this->configuration->getRootDirectory();
+
+        return $this->getViewPath($path);
+    }
+
+    /**
+     * TODO: This needs to be tested after the theme repository is implemented.
+     *
      * @param LoaderInterface $twigLoader
      * @throws LoaderError
      * @throws ThemeException
@@ -86,8 +99,9 @@ class ThemeService
 
         $themeList = $this->themeRepository->getAll();
         foreach ($themeList as $theme) {
+            $path = $theme->getPath();
             // The name is used as the namespace.
-            $twigLoader->addPath($theme->getPath(), $theme->getName());
+            $twigLoader->addPath($this->getViewPath($path), $theme->getName());
         }
     }
 }

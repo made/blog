@@ -1,29 +1,30 @@
 {
-    "name": "made/blog-engine",
-    "description": "Blog engine library for made/blog.",
-    "type": "library",
-    "license": "MIT",
-    "minimum-stability": "stable",
-    "require": {
-        "psr/log": "^1.1",
-        "pimple/pimple": "^3.2",
-        "twig/twig": "^3.0",
-        "erusev/parsedown": "^1.7",
-        "gameplayjdk/php-file-cache": "^1.0"
+  "name": "made/blog-engine",
+  "description": "Blog engine library for made/blog.",
+  "type": "library",
+  "license": "MIT",
+  "minimum-stability": "stable",
+  "require": {
+    "psr/log": "^1.1",
+    "pimple/pimple": "^3.2",
+    "twig/twig": "^3.0",
+    "erusev/parsedown": "^1.7",
+    "gameplayjdk/php-file-cache": "^1.0",
+    "gameplayjdk/pimple-package-utility": "^1.0"
+  },
+  "authors": [
+    {
+      "name": "GameplayJDK",
+      "email": "github@gameplayjdk.de"
     },
-    "authors": [
-        {
-            "name": "GameplayJDK",
-            "email": "github@gameplayjdk.de"
-        },
-        {
-            "name": "Dennis Barlowe",
-            "email": "dennis@dennzo.com"
-        }
-    ],
-    "autoload": {
-        "psr-4": {
-            "Made\\Blog\\Engine\\": "src/"
-        }
+    {
+      "name": "Dennis Barlowe",
+      "email": "dennis@dennzo.com"
     }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Made\\Blog\\Engine\\": "src/"
+    }
+  }
 }
