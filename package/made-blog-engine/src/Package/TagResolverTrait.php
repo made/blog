@@ -26,14 +26,14 @@ use Pimple\Package\PackageAbstract;
 /**
  * Trait TagResolverTrait
  *
+ * TODO: Move this over to the pimple-package-utility composer package at some point. For now, traits are good for this use-case.
+ *
  * @package Made\Blog\Engine\Package
  */
 trait TagResolverTrait
 {
     /**
      * Resolve to the first service with given tag.
-     *
-     * TODO: Resolve logic is insufficient with multiple implementations.
      *
      * @param string $tagName
      * @param string|null $parentClassName

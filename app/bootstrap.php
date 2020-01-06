@@ -31,9 +31,8 @@ if (PHP_SAPI == 'cli-server') {
     }
 }
 
-require __DIR__ . '/../vendor/autoload.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
 
-use App\Package;
 use Made\Blog\Engine\Service\Configuration\Strategy\File\FileConfigurationStrategy;
 use Pimple\Container;
 use Pimple\Psr11\Container as Psr11Container;
@@ -59,7 +58,7 @@ $app->addRoutingMiddleware();
 
 $container->register(new \Made\Blog\Engine\Package($container));
 // TODO: Change namespace.
-$container->register(new Package($app));
+$container->register(new \App\Package($app));
 
 /*
  * Add Error Handling Middleware.
@@ -72,7 +71,7 @@ $container->register(new Package($app));
  */
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-// TODO: Move to another file if needed.
+// TODO: Move to another file or to a controller class if needed.
 $app->get('/{slug:.*}', function (Request $request, Response $response, array $args) {
     /** @var string $slug */
     $slug = $args['slug'];
