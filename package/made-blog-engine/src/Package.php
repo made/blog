@@ -153,10 +153,12 @@ class Package extends PackageAbstract
 
         // Then repository.
         $this->registerTagAndService(ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepository::class, function (Container $container): ThemeRepositoryInterface {
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
             /** @var ThemeMapper $themeMapper */
             $themeMapper = $container[ThemeMapper::class];
 
-            return new ThemeRepository($themeMapper);
+            return new ThemeRepository($configuration, $themeMapper);
         });
 
         $this->registerServiceAlias(ThemeRepositoryInterface::class, ThemeRepository::class);

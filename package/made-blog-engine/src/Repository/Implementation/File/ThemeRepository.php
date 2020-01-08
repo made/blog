@@ -19,9 +19,15 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
+use Made\Blog\Engine\Help\Directory;
+use Made\Blog\Engine\Help\File;
+use Made\Blog\Engine\Help\Json;
+use Made\Blog\Engine\Help\Path;
+use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Theme;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
+use Made\Blog\Engine\Service\ThemeService;
 
 /**
  * Class ThemeRepository
@@ -31,6 +37,11 @@ use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 class ThemeRepository implements ThemeRepositoryInterface
 {
     /**
+     * @var Configuration
+     */
+    private $configuration;
+
+    /**
      * @var ThemeMapper
      */
     private $themeMapper;
@@ -39,8 +50,9 @@ class ThemeRepository implements ThemeRepositoryInterface
      * ThemeRepository constructor.
      * @param ThemeMapper $themeMapper
      */
-    public function __construct(ThemeMapper $themeMapper)
+    public function __construct(Configuration $configuration, ThemeMapper $themeMapper)
     {
+        $this->configuration = $configuration;
         $this->themeMapper = $themeMapper;
     }
 
@@ -49,8 +61,38 @@ class ThemeRepository implements ThemeRepositoryInterface
      */
     public function getAll(): array
     {
-        // TODO: Implement getAll() method.
-        return [];
+        $path = $this->getPath();
+
+        $list = Directory::listCallback($path, function (string $entry) use ($path): bool {
+            if ('.' === $entry || '..' === $entry) {
+                return false;
+            }
+
+            $themePath = $this->getThemePath($entry);
+            $viewPath = $this->getViewPath($entry);
+            $configurationPath = $this->getConfigurationPath($entry);
+
+            return is_dir($themePath) && is_dir($viewPath) && is_file($configurationPath);
+        });
+
+        $all = array_map(function (string $entry) use ($path): ?Theme {
+            $themePath = $this->getThemePath($entry);
+            $configurationPath = $this->getConfigurationPath($entry);
+
+            $data = $this->getContent($configurationPath);
+
+            if (empty($data)) {
+                return null;
+            }
+
+            $data[ThemeMapper::KEY_PATH] = $themePath;
+
+            return $this->themeMapper->fromData($data);
+        }, $list);
+
+        return array_filter($all, function (?Theme $theme): bool {
+            return null !== $theme;
+        });
     }
 
     /**
@@ -58,7 +100,77 @@ class ThemeRepository implements ThemeRepositoryInterface
      */
     public function getOneByName(string $name): ?Theme
     {
-        // TODO: Implement getOneByName() method.
-        return null;
+        $all = $this->getAll();
+
+        return array_reduce($all, function (?Theme $carry, Theme $theme) use ($name): ?Theme {
+            if (null === $carry && $theme->getName() === $name) {
+                $carry = $theme;
+            }
+
+            return $carry;
+        }, null);
+    }
+
+    /**
+     * @param string $path
+     * @return array
+     */
+    private function getContent(string $path): array
+    {
+        $content = File::read($path);
+        return Json::decode($content);
+    }
+
+    /**
+     * @return string
+     */
+    private function getPath(): string
+    {
+        return Path::join(...[
+            $this->configuration->getRootDirectory(),
+            ThemeService::PATH_THEME,
+        ]);
+    }
+
+    /**
+     * @param string $entry
+     * @return string
+     */
+    private function getThemePath(string $entry): string
+    {
+        $path = $this->getPath();
+
+        return Path::join(...[
+            $path,
+            $entry,
+        ]);
+    }
+
+    /**
+     * @param string $entry
+     * @return string
+     */
+    private function getViewPath(string $entry): string
+    {
+        $path = $this->getThemePath($entry);
+
+        return Path::join(...[
+            $path,
+            ThemeService::PATH_VIEW,
+        ]);
+    }
+
+    /**
+     * @param string $entry
+     * @return string
+     */
+    private function getConfigurationPath(string $entry): string
+    {
+        $path = $this->getThemePath($entry);
+
+        return Path::join(...[
+            $path,
+            ThemeService::PATH_CONFIGURATION,
+        ]);
     }
 }

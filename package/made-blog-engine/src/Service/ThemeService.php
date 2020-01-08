@@ -29,14 +29,25 @@ use Twig\Loader\LoaderInterface;
 
 /**
  * Class ThemeLoadingService
+ *
  * @package Made\Blog\Engine\Service
  */
 class ThemeService
 {
     /**
-     * Path to the base view folder relative to the root directory.
+     * Path to the theme folder relative to the root directory.
+     */
+    const PATH_THEME = '/theme';
+
+    /**
+     * Path to the theme base view folder relative to the root directory.
      */
     const PATH_VIEW = '/view';
+
+    /**
+     * Path to the theme configuration file (json).
+     */
+    const PATH_CONFIGURATION = '/theme.json';
 
     /**
      * @var Configuration
@@ -77,7 +88,6 @@ class ThemeService
     public function getPath(): string
     {
         $path = $this->configuration->getRootDirectory();
-
         return $this->getViewPath($path);
     }
 
