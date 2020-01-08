@@ -19,12 +19,14 @@
 
 namespace Made\Blog\Engine;
 
-use ArrayObject;
+use Cache\Cache;
+use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Exception\ConfigurationException;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\TagResolverTrait;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
+use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\Configuration\ConfigurationService;
 use Made\Blog\Engine\Service\Configuration\Strategy\ConfigurationStrategyInterface;
@@ -33,6 +35,7 @@ use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
 use Pimple\Package\PackageAbstract;
+use Psr\SimpleCache\CacheInterface;
 
 /**
  * Class Package
@@ -67,6 +70,8 @@ class Package extends PackageAbstract
         }
 
         $this->registerConfigurationStuff($pimple);
+
+        $this->registerCacheStuff($pimple);
 
         $this->registerDataLayer($pimple);
 
@@ -144,6 +149,48 @@ class Package extends PackageAbstract
      * @param Container $container
      * @throws PackageException
      */
+    private function registerCacheStuff(Container $container): void
+    {
+        // TODO: Rather use a constant for some stuff inside this function. Not sure where to place them, thought.
+
+        $this->registerConfiguration('cache', [
+            // TODO
+            'path' => null,
+        ]);
+
+        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
+
+        // TODO: This could be done inside a function in the abstract class called "registerConfigurationAlias" or something along that line.
+        //  This makes the configuration available under the class name. Not yet sure if that practice should be continued or if normal strings should be used instead.
+        $this->registerConfiguration(Cache::class, $configuration['cache']);
+        //  Same goes with this, as the configuration array is not handled by reference.
+        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
+
+        $this->registerService(Cache::class, function (Container $container) use ($configuration): Cache {
+            /** @var array $settings */
+            $settings = $configuration[Cache::class];
+
+            // TODO: Make the path relative to the root directory.
+            $path = $settings['path'];
+
+            return new Cache($path);
+        });
+
+        $this->registerService(Psr16Cache::class, function (Container $container): Psr16Cache {
+            /** @var Cache $cache */
+            $cache = $container[Cache::class];
+
+            return new Psr16Cache($cache);
+        });
+
+        // Alias the implementation.
+        $this->registerServiceAlias(CacheInterface::class, Psr16Cache::class);
+    }
+
+    /**
+     * @param Container $container
+     * @throws PackageException
+     */
     private function registerDataLayer(Container $container): void
     {
         // First register mapper.
@@ -161,8 +208,17 @@ class Package extends PackageAbstract
             return new ThemeRepository($configuration, $themeMapper);
         });
 
+        // Then alias the implementation.
         $this->registerServiceAlias(ThemeRepositoryInterface::class, ThemeRepository::class);
         $this->registerTag(ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepositoryInterface::class);
+
+        // Then proxy.
+        $container->extend(ThemeRepositoryInterface::class, function (ThemeRepositoryInterface $themeRepository, Container $container): ThemeRepositoryInterface {
+            /** @var CacheInterface $cache */
+            $cache = $container[CacheInterface::class];
+
+            return new CacheProxyThemeRepository($cache, $themeRepository);
+        });
     }
 
     /**

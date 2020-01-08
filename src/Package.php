@@ -81,10 +81,7 @@ class Package extends PackageAbstract
 
         $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
 
-        // TODO: This could be done inside a function in the abstract class called "registerConfigurationAlias" or something along that line.
-        //  This makes the configuration available under the class name. Not yet sure if that practice should be continued or if normal strings should be used instead.
         $this->registerConfiguration(Twig::class, $configuration['twig']);
-        //  Same goes with this, as the configuration array is not handled by reference.
         $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
 
         $this->registerService(Twig::class, function (Container $container) use ($configuration): Twig {

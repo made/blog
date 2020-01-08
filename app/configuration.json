@@ -6,5 +6,9 @@
   },
   "twig": {
     "cache": false
+  },
+  "cache": {
+    "__comment__": "The path is relative to the root directory!",
+    "path": "/var/cache"
   }
 }
