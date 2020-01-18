@@ -35,7 +35,6 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Package;
 use Pimple\Container;
-use Pimple\Package\PackageAbstract;
 use Pimple\Package\PackageInterface;
 use Pimple\Psr11\Container as Psr11Container;
 use Slim\Factory\AppFactory;
