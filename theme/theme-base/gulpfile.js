@@ -19,9 +19,6 @@
 
 'use strict';
 
-// TODO: Modify tasks and add a way to extend the path configuration from within the currently set theme.
-// TODO: Reorganize the asset structure to only use the bundled base-theme instead of root-level folder structures.
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**

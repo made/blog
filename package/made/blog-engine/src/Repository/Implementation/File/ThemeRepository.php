@@ -89,6 +89,10 @@ class ThemeRepository implements ThemeRepositoryInterface
             }
 
             // TODO: Docs.
+            //  By allowing manual definition, a theme can define another path to its own content root. This can be
+            //  useful when delivering themes via composer packages. The post-install command can then copy the theme
+            //  configuration to the theme folder. The theme view files are resolved while keeping autoloaded php stuff
+            //  intact.
             if (!array_key_exists(ThemeMapper::KEY_PATH, $data)) {
                 $data[ThemeMapper::KEY_PATH] = $themePath;
             }
