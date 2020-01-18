@@ -23,6 +23,7 @@ use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\TagResolverTrait;
+use Made\Blog\Engine\Repository\ContentRepositoryInterface;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
@@ -30,6 +31,7 @@ use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\Configuration\ConfigurationService;
 use Made\Blog\Engine\Service\Configuration\Strategy\ConfigurationStrategyInterface;
 use Made\Blog\Engine\Service\Configuration\Strategy\File\FileConfigurationStrategy;
+use Made\Blog\Engine\Service\ContentService;
 use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
@@ -68,27 +70,28 @@ class Package extends PackageAbstract
             $this->addConfigurationSupport();
         }
 
-        $this->registerConfigurationStuff($pimple);
+        $this->registerConfigurationStuff();
 
-        $this->registerCacheStuff($pimple);
+        $this->registerCacheStuff();
 
-        $this->registerDataLayer($pimple);
+        $this->registerDataLayer();
 
-        $this->registerThemeService($pimple);
+        $this->registerThemeService();
+
+        $this->registerContentService();
     }
 
     /**
-     * @param Container $container
      * @throws PackageException
      */
-    private function registerConfigurationStuff(Container $container): void
+    private function registerConfigurationStuff(): void
     {
         $this->registerConfiguration(Configuration::class, [
             Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__, 4),
             Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
         ]);
 
-        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
         $this->registerService(Configuration::class, function (Container $container) use ($configuration): Configuration {
             /** @var array $settings */
@@ -101,10 +104,9 @@ class Package extends PackageAbstract
     }
 
     /**
-     * @param Container $container
      * @throws PackageException
      */
-    private function registerCacheStuff(Container $container): void
+    private function registerCacheStuff(): void
     {
         // TODO: Rather use a constant for some stuff inside this function. Not sure where to place them, thought.
 
@@ -112,7 +114,7 @@ class Package extends PackageAbstract
             'path' => dirname(__DIR__, 4) . '/var/cache',
         ]);
 
-        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
         $this->registerService(Cache::class, function (Container $container) use ($configuration): Cache {
             /** @var array $settings */
@@ -136,10 +138,9 @@ class Package extends PackageAbstract
     }
 
     /**
-     * @param Container $container
      * @throws PackageException
      */
-    private function registerDataLayer(Container $container): void
+    private function registerDataLayer(): void
     {
         // First register mapper.
         $this->registerService(ThemeMapper::class, function (Container $container): ThemeMapper {
@@ -161,7 +162,7 @@ class Package extends PackageAbstract
         $this->registerTag(ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepositoryInterface::class);
 
         // Then proxy.
-        $container->extend(ThemeRepositoryInterface::class, function (ThemeRepositoryInterface $themeRepository, Container $container): ThemeRepositoryInterface {
+        $this->container->extend(ThemeRepositoryInterface::class, function (ThemeRepositoryInterface $themeRepository, Container $container): ThemeRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
 
@@ -169,10 +170,7 @@ class Package extends PackageAbstract
         });
     }
 
-    /**
-     * @param Container $container
-     */
-    private function registerThemeService(Container $container): void
+    private function registerThemeService(): void
     {
         $this->registerService(ThemeService::class, function (Container $container): ThemeService {
             /** @var Configuration $configuration */
@@ -181,6 +179,18 @@ class Package extends PackageAbstract
             $themeRepository = $container[ThemeRepositoryInterface::class];
 
             return new ThemeService($configuration, $themeRepository);
+        });
+    }
+
+    private function registerContentService(): void
+    {
+        $this->registerService(ContentService::class, function (Container $container): ContentService {
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
+            /** @var ContentRepositoryInterface $contentRepository */
+            $contentRepository = $container[ContentRepositoryInterface::class];
+
+            return new ContentService($configuration, $contentRepository);
         });
     }
 }
