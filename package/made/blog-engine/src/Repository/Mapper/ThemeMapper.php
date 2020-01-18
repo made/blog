@@ -31,7 +31,6 @@ class ThemeMapper
 {
     const KEY_PATH = 'path';
     const KEY_NAME = 'name';
-    const KEY_CONFIGURATION = 'configuration';
 
     /**
      * @param array $data
@@ -54,11 +53,6 @@ class ThemeMapper
             $theme->setName($data[static::KEY_NAME]);
         } else {
             throw new MapperException('Missing key: ' . static::KEY_NAME);
-        }
-
-        // Optional:
-        if (isset($data[static::KEY_CONFIGURATION]) && is_array($data[static::KEY_CONFIGURATION])) {
-            $theme->setConfiguration($data[static::KEY_CONFIGURATION]);
         }
 
         return $theme;

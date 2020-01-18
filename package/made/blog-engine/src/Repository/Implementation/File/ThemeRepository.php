@@ -88,7 +88,10 @@ class ThemeRepository implements ThemeRepositoryInterface
                 return null;
             }
 
-            $data[ThemeMapper::KEY_PATH] = $themePath;
+            // TODO: Docs.
+            if (!array_key_exists(ThemeMapper::KEY_PATH, $data)) {
+                $data[ThemeMapper::KEY_PATH] = $themePath;
+            }
 
             try {
                 return $this->themeMapper->fromData($data);

@@ -1,7 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2019 Made
- * Written by GameplayJDK
+ * Copyright (c) 2020 Made
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -15,6 +14,7 @@
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
  */
 
 'use strict';
@@ -84,133 +84,123 @@ option = (function (option) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const configuration = require('./app/configuration.json');
-
-let path = require(`./theme/${configuration.engine.theme}/theme`);
-
-if (path && path['configuration']) {
-    path = path['configuration'];
-} else {
-    console.error('Unable to load theme configuration.');
-
-    return;
-}
-
 // Configuration format:
-// const path = {
-//     style: {
-//         // Additional scss dependencies are added through @import statements.
-//         src: './asset/style/**/*.scss',
-//         dest: './public/asset/style',
-//         map: './map',
-//         // Delete this when cleaning up.
-//         del: './public/asset/style/**',
-//     },
-//     script: {
-//         // Additional javascript dependencies are prepended to the final js.
-//         add: [
-//             './node_modules/jquery/dist/jquery.js',
-//             './node_modules/popper.js/dist/umd/popper.js',
-//             './node_modules/bootstrap/dist/js/bootstrap.js',
-//             './node_modules/lazysizes/lazysizes.js',
-//             './node_modules/lazysizes/plugins/bgset/ls.bgset.js',
-//             // Prepend module function definition.
-//             './asset/script/main.js',
-//         ],
-//         src: './asset/script/module/*.js',
-//         dest: './public/asset/script',
-//         map: './map',
-//         // The names for each step.
-//         rename: {
-//             // The normal js file.
-//             concat: 'main.js',
-//             // The options for the minification.
-//             src: '.js',
-//             min: '.min.js',
-//         },
-//         // Delete this when cleaning up.
-//         del: './public/asset/script/**',
-//     },
-//     image: {
-//         src: './asset/image/**/*.{png,jpg,jpeg,gif,svg}',
-//         dest: './public/asset/image',
-//         // Delete this when cleaning up.
-//         del: './public/asset/image/**',
-//         // The responsive configuration, which is different from the normal one.
-//         responsive: {
-//             src: [
-//                 './asset/image/**/*.{png,jpg}',
-//                 '!./asset/image/responsive',
-//             ],
-//             dest: './asset/image/responsive',
-//             del: './asset/image/responsive/**',
-//             config: {
-//                 '*.png': [
-//                     {
-//                         width: 540,
-//                         rename: {
-//                             suffix: '-540',
-//                         },
-//                     },
-//                     {
-//                         width: 720,
-//                         rename: {
-//                             suffix: '-720',
-//                         },
-//                     },
-//                     {
-//                         width: 960,
-//                         rename: {
-//                             suffix: '-960',
-//                         },
-//                     },
-//                     {
-//                         width: 1140,
-//                         rename: {
-//                             suffix: '-1140',
-//                         },
-//                     },
-//                     {
-//                         rename: {
-//                             suffix: '-original',
-//                         },
-//                     },
-//                 ],
-//                 '*.jpg': [
-//                     {
-//                         width: 540,
-//                         rename: {
-//                             suffix: '-540',
-//                         },
-//                     },
-//                     {
-//                         width: 720,
-//                         rename: {
-//                             suffix: '-720',
-//                         },
-//                     },
-//                     {
-//                         width: 960,
-//                         rename: {
-//                             suffix: '-960',
-//                         },
-//                     },
-//                     {
-//                         width: 1140,
-//                         rename: {
-//                             suffix: '-1140',
-//                         },
-//                     },
-//                     {
-//                         rename: {
-//                             suffix: '-original',
-//                         },
-//                     },
-//                 ],
-//             },
-//         },
-//     },
-// };
+const path = {
+    style: {
+        // Additional scss dependencies are added through @import statements.
+        src: './asset/style/**/*.scss',
+        dest: '../../public/asset/style',
+        map: './map',
+        // Delete this when cleaning up.
+        del: '../../public/asset/style/**',
+    },
+    script: {
+        // Additional javascript dependencies are prepended to the final js.
+        add: [
+            './node_modules/jquery/dist/jquery.js',
+            './node_modules/popper.js/dist/umd/popper.js',
+            './node_modules/bootstrap/dist/js/bootstrap.js',
+            './node_modules/lazysizes/lazysizes.js',
+            './node_modules/lazysizes/plugins/bgset/ls.bgset.js',
+            // Prepend module function definition.
+            './node_modules/small-module-js/src/main.js',
+        ],
+        src: './asset/script/module/*.js',
+        dest: '../../public/asset/script',
+        map: './map',
+        // The names for each step.
+        rename: {
+            // The normal js file.
+            concat: 'main.js',
+            // The options for the minification.
+            src: '.js',
+            min: '.min.js',
+        },
+        // Delete this when cleaning up.
+        del: '../../public/asset/script/**',
+    },
+    image: {
+        src: './asset/image/**/*.{png,jpg,jpeg,gif,svg}',
+        dest: '../../public/asset/image',
+        // Delete this when cleaning up.
+        del: '../../public/asset/image/**',
+        // The responsive configuration, which is different from the normal one.
+        responsive: {
+            src: [
+                './asset/image/**/*.{png,jpg}',
+                '!./asset/image/responsive',
+            ],
+            dest: '../../asset/image/responsive',
+            del: '../../asset/image/responsive/**',
+            config: {
+                '*.png': [
+                    {
+                        width: 540,
+                        rename: {
+                            suffix: '-540',
+                        },
+                    },
+                    {
+                        width: 720,
+                        rename: {
+                            suffix: '-720',
+                        },
+                    },
+                    {
+                        width: 960,
+                        rename: {
+                            suffix: '-960',
+                        },
+                    },
+                    {
+                        width: 1140,
+                        rename: {
+                            suffix: '-1140',
+                        },
+                    },
+                    {
+                        rename: {
+                            suffix: '-original',
+                        },
+                    },
+                ],
+                '*.jpg': [
+                    {
+                        width: 540,
+                        rename: {
+                            suffix: '-540',
+                        },
+                    },
+                    {
+                        width: 720,
+                        rename: {
+                            suffix: '-720',
+                        },
+                    },
+                    {
+                        width: 960,
+                        rename: {
+                            suffix: '-960',
+                        },
+                    },
+                    {
+                        width: 1140,
+                        rename: {
+                            suffix: '-1140',
+                        },
+                    },
+                    {
+                        rename: {
+                            suffix: '-original',
+                        },
+                    },
+                ],
+            },
+        },
+    },
+};
+
+const delOverridePath = '../../public/asset';
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -233,7 +223,9 @@ const postcssPlugin = (function (option) {
 
 function cleanStyleTask() {
     return (
-        del(path.style.del)
+        del(path.style.del, {
+            force: 0 === path.style.del.indexOf(delOverridePath),
+        })
     );
 }
 
@@ -291,7 +283,9 @@ function watchStyleTask() {
 
 function cleanScriptTask() {
     return (
-        del(path.script.del)
+        del(path.script.del, {
+            force: 0 === path.script.del.indexOf(delOverridePath),
+        })
     );
 }
 
@@ -356,7 +350,9 @@ function watchScriptTask() {
 
 function cleanImageTask() {
     return (
-        del(path.image.del)
+        del(path.image.del, {
+            force: 0 === path.image.del.indexOf(delOverridePath),
+        })
     );
 }
 
@@ -404,7 +400,9 @@ function watchImageTask() {
 
 function responsiveImageTask() {
     function cleanImageTask() {
-        return del(path.image.responsive.del);
+        return del(path.image.responsive.del, {
+            force: 0 === path.image.responsive.del.indexOf(delOverridePath),
+        });
     }
 
     function compileImageTask() {

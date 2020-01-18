@@ -36,11 +36,6 @@ class Theme
      */
     private $name;
 
-    /**
-     * @var array
-     */
-    private $configuration;
-
     /** generated methods */
 
     /**
@@ -76,24 +71,6 @@ class Theme
     public function setName(string $name): Theme
     {
         $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getConfiguration(): array
-    {
-        return $this->configuration;
-    }
-
-    /**
-     * @param array $configuration
-     * @return Theme
-     */
-    public function setConfiguration(array $configuration): Theme
-    {
-        $this->configuration = $configuration;
         return $this;
     }
 }
