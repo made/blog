@@ -26,13 +26,17 @@ return [
     Configuration::class => [
         Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__),
         Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
+        // ToDo: add supported languages for blog posts
     ],
+
+    // ToDo: Use a class later here.
+    'content' => require dirname(__DIR__) . '/app/configuration.content.php',
 
     Twig::class => [
         'cache' => false,
     ],
 
     Cache::class => [
-        'path' => '/var/cache',
+        'path' => dirname(__DIR__) . '/var/cache',
     ],
 ];

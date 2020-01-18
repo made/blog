@@ -48,6 +48,7 @@ class ThemeRepository implements ThemeRepositoryInterface
 
     /**
      * ThemeRepository constructor.
+     * @param Configuration $configuration
      * @param ThemeMapper $themeMapper
      */
     public function __construct(Configuration $configuration, ThemeMapper $themeMapper)
@@ -72,6 +73,7 @@ class ThemeRepository implements ThemeRepositoryInterface
             $viewPath = $this->getViewPath($entry);
             $configurationPath = $this->getConfigurationPath($entry);
 
+            // ToDo: Logging if below check is failed
             return is_dir($themePath) && is_dir($viewPath) && is_file($configurationPath);
         });
 

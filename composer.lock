@@ -186,7 +186,8 @@
             "dist": {
                 "type": "path",
                 "url": "package/made/blog-engine",
-                "reference": "65e0942ab12614266cff28eb6e613f0e9176f387"
+                "reference": "a4ff34edb9d6278040f9ca6367bb4116cf33103b",
+                "shasum": null
             },
             "require": {
                 "erusev/parsedown": "^1.7",

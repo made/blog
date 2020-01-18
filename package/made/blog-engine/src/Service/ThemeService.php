@@ -50,6 +50,11 @@ class ThemeService
     const PATH_CONFIGURATION = '/theme.json';
 
     /**
+     * Namespace for Twig
+     */
+    const THEME_NAMESPACE = 'App';
+
+    /**
      * @var Configuration
      */
     private $configuration;
@@ -110,7 +115,7 @@ class ThemeService
         $themeList = $this->themeRepository->getAll();
         foreach ($themeList as $theme) {
             $path = $theme->getPath();
-            // The name is used as the namespace.
+            // The name of the theme is used as the namespace.
             $twigLoader->addPath($this->getViewPath($path), $theme->getName());
         }
     }

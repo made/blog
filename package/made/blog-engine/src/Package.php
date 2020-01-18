@@ -21,7 +21,6 @@ namespace Made\Blog\Engine;
 
 use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
-use Made\Blog\Engine\Exception\ConfigurationException;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\TagResolverTrait;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
