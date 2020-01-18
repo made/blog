@@ -82,7 +82,6 @@ class Package extends PackageAbstract
      */
     private function register3rdPartyDependency(): void
     {
-        // TODO: Use a constant for the service name.
         $this->registerConfiguration(Twig::class, [
             // TODO: Complete option list with defaults.
             'cache' => false,
