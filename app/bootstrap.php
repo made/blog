@@ -36,6 +36,8 @@ require dirname(__DIR__) . '/vendor/autoload.php';
 use App\Package;
 use Made\Blog\Engine\Service\Configuration\Strategy\File\FileConfigurationStrategy;
 use Pimple\Container;
+use Pimple\Package\PackageAbstract;
+use Pimple\Package\PackageInterface;
 use Pimple\Psr11\Container as Psr11Container;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -57,10 +59,6 @@ $app = AppFactory::create();
 // Add Routing Middleware.
 $app->addRoutingMiddleware();
 
-$container->register(new \Made\Blog\Engine\Package($container));
-// TODO: Change namespace.
-$container->register(new Package($app));
-
 /*
  * Add Error Handling Middleware.
  *
@@ -72,16 +70,17 @@ $container->register(new Package($app));
  */
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-// TODO: Move to another file or to a controller class if needed.
-$app->get('/{slug:.*}', function (Request $request, Response $response, array $args) {
-    /** @var string $slug */
-    $slug = $args['slug'];
+/** @var array|PackageAbstract[] $packageList */
+$packageList = require dirname(__DIR__) . '/app/package.php';
+ksort($packageList);
 
-    $response->getBody()
-        ->write("The slug is: '$slug'.");
+foreach ($packageList as $package) {
+    if (!$package instanceof PackageInterface) {
+        continue;
+    }
 
-    return $response;
-});
+    $container->register($package);
+}
 
 $app->run();
 

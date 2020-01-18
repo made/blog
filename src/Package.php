@@ -20,10 +20,14 @@
 
 namespace App;
 
+use App\Controller\BlogController;
 use Made\Blog\Engine\Service\ThemeService;
+use Monolog\Handler\RotatingFileHandler;
+use Monolog\Logger;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
 use Pimple\Package\PackageAbstract;
+use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
@@ -68,14 +72,15 @@ class Package extends PackageAbstract
             return $this->app;
         });
 
-        $this->register3rdPartyDependency($pimple);
+        $this->register3rdPartyDependency();
+
+        $this->registerController();
     }
 
     /**
-     * @param Container $container
      * @throws PackageException
      */
-    private function register3rdPartyDependency(Container $container): void
+    private function register3rdPartyDependency(): void
     {
         // TODO: Use a constant for the service name.
         $this->registerConfiguration(Twig::class, [
@@ -83,7 +88,12 @@ class Package extends PackageAbstract
             'cache' => false,
         ]);
 
-        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
+        $this->registerConfiguration(Logger::class, [
+            'name' => 'app',
+            'filename' => dirname(__DIR__) . '/var/log/app.log',
+        ]);
+
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
         $this->registerService(Twig::class, function (Container $container) use ($configuration): Twig {
             /** @var array $settings */
@@ -91,8 +101,6 @@ class Package extends PackageAbstract
 
             /** @var ThemeService $themeService */
             $themeService = $container[ThemeService::class];
-
-//            echo('<pre>');print_r($themeService->getPath());echo('</pre>');exit();
 
             $twig = Twig::create($themeService->getPath(), $settings);
             $themeService->updateLoader($twig->getLoader());
@@ -103,6 +111,34 @@ class Package extends PackageAbstract
         $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
         $this->app->add($twigMiddleware);
 
-        // TODO: monolog!
+        $this->registerService(Logger::class, function (Container $container) use ($configuration): Logger {
+            /** @var array $settings */
+            $settings = $configuration[Logger::class];
+
+            /** @var Logger $logger */
+            $logger = new Logger($settings['name']);
+
+            /** @var RotatingFileHandler $handler */
+            $handler = new RotatingFileHandler($settings['filename']);
+            $handler->setFilenameFormat('{date}_{filename}', 'Ymd');
+
+            $logger->pushHandler($handler);
+
+            return $logger;
+        });
+
+        $this->registerServiceAlias(LoggerInterface::class, Logger::class);
+    }
+
+    private function registerController(): void
+    {
+        $this->registerService(BlogController::class, function (Container $container): BlogController {
+            /** @var Twig $twig */
+            $twig = $container[Twig::class];
+
+            return new BlogController($twig);
+        });
+
+        BlogController::register($this->app);
     }
 }
