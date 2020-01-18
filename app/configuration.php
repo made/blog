@@ -20,9 +20,19 @@
 
 use Cache\Cache;
 use Made\Blog\Engine\Model\Configuration;
+use Monolog\Logger;
 use Slim\Views\Twig;
 
 return [
+    Logger::class => [
+        'name' => 'app',
+        'filename' => dirname(__DIR__) . '/var/log/app.log',
+    ],
+
+    Twig::class => [
+        'cache' => false,
+    ],
+
     Configuration::class => [
         Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__),
         Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
@@ -31,10 +41,6 @@ return [
 
     // ToDo: Use a class later here.
     'content' => require dirname(__DIR__) . '/app/configuration.content.php',
-
-    Twig::class => [
-        'cache' => false,
-    ],
 
     Cache::class => [
         'path' => dirname(__DIR__) . '/var/cache',
