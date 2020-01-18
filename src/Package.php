@@ -82,7 +82,6 @@ class Package extends PackageAbstract
      */
     private function register3rdPartyDependency(): void
     {
-        // TODO: Use a constant for the service name.
         $this->registerConfiguration(Twig::class, [
             // TODO: Complete option list with defaults.
             'cache' => false,
@@ -102,7 +101,7 @@ class Package extends PackageAbstract
             /** @var ThemeService $themeService */
             $themeService = $container[ThemeService::class];
 
-            $twig = Twig::create($themeService->getPath(), $settings);
+            $twig = Twig::create($themeService->getPathAndNamespace(), $settings);
             $themeService->updateLoader($twig->getLoader());
 
             return $twig;
@@ -135,8 +134,10 @@ class Package extends PackageAbstract
         $this->registerService(BlogController::class, function (Container $container): BlogController {
             /** @var Twig $twig */
             $twig = $container[Twig::class];
+            /** @var Logger $logger */
+            $logger = $container[Logger::class];
 
-            return new BlogController($twig);
+            return new BlogController($twig, $logger);
         });
 
         BlogController::register($this->app);

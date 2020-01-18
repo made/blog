@@ -58,7 +58,21 @@ class ThemeMapper
         return $theme;
     }
 
-    // TODO: fromDataArray()
+    /**
+     * @param array|array[] $dataArray
+     * @return array|Theme[]
+     * @throws MapperException
+     */
+    public function fromDataArray(array $dataArray): array
+    {
+        $array = [];
+
+        foreach ($dataArray as $data) {
+            $array[] = $this->fromData($data);
+        }
+
+        return $array;
+    }
 
     /**
      * @param Theme $theme
@@ -70,10 +84,22 @@ class ThemeMapper
 
         $data[static::KEY_PATH] = $theme->getPath();
         $data[static::KEY_NAME] = $theme->getName();
-        $data[static::KEY_CONFIGURATION] = $theme->getConfiguration();
 
         return $data;
     }
 
-    // TODO: toDataArray()
+    /**
+     * @param array|Theme[] $array
+     * @return array|array[]
+     */
+    public function toDataArray(array $array): array
+    {
+        $dataArray = [];
+
+        foreach ($array as $theme) {
+            $dataArray[] = $this->toData($theme);
+        }
+
+        return $dataArray;
+    }
 }
