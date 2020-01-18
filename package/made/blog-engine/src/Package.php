@@ -24,7 +24,10 @@ use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\TagResolverTrait;
 use Made\Blog\Engine\Repository\ContentRepositoryInterface;
+use Made\Blog\Engine\Repository\Implementation\Aggregation\ContentRepository as ContentRepositoryAggregation;
+use Made\Blog\Engine\Repository\Implementation\File\ContentRepository as ContentRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
+use Made\Blog\Engine\Repository\Mapper\ContentMapper;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
@@ -74,10 +77,10 @@ class Package extends PackageAbstract
 
         $this->registerCacheStuff();
 
-        $this->registerDataLayer();
+        $this->registerDataLayerTheme();
+        $this->registerDataLayerContent();
 
         $this->registerThemeService();
-
         $this->registerContentService();
     }
 
@@ -140,7 +143,7 @@ class Package extends PackageAbstract
     /**
      * @throws PackageException
      */
-    private function registerDataLayer(): void
+    private function registerDataLayerTheme(): void
     {
         // First register mapper.
         $this->registerService(ThemeMapper::class, function (Container $container): ThemeMapper {
@@ -159,7 +162,6 @@ class Package extends PackageAbstract
 
         // Then alias the implementation.
         $this->registerServiceAlias(ThemeRepositoryInterface::class, ThemeRepository::class);
-        $this->registerTag(ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepositoryInterface::class);
 
         // Then proxy.
         $this->container->extend(ThemeRepositoryInterface::class, function (ThemeRepositoryInterface $themeRepository, Container $container): ThemeRepositoryInterface {
@@ -167,6 +169,37 @@ class Package extends PackageAbstract
             $cache = $container[CacheInterface::class];
 
             return new CacheProxyThemeRepository($cache, $themeRepository);
+        });
+    }
+
+    /**
+     * @throws PackageException
+     */
+    private function registerDataLayerContent(): void
+    {
+        // First register mapper.
+        $this->registerService(ContentMapper::class, function (Container $container): ContentMapper {
+            return new ContentMapper();
+        });
+
+        // Then repository.
+        $this->registerTagAndService(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentRepositoryFile::class, function (Container $container): ContentRepositoryInterface {
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
+            /** @var ContentMapper $contentMapper */
+            $contentMapper = $container[ContentMapper::class];
+
+            return new ContentRepositoryFile($configuration, $contentMapper);
+        });
+
+        // Then alias the implementation.
+        $this->registerServiceAlias(ContentRepositoryInterface::class, ContentRepositoryFile::class);
+
+        // Register the Aggregation ContentRepository
+        $this->registerTagAndService(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentRepositoryAggregation::class, function (Container $container): ContentRepositoryInterface {
+            $classList = $this->resolveTag(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY,ContentRepositoryInterface::class, [ContentRepositoryAggregation::class]);
+
+            return new ContentRepositoryAggregation($classList);
         });
     }
 

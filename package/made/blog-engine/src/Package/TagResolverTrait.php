@@ -37,10 +37,11 @@ trait TagResolverTrait
      *
      * @param string $tagName
      * @param string|null $parentClassName
-     * @return mixed
+     * @param array|null $excludeClassName
+     * @return array
      * @throws PackageException
      */
-    protected function resolveTag(string $tagName, ?string $parentClassName = null)
+    protected function resolveTag(string $tagName, ?string $parentClassName = null, array $excludeClassName = null): array
     {
         if (!isset($this->container) || !method_exists($this, 'hasTagSupport')) {
             throw new PackageException('Container not found.');
@@ -54,7 +55,11 @@ trait TagResolverTrait
         if (isset($tag[$tagName]) && is_array($tag[$tagName])) {
             $tagArray = $tag[$tagName];
 
-            return array_reduce($tagArray, function (array $carry, string $serviceName) use ($parentClassName): array {
+            return array_reduce($tagArray, function (array $carry, string $serviceName) use ($parentClassName, $excludeClassName): array {
+                if (null !== $excludeClassName && in_array($serviceName, $excludeClassName)) {
+                    return $carry;
+                }
+                
                 $service = $this->container[$serviceName] ?? null;
 
                 if (null === $parentClassName || (null !== $parentClassName && is_subclass_of($service, $parentClassName))) {
