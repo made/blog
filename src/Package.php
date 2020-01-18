@@ -64,6 +64,10 @@ class Package extends PackageAbstract
     {
         parent::register($pimple);
 
+        $this->registerService(App::class, function (Container $container) {
+            return $this->app;
+        });
+
         $this->register3rdPartyDependency($pimple);
     }
 
@@ -74,14 +78,11 @@ class Package extends PackageAbstract
     private function register3rdPartyDependency(Container $container): void
     {
         // TODO: Use a constant for the service name.
-        $this->registerConfiguration('twig', [
+        $this->registerConfiguration(Twig::class, [
             // TODO: Complete option list with defaults.
             'cache' => false,
         ]);
 
-        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
-
-        $this->registerConfiguration(Twig::class, $configuration['twig']);
         $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
 
         $this->registerService(Twig::class, function (Container $container) use ($configuration): Twig {
@@ -90,6 +91,8 @@ class Package extends PackageAbstract
 
             /** @var ThemeService $themeService */
             $themeService = $container[ThemeService::class];
+
+//            echo('<pre>');print_r($themeService->getPath());echo('</pre>');exit();
 
             $twig = Twig::create($themeService->getPath(), $settings);
             $themeService->updateLoader($twig->getLoader());

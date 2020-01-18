@@ -33,6 +33,7 @@ if (PHP_SAPI == 'cli-server') {
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
+use App\Package;
 use Made\Blog\Engine\Service\Configuration\Strategy\File\FileConfigurationStrategy;
 use Pimple\Container;
 use Pimple\Psr11\Container as Psr11Container;
@@ -40,10 +41,10 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
-$rootDirectory = dirname(__DIR__);
-FileConfigurationStrategy::setRootDirectoryPath($rootDirectory);
+$configuration = [];
+$configuration[Package::SERVICE_NAME_CONFIGURATION] = require dirname(__DIR__) . '/app/configuration.php';
 
-$container = new Container();
+$container = new Container($configuration);
 AppFactory::setContainer(new Psr11Container($container));
 
 /**
@@ -58,7 +59,7 @@ $app->addRoutingMiddleware();
 
 $container->register(new \Made\Blog\Engine\Package($container));
 // TODO: Change namespace.
-$container->register(new \App\Package($app));
+$container->register(new Package($app));
 
 /*
  * Add Error Handling Middleware.

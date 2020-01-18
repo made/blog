@@ -84,29 +84,8 @@ class Package extends PackageAbstract
      */
     private function registerConfigurationStuff(Container $container): void
     {
-        $this->registerTagAndService(ConfigurationStrategyInterface::TAG_CONFIGURATION_STRATEGY, FileConfigurationStrategy::class, function (Container $container): ConfigurationStrategyInterface {
-            return new FileConfigurationStrategy();
-        });
-
-        // TODO: Currently this is set statically to use the file configuration strategy. The extra tagging is needed so the resolver can find the alias.
-        $this->registerServiceAlias(ConfigurationStrategyInterface::class, FileConfigurationStrategy::class);
-        $this->registerTag(ConfigurationStrategyInterface::TAG_CONFIGURATION_STRATEGY, ConfigurationStrategyInterface::class);
-
-        $this->registerService(ConfigurationService::class, function (Container $container): ConfigurationService {
-            /** @var array|ConfigurationStrategyInterface[] $configurationStrategyArray */
-            $configurationStrategyArray = $this->resolveTag(ConfigurationStrategyInterface::TAG_CONFIGURATION_STRATEGY, ConfigurationStrategyInterface::class);
-            /** @var ConfigurationStrategyInterface $configurationStrategy */
-            $configurationStrategy = $configurationStrategyArray[ConfigurationStrategyInterface::class];
-
-            return new ConfigurationService($configurationStrategy);
-        });
-
-        // Initialize the configuration.
-        $this->initializeConfiguration($container);
-
-        $this->registerConfiguration(Configuration::CONFIGURATION_NAME, [
-            // TODO: Find a way to detect the correct root directory.
-            Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => null,
+        $this->registerConfiguration(Configuration::class, [
+            Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__, 4),
             Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
         ]);
 
@@ -114,35 +93,12 @@ class Package extends PackageAbstract
 
         $this->registerService(Configuration::class, function (Container $container) use ($configuration): Configuration {
             /** @var array $settings */
-            $settings = $configuration[Configuration::CONFIGURATION_NAME];
+            $settings = $configuration[Configuration::class];
 
             return (new Configuration())
-                // The root directory is expected to be at the top level of the configuration array and has to be placed
-                // there explicitly by the used configuration strategy.
-                ->setRootDirectory($configuration[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
+                ->setRootDirectory($settings[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
                 ->setTheme($settings[Configuration::CONFIGURATION_NAME_THEME]);
         });
-    }
-
-    /**
-     * Initialize the configuration. As of now, this method will replace all existing configuration with the newly
-     * initialized one.
-     *
-     * TODO: Make this method use an array_merge() or something.
-     *
-     * @param Container $container
-     * @throws PackageException
-     */
-    private function initializeConfiguration(Container $container): void
-    {
-        /** @var ConfigurationService $configurationService */
-        $configurationService = $container[ConfigurationService::class];
-
-        try {
-            $container[static::SERVICE_NAME_CONFIGURATION] = $configurationService->getConfigurationArray(true);
-        } catch (ConfigurationException $ex) {
-            throw new PackageException('Configuration exception.');
-        }
     }
 
     /**
@@ -153,17 +109,10 @@ class Package extends PackageAbstract
     {
         // TODO: Rather use a constant for some stuff inside this function. Not sure where to place them, thought.
 
-        $this->registerConfiguration('cache', [
-            // TODO
-            'path' => null,
+        $this->registerConfiguration(Cache::class, [
+            'path' => dirname(__DIR__, 4) . '/var/cache',
         ]);
 
-        $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
-
-        // TODO: This could be done inside a function in the abstract class called "registerConfigurationAlias" or something along that line.
-        //  This makes the configuration available under the class name. Not yet sure if that practice should be continued or if normal strings should be used instead.
-        $this->registerConfiguration(Cache::class, $configuration['cache']);
-        //  Same goes with this, as the configuration array is not handled by reference.
         $configuration = $container[static::SERVICE_NAME_CONFIGURATION];
 
         $this->registerService(Cache::class, function (Container $container) use ($configuration): Cache {

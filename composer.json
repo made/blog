@@ -31,7 +31,7 @@
   "repositories": [
     {
       "type": "path",
-      "url": "package/made-blog-engine"
+      "url": "package/made/blog-engine"
     }
   ]
 }

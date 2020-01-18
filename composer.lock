@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9b990bbd52d4bf12be27889ef9137369",
+    "content-hash": "b0852edd6c9062079e7b65427156f65a",
     "packages": [
         {
             "name": "erusev/parsedown",
@@ -185,9 +185,8 @@
             "version": "dev-master",
             "dist": {
                 "type": "path",
-                "url": "package/made-blog-engine",
-                "reference": "65e0942ab12614266cff28eb6e613f0e9176f387",
-                "shasum": null
+                "url": "package/made/blog-engine",
+                "reference": "65e0942ab12614266cff28eb6e613f0e9176f387"
             },
             "require": {
                 "erusev/parsedown": "^1.7",

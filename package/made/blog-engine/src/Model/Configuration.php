@@ -17,46 +17,75 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Service\Configuration;
-
-use Made\Blog\Engine\Exception\ConfigurationException;
-use Made\Blog\Engine\Model\Configuration;
-use Made\Blog\Engine\Service\Configuration\Strategy\ConfigurationStrategyInterface;
+namespace Made\Blog\Engine\Model;
 
 /**
- * Class ConfigurationService
+ * Class Configuration
  *
- * @package Made\Blog\Engine\Service\Configuration
+ * @package Made\Blog\Engine\Model
  */
-class ConfigurationService
+class Configuration
 {
-    /**
-     * @var ConfigurationStrategyInterface
-     */
-    private $configurationStrategy;
+    const CONFIGURATION_NAME_THEME = 'theme';
+    const CONFIGURATION_NAME_ROOT_DIRECTORY = 'root_directory';
 
     /**
-     * ConfigurationService constructor.
-     * @param ConfigurationStrategyInterface $configurationStrategy
+     * 'root_directory'
+     *
+     * @var string
      */
-    public function __construct(ConfigurationStrategyInterface $configurationStrategy)
+    private $rootDirectory;
+
+    /**
+     * 'theme'
+     *
+     * @var string
+     */
+    private $theme;
+
+    /**
+     * @return bool
+     */
+    public function hasTheme(): bool
     {
-        $this->configurationStrategy = $configurationStrategy;
+        return !empty($this->theme);
+    }
+
+    /** generated methods */
+
+    /**
+     * @return string
+     */
+    public function getRootDirectory(): string
+    {
+        return $this->rootDirectory;
     }
 
     /**
-     * @param bool $shouldThrow If an exception should be thrown for an empty configuration array returned by the strategy.
-     * @return array
-     * @throws ConfigurationException
+     * @param string $rootDirectory
+     * @return Configuration
      */
-    public function getConfigurationArray(bool $shouldThrow = false): array
+    public function setRootDirectory(string $rootDirectory): Configuration
     {
-        $content = $this->configurationStrategy->initialize();
+        $this->rootDirectory = $rootDirectory;
+        return $this;
+    }
 
-        if (empty($content) && $shouldThrow) {
-            throw new ConfigurationException('Empty configuration initialized!');
-        }
+    /**
+     * @return string
+     */
+    public function getTheme(): string
+    {
+        return $this->theme;
+    }
 
-        return $content;
+    /**
+     * @param string $theme
+     * @return Configuration
+     */
+    public function setTheme(string $theme): Configuration
+    {
+        $this->theme = $theme;
+        return $this;
     }
 }
