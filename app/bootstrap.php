@@ -34,13 +34,10 @@ if (PHP_SAPI == 'cli-server') {
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use App\Package;
-use Made\Blog\Engine\Service\Configuration\Strategy\File\FileConfigurationStrategy;
 use Pimple\Container;
 use Pimple\Package\PackageAbstract;
 use Pimple\Package\PackageInterface;
 use Pimple\Psr11\Container as Psr11Container;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
 $configuration = [];
