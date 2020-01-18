@@ -92,9 +92,7 @@ class Package extends PackageAbstract
             /** @var ThemeService $themeService */
             $themeService = $container[ThemeService::class];
 
-//            echo('<pre>');print_r($themeService->getPath());echo('</pre>');exit();
-
-            $twig = Twig::create($themeService->getPath(), $settings);
+            $twig = Twig::create($themeService->getPathAndNamespace(), $settings);
             $themeService->updateLoader($twig->getLoader());
 
             return $twig;

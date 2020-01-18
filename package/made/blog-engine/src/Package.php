@@ -165,8 +165,10 @@ class Package extends PackageAbstract
         $this->container->extend(ThemeRepositoryInterface::class, function (ThemeRepositoryInterface $themeRepository, Container $container): ThemeRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
+            /** @var ThemeMapper $themeMapper */
+            $themeMapper = $container[ThemeMapper::class];
 
-            return new CacheProxyThemeRepository($cache, $themeRepository);
+            return new CacheProxyThemeRepository($cache, $themeRepository, $themeMapper);
         });
     }
 

@@ -52,7 +52,7 @@ class ThemeService
     /**
      * Namespace for Twig
      */
-    const THEME_NAMESPACE = 'App';
+    const NAMESPACE_VIEW = 'App';
 
     /**
      * @var Configuration
@@ -94,6 +94,16 @@ class ThemeService
     {
         $path = $this->configuration->getRootDirectory();
         return $this->getViewPath($path);
+    }
+
+    /**
+     * @return array
+     */
+    public function getPathAndNamespace(): array
+    {
+        return [
+            static::NAMESPACE_VIEW => $this->getPath(),
+        ];
     }
 
     /**
