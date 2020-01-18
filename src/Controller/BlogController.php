@@ -21,8 +21,10 @@
 namespace App\Controller;
 
 use App\ControllerInterface;
+use Fig\Http\Message\StatusCodeInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Views\Twig;
 
@@ -34,7 +36,6 @@ use Slim\Views\Twig;
 class BlogController implements ControllerInterface
 {
     const ROUTE_SLUG = 'blog.slug';
-
 
     /**
      * @inheritDoc
@@ -51,12 +52,18 @@ class BlogController implements ControllerInterface
     private $twig;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * BlogController constructor.
      * @param Twig $twig
      */
-    public function __construct(Twig $twig)
+    public function __construct(Twig $twig, LoggerInterface $logger)
     {
         $this->twig = $twig;
+        $this->logger = $logger;
     }
 
     /**
@@ -70,8 +77,17 @@ class BlogController implements ControllerInterface
         /** @var string $slug */
         $slug = $args['slug'];
 
+        $line = "The slug is: '$slug'.";
+
         $response->getBody()
-            ->write("The slug is: '$slug'.");
+            ->write($line);
+
+        // This is a serious tripwire!
+        if ('favicon.ico' === $slug) {
+            return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
+        }
+
+        $this->logger->info($line);
 
         return $response;
     }

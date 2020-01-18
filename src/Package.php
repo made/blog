@@ -135,8 +135,10 @@ class Package extends PackageAbstract
         $this->registerService(BlogController::class, function (Container $container): BlogController {
             /** @var Twig $twig */
             $twig = $container[Twig::class];
+            /** @var Logger $logger */
+            $logger = $container[Logger::class];
 
-            return new BlogController($twig);
+            return new BlogController($twig, $logger);
         });
 
         BlogController::register($this->app);
