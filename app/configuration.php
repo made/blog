@@ -15,24 +15,24 @@
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-
-namespace Made\Blog\Engine\Service\Configuration\Strategy;
-
-use Made\Blog\Engine\Exception\ConfigurationException;
-
-/**
- * Class ConfigurationStrategyInterface
  *
- * @package Made\Blog\Engine\Service\Configuration\Strategy
  */
-interface ConfigurationStrategyInterface
-{
-    const TAG_CONFIGURATION_STRATEGY = 'strategy.configuration';
 
-    /**
-     * @return array
-     * @throws ConfigurationException
-     */
-    public function initialize(): array;
-}
+use Cache\Cache;
+use Made\Blog\Engine\Model\Configuration;
+use Slim\Views\Twig;
+
+return [
+    Configuration::class => [
+        Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__),
+        Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
+    ],
+
+    Twig::class => [
+        'cache' => false,
+    ],
+
+    Cache::class => [
+        'path' => '/var/cache',
+    ],
+];
