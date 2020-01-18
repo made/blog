@@ -19,9 +19,12 @@
 
 namespace Made\Blog\Engine\Repository\Proxy;
 
+use Made\Blog\Engine\Exception\MapperException;
 use Made\Blog\Engine\Model\Theme;
+use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Psr\SimpleCache\CacheInterface;
+use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class CachingThemeRepository
@@ -30,6 +33,9 @@ use Psr\SimpleCache\CacheInterface;
  */
 class CacheProxyThemeRepository implements ThemeRepositoryInterface
 {
+    const CACHE_KEY_ALL = 'theme-all';
+    const CACHE_KEY_ONE = 'theme-one-%1$s';
+
     /**
      * @var CacheInterface
      */
@@ -41,31 +47,84 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
     private $themeRepository;
 
     /**
+     * @var ThemeMapper
+     */
+    private $themeMapper;
+
+    /**
      * CacheProxyThemeRepository constructor.
      * @param CacheInterface $cache
      * @param ThemeRepositoryInterface $themeRepository
+     * @param ThemeMapper $themeMapper
      */
-    public function __construct(CacheInterface $cache, ThemeRepositoryInterface $themeRepository)
+    public function __construct(CacheInterface $cache, ThemeRepositoryInterface $themeRepository, ThemeMapper $themeMapper)
     {
         $this->cache = $cache;
         $this->themeRepository = $themeRepository;
+        $this->themeMapper = $themeMapper;
     }
 
     /**
      * @inheritDoc
+     * @throws InvalidArgumentException
      */
     public function getAll(): array
     {
-        // TODO: Implement getAll() method.
-        return $this->themeRepository->getAll();
+        // TODO: Cache expiry for gameplayjdk/php-file-cache!
+        $key = static::CACHE_KEY_ALL;
+
+        /** @var array|Theme[] $all */
+        $allData = $this->cache->get($key, []);
+        $all = [];
+
+        try {
+            $all = $this->themeMapper->fromDataArray($allData);
+        } catch (MapperException $exception) {
+            // TODO: Logging.
+        }
+
+        if (empty($all)) {
+            $all = $this->themeRepository->getAll();
+
+            if (!empty($all)) {
+                $allData = $this->themeMapper->toDataArray($all);
+
+                $this->cache->set($key, $allData);
+            }
+        }
+
+        return $all;
     }
 
     /**
      * @inheritDoc
+     * @throws InvalidArgumentException
      */
     public function getOneByName(string $name): ?Theme
     {
-        // TODO: Implement getOneByName() method.
-        return $this->themeRepository->getOneByName($name);
+        $key = vsprintf(static::CACHE_KEY_ONE, [
+            $name,
+        ]);
+
+        $oneData = $this->cache->get($key);
+        $one = null;
+
+        try {
+            $one = $this->themeMapper->fromData($oneData);
+        } catch (MapperException $exception) {
+            // TODO: Logging.
+        }
+
+        if (empty($one)) {
+            $one = $this->themeRepository->getOneByName($name);
+
+            if (!empty($one)) {
+                $oneData = $this->themeMapper->toData($one);
+
+                $this->cache->set($key, $oneData);
+            }
+        }
+
+        return $one;
     }
 }
