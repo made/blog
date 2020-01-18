@@ -19,7 +19,61 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
+use Made\Blog\Engine\Exception\ContentException;
+use Made\Blog\Engine\Model\Content;
+
 class ContentMapper
 {
+    const KEY_SLUG = 'slug';
+    const KEY_TITLE = 'title';
+    const KEY_DESCRIPTION = 'description';
+    const KEY_LOCALE = 'locale';
+    const KEY_CATEGORIES = 'categories';
+    const KEY_TAGS = 'tags';
+    const KEY_REDIRECT = 'redirect';
 
+    /**
+     * @param array $data
+     * @return Content
+     * @throws ContentException
+     */
+    public function fromData(array $data)
+    {
+        $content = new Content();
+
+        if (!array_key_exists(static::KEY_SLUG, $data)) {
+            throw new ContentException('Unfortunately no slug is configured.');
+        }
+
+        if (!array_key_exists(static::KEY_TITLE, $data)) {
+            throw new ContentException('Unfortunately no title is configured.');
+        }
+
+        if (!array_key_exists(static::KEY_DESCRIPTION, $data)) {
+            throw new ContentException('Unfortunately no description is configured.');
+        }
+
+        if (!array_key_exists(static::KEY_LOCALE, $data)) {
+            throw new ContentException('Unfortunately no description is configured.');
+        }
+
+        $content
+            ->setSlug($data[static::KEY_SLUG])
+            ->setTitle($data[static::KEY_TITLE])
+            ->setDescription($data[static::KEY_DESCRIPTION]);
+
+        if (array_key_exists(static::KEY_CATEGORIES, $data)) {
+            $content->setCategories($data[static::KEY_CATEGORIES]);
+        }
+
+        if (array_key_exists(static::KEY_TAGS, $data)) {
+            $content->setTags($data[static::KEY_TAGS]);
+        }
+
+        if (array_key_exists(static::KEY_REDIRECT, $data)) {
+            $content->setRedirect($data[static::KEY_REDIRECT]);
+        }
+
+        return $content;
+    }
 }

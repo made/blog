@@ -19,6 +19,10 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
+use Made\Blog\Engine\Exception\ContentException;
+use Made\Blog\Engine\Help\Directory;
+use Made\Blog\Engine\Help\File;
+use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Content;
@@ -54,7 +58,39 @@ class ContentRepository implements ContentRepositoryInterface
      */
     public function getAll(): array
     {
-        // TODO: Implement getAll() method.
+        $path = $this->getPath();
+
+        $list = Directory::listCallback($path, function (string $entry): bool {
+            if ('.' === $entry || '..' === $entry) {
+                return false;
+            }
+
+            $contentPath = $this->getContentPath($entry);
+            $configurationPath = $this->getConfigurationPath($entry);
+
+            // TODO: Logging if below check is failed.
+            return is_dir($contentPath) && is_file($configurationPath);
+        });
+
+        $all = array_map(function (string $entry): ?Content {
+            $configurationPath = $this->getConfigurationPath($entry);
+
+            $data = $this->getContent($configurationPath);
+
+            if (empty($data)) {
+                return null;
+            }
+
+            try {
+                return $this->contentMapper->fromData($data);
+            } catch (ContentException $exception) {
+                // ToDo: Logging
+            }
+
+            return null;
+        }, $list);
+
+        return array_values($all);
     }
 
     /**
@@ -62,7 +98,14 @@ class ContentRepository implements ContentRepositoryInterface
      */
     public function getOneBySlug(string $name): ?Content
     {
-        // TODO: Implement getOneByName() method.
+        $all = $this->getAll();
+        var_dump($all);
+        if (in_array($name, $all)) {
+            // ToDo: Implement the mapper to get an array of Content
+            return new Content();
+        }
+
+        return null;
     }
 
     /**
@@ -98,5 +141,44 @@ class ContentRepository implements ContentRepositoryInterface
             $this->configuration->getRootDirectory(),
             ContentService::PATH_CONTENT,
         ]);
+    }
+
+
+    /**
+     * @param string $entry
+     * @return string
+     */
+    private function getContentPath(string $entry): string
+    {
+        $path = $this->getPath();
+
+        return Path::join(...[
+            $path,
+            $entry,
+        ]);
+    }
+
+    /**
+     * @param string $entry
+     * @return string
+     */
+    private function getConfigurationPath(string $entry): string
+    {
+        $path = $this->getContentPath($entry);
+
+        return Path::join(...[
+            $path,
+            ContentService::PATH_CONFIGURATION,
+        ]);
+    }
+
+    /**
+     * @param string $path
+     * @return array
+     */
+    private function getContent(string $path): array
+    {
+        $content = File::read($path);
+        return Json::decode($content);
     }
 }

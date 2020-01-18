@@ -170,6 +170,7 @@ class Package extends PackageAbstract
 
             return new CacheProxyThemeRepository($cache, $themeRepository);
         });
+
     }
 
     /**
@@ -201,6 +202,12 @@ class Package extends PackageAbstract
 
             return new ContentRepositoryAggregation($classList);
         });
+
+        /** @var ContentRepositoryFile $rs */
+        $rs = $this->container[ContentRepositoryFile::class];
+
+var_dump($rs);
+        $rs->getOneBySlug('example1');
     }
 
     private function registerThemeService(): void
