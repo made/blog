@@ -19,6 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
+use Made\Blog\Engine\Exception\MapperException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
@@ -64,7 +65,7 @@ class ThemeRepository implements ThemeRepositoryInterface
     {
         $path = $this->getPath();
 
-        $list = Directory::listCallback($path, function (string $entry) use ($path): bool {
+        $list = Directory::listCallback($path, function (string $entry): bool {
             if ('.' === $entry || '..' === $entry) {
                 return false;
             }
@@ -73,11 +74,11 @@ class ThemeRepository implements ThemeRepositoryInterface
             $viewPath = $this->getViewPath($entry);
             $configurationPath = $this->getConfigurationPath($entry);
 
-            // ToDo: Logging if below check is failed
+            // TODO: Logging if below check is failed.
             return is_dir($themePath) && is_dir($viewPath) && is_file($configurationPath);
         });
 
-        $all = array_map(function (string $entry) use ($path): ?Theme {
+        $all = array_map(function (string $entry): ?Theme {
             $themePath = $this->getThemePath($entry);
             $configurationPath = $this->getConfigurationPath($entry);
 
@@ -89,7 +90,13 @@ class ThemeRepository implements ThemeRepositoryInterface
 
             $data[ThemeMapper::KEY_PATH] = $themePath;
 
-            return $this->themeMapper->fromData($data);
+            try {
+                return $this->themeMapper->fromData($data);
+            } catch (MapperException $exception) {
+                // TODO: Logging.
+            }
+
+            return null;
         }, $list);
 
         return array_filter($all, function (?Theme $theme): bool {

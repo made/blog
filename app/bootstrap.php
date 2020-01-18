@@ -54,7 +54,7 @@ AppFactory::setContainer(new Psr11Container($container));
  * choice e.g.: Slim PSR-7 and a supported ServerRequest creator (included with Slim PSR-7).
  */
 $app = AppFactory::create();
-// Add Routing Middleware. TODO: Move this to the src/Package class.
+// Add Routing Middleware.
 $app->addRoutingMiddleware();
 
 $container->register(new \Made\Blog\Engine\Package($container));
