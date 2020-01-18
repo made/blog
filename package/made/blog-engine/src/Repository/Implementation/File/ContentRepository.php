@@ -96,24 +96,35 @@ class ContentRepository implements ContentRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneBySlug(string $name): ?Content
+    public function getOneBySlug(string $slug): ?Content
     {
         $all = $this->getAll();
-        var_dump($all);
-        if (in_array($name, $all)) {
-            // ToDo: Implement the mapper to get an array of Content
-            return new Content();
-        }
 
-        return null;
+        return array_reduce($all, function (?Content $carry, Content $content) use ($slug): ?Content {
+            if (null === $carry && $content->getSlug() === $slug) {
+                $carry = $content;
+            }
+
+            return $carry;
+        }, null);
+        // ToDo: Maybe think about also searching for redirect slugs if nothing is found above.
+        //  Maybe an extra Repository Layer for this (Proxy).
     }
 
     /**
      * @inheritDoc
      */
-    public function getOneBySlugRedirect(string $name): ?Content
+    public function getOneBySlugRedirect(string $slugRedirect): ?Content
     {
-        // TODO: Implement getOneBySlugRedirect() method.
+        $all = $this->getAll();
+
+        return array_reduce($all, function (?Content $carry, Content $content) use ($slugRedirect): ?Content {
+            if (null === $carry && in_array($slugRedirect, $content->getRedirect())) {
+                $carry = $content;
+            }
+
+            return $carry;
+        }, null);
     }
 
     /**

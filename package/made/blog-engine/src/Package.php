@@ -198,16 +198,10 @@ class Package extends PackageAbstract
 
         // Register the Aggregation ContentRepository
         $this->registerTagAndService(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentRepositoryAggregation::class, function (Container $container): ContentRepositoryInterface {
-            $classList = $this->resolveTag(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY,ContentRepositoryInterface::class, [ContentRepositoryAggregation::class]);
+            $classList = $this->resolveTag(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentRepositoryInterface::class, [ContentRepositoryAggregation::class]);
 
             return new ContentRepositoryAggregation($classList);
         });
-
-        /** @var ContentRepositoryFile $rs */
-        $rs = $this->container[ContentRepositoryFile::class];
-
-var_dump($rs);
-        $rs->getOneBySlug('example1');
     }
 
     private function registerThemeService(): void
