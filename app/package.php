@@ -18,8 +18,15 @@
  *
  */
 
+use App\Package;
+use Pimple\Container;
+use Slim\App;
+
+/** @var Container $container */
+/** @var App $app */
+
 // Keep the namespace near the package class or use an alias for better readability.
 return [
-    10 => new \Made\Blog\Engine\Package($container),
-    90 => new \App\Package($app),
+    10 => new Made\Blog\Engine\Package($container),
+    90 => new Package($app),
 ];

@@ -67,7 +67,7 @@ $app->addRoutingMiddleware();
  */
 $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
-/** @var array|PackageAbstract[] $packageList */
+/** @var array|PackageInterface[] $packageList */
 $packageList = require dirname(__DIR__) . '/app/package.php';
 ksort($packageList);
 
