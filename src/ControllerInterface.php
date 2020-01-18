@@ -18,31 +18,19 @@
  *
  */
 
-use Cache\Cache;
-use Made\Blog\Engine\Model\Configuration;
-use Monolog\Logger;
-use Slim\Views\Twig;
+namespace App;
 
-return [
-    Logger::class => [
-        'name' => 'app',
-        'filename' => dirname(__DIR__) . '/var/log/app.log',
-    ],
+use Slim\App;
 
-    Twig::class => [
-        'cache' => false,
-    ],
-
-    Configuration::class => [
-        Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__),
-        Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
-        // ToDo: add supported languages for blog posts
-    ],
-
-    // ToDo: Use a class later here.
-    'content' => require dirname(__DIR__) . '/app/configuration.content.php',
-
-    Cache::class => [
-        'path' => dirname(__DIR__) . '/var/cache',
-    ],
-];
+/**
+ * Interface ControllerInterface
+ *
+ * @package App
+ */
+interface ControllerInterface
+{
+    /**
+     * @param App $app
+     */
+    public static function register(App $app): void;
+}
