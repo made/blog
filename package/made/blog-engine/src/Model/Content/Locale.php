@@ -17,10 +17,15 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Model;
+namespace Made\Blog\Engine\Model\Content;
 
-class Content
+class Locale
 {
+    /**
+     * @var string
+     */
+    private $language;
+
     /**
      * @var string
      */
@@ -37,9 +42,9 @@ class Content
     private $description;
 
     /**
-     * @var array
+     * @var Meta
      */
-    private $locale;
+    private $meta;
 
     /**
      * @var array
@@ -59,6 +64,24 @@ class Content
     /**
      * @return string
      */
+    public function getLanguage(): string
+    {
+        return $this->language;
+    }
+
+    /**
+     * @param string $language
+     * @return Locale
+     */
+    public function setLanguage(string $language): Locale
+    {
+        $this->language = $language;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
     public function getSlug(): string
     {
         return $this->slug;
@@ -66,9 +89,9 @@ class Content
 
     /**
      * @param string $slug
-     * @return Content
+     * @return Locale
      */
-    public function setSlug(string $slug): Content
+    public function setSlug(string $slug): Locale
     {
         $this->slug = $slug;
         return $this;
@@ -84,9 +107,9 @@ class Content
 
     /**
      * @param string $title
-     * @return Content
+     * @return Locale
      */
-    public function setTitle(string $title): Content
+    public function setTitle(string $title): Locale
     {
         $this->title = $title;
         return $this;
@@ -102,29 +125,29 @@ class Content
 
     /**
      * @param string $description
-     * @return Content
+     * @return Locale
      */
-    public function setDescription(string $description): Content
+    public function setDescription(string $description): Locale
     {
         $this->description = $description;
         return $this;
     }
 
     /**
-     * @return array
+     * @return Meta
      */
-    public function getLocale(): array
+    public function getMeta(): Meta
     {
-        return $this->locale;
+        return $this->meta;
     }
 
     /**
-     * @param array $locale
-     * @return Content
+     * @param Meta $meta
+     * @return Locale
      */
-    public function setLocale(array $locale): Content
+    public function setMeta(Meta $meta): Locale
     {
-        $this->locale = $locale;
+        $this->meta = $meta;
         return $this;
     }
 
@@ -138,9 +161,9 @@ class Content
 
     /**
      * @param array $categories
-     * @return Content
+     * @return Locale
      */
-    public function setCategories(array $categories): Content
+    public function setCategories(array $categories): Locale
     {
         $this->categories = $categories;
         return $this;
@@ -156,9 +179,9 @@ class Content
 
     /**
      * @param array $tags
-     * @return Content
+     * @return Locale
      */
-    public function setTags(array $tags): Content
+    public function setTags(array $tags): Locale
     {
         $this->tags = $tags;
         return $this;
@@ -174,9 +197,9 @@ class Content
 
     /**
      * @param array $redirect
-     * @return Content
+     * @return Locale
      */
-    public function setRedirect(array $redirect): Content
+    public function setRedirect(array $redirect): Locale
     {
         $this->redirect = $redirect;
         return $this;

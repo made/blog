@@ -25,13 +25,16 @@ use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
-use Made\Blog\Engine\Model\Content;
+use Made\Blog\Engine\Model\Content\Content;
 use Made\Blog\Engine\Repository\ContentRepositoryInterface;
 use Made\Blog\Engine\Repository\Mapper\ContentMapper;
 use Made\Blog\Engine\Service\ContentService;
 
 class ContentRepository implements ContentRepositoryInterface
 {
+    // ToDo: array_column to get a summary of the categories and tags of all posts :)
+    //  for Methods like getAllCategories() or getAllTags()
+
     /**
      * @var Configuration
      */
@@ -96,12 +99,24 @@ class ContentRepository implements ContentRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneBySlug(string $slug): ?Content
+    public function getOneBySlug(string $slug, string $locale = null): ?Content
     {
+        if ($locale === null) {
+            // ToDo: LocaleService should be injected into the constructor and used as class property
+            //  $this->locale = $localeService->getLocale();
+            $locale = 'en';
+        }
+
         $all = $this->getAll();
 
-        return array_reduce($all, function (?Content $carry, Content $content) use ($slug): ?Content {
-            if (null === $carry && $content->getSlug() === $slug) {
+        return array_reduce($all, function (?Content $carry, Content $content) use ($slug, $locale): ?Content {
+            if (!isset($content->getLocale()[$locale])) {
+                throw new ContentException('Unfortunately no content for this locale');
+            }
+
+            $slugInCurrentLocale = $content->getLocale()[$locale]->getSlug();
+
+            if (null === $carry && $slugInCurrentLocale === $slug) {
                 $carry = $content;
             }
 
@@ -114,12 +129,24 @@ class ContentRepository implements ContentRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneBySlugRedirect(string $slugRedirect): ?Content
+    public function getOneBySlugRedirect(string $slugRedirect, string $locale = null): ?Content
     {
+        if ($locale === null) {
+            // ToDo: LocaleService should be injected into the constructor and used as class property
+            //  $this->locale = $localeService->getLocale();
+            $locale = 'en';
+        }
+
         $all = $this->getAll();
 
-        return array_reduce($all, function (?Content $carry, Content $content) use ($slugRedirect): ?Content {
-            if (null === $carry && in_array($slugRedirect, $content->getRedirect())) {
+        return array_reduce($all, function (?Content $carry, Content $content) use ($slugRedirect, $locale): ?Content {
+            if (!isset($content->getLocale()[$locale])) {
+                throw new ContentException('Unfortunately no content for this locale');
+            }
+
+            $redirectInCurrentLocale = $content->getLocale()[$locale]->getRedirect();
+
+            if (null === $carry && in_array($slugRedirect, $redirectInCurrentLocale)) {
                 $carry = $content;
             }
 
@@ -128,19 +155,62 @@ class ContentRepository implements ContentRepositoryInterface
     }
 
     /**
+     * // ToDo: Only english locale works at the moment when calling the method directly
      * @inheritDoc
      */
     public function getAllByCategory(string ...$category): array
     {
-        // TODO: Implement getAllByCategory() method.
+        // ToDo: Maybe also find a way to override the locale with a function parameter
+        //  Since splat operator is used, no optional parameters can be passed
+        //  Like this the function ain't that flexible
+
+        // ToDo: LocaleService should be injected into the constructor and used as class property
+        //  $this->locale = $localeService->getLocale();
+        $locale = 'en';
+        $all = $this->getAll();
+
+        return array_filter($all, function (Content $content) use ($category, $locale): ?Content {
+            if (!isset($content->getLocale()[$locale])) {
+                throw new ContentException('Unfortunately no content for this locale');
+            }
+
+            $categoryInCurrentLocale = $content->getLocale()[$locale]->getCategories();
+
+
+            if (array_intersect($category, $categoryInCurrentLocale)) {
+                return $content;
+            }
+            return null;
+        });
     }
 
     /**
+     * // ToDo: Only english locale works at the moment when calling the method directly
      * @inheritDoc
      */
     public function getAllByTag(string ...$tag): array
     {
-        // TODO: Implement getAllByTag() method.
+        // ToDo: Maybe also find a way to override the locale with a function parameter
+        //  Since splat operator is used, no optional parameters can be passed
+        //  Like this the function ain't that flexible
+
+        // ToDo: LocaleService should be injected into the constructor and used as class property
+        //  $this->locale = $localeService->getLocale();
+        $locale = 'en';
+        $all = $this->getAll();
+
+        return array_filter($all, function (Content $content) use ($tag, $locale): ?Content {
+            if (!isset($content->getLocale()[$locale])) {
+                throw new ContentException('Unfortunately no content for this locale');
+            }
+
+            $tagsInCurrentLocale = $content->getLocale()[$locale]->getTags();
+
+            if (array_intersect($tag, $tagsInCurrentLocale)) {
+                return $content;
+            }
+            return null;
+        });
     }
 
     /**

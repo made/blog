@@ -17,42 +17,78 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Repository;
+namespace Made\Blog\Engine\Model\Content;
 
-use Made\Blog\Engine\Model\Content\Content;
+use DateTime;
 
-interface ContentRepositoryInterface
+class Content
 {
-    const TAG_CONTENT_REPOSITORY = 'repository.content';
+    /**
+     * @var DateTime
+     */
+    private $postDate;
 
     /**
-     * @return array|Content[]
+     * @var Locale[]
      */
-    public function getAll(): array;
+    private $locale;
 
     /**
-     * Get any post content from slug name.
-     * @param string $name
-     * @return Content|null
+     * @var bool
      */
-    public function getOneBySlug(string $name): ?Content;
+    private $status;
 
     /**
-     * Get any redirect post content from slug name.
-     * @param string $name
-     * @return Content|null
+     * @return DateTime
      */
-    public function getOneBySlugRedirect(string $name): ?Content;
+    public function getPostDate(): DateTime
+    {
+        return $this->postDate;
+    }
 
     /**
-     * @param string ...$category
-     * @return array|Content[]
+     * @param DateTime $postDate
+     * @return Content
      */
-    public function getAllByCategory(string ...$category): array;
+    public function setPostDate(DateTime $postDate): Content
+    {
+        $this->postDate = $postDate;
+        return $this;
+    }
 
     /**
-     * @param string ...$tag
-     * @return array|Content[]
+     * @return Locale[]
      */
-    public function getAllByTag(string ...$tag): array;
+    public function getLocale(): array
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @param Locale[] $locale
+     * @return Content
+     */
+    public function setLocale(array $locale): Content
+    {
+        $this->locale = $locale;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatus(): bool
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param bool $status
+     * @return Content
+     */
+    public function setStatus(bool $status): Content
+    {
+        $this->status = $status;
+        return $this;
+    }
 }

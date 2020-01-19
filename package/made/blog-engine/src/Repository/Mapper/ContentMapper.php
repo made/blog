@@ -20,17 +20,22 @@
 namespace Made\Blog\Engine\Repository\Mapper;
 
 use Made\Blog\Engine\Exception\ContentException;
-use Made\Blog\Engine\Model\Content;
+use Made\Blog\Engine\Model\Content\Content;
+use Made\Blog\Engine\Model\Content\Locale;
+use Made\Blog\Engine\Model\Content\Meta;
 
 class ContentMapper
 {
     const KEY_SLUG = 'slug';
+    const KEY_POST_DATE = 'post_date';
+    const KEY_STATUS = 'status';
     const KEY_TITLE = 'title';
     const KEY_DESCRIPTION = 'description';
     const KEY_LOCALE = 'locale';
     const KEY_CATEGORIES = 'categories';
     const KEY_TAGS = 'tags';
     const KEY_REDIRECT = 'redirect';
+    const KEY_META = 'meta';
 
     /**
      * @param array $data
@@ -41,39 +46,99 @@ class ContentMapper
     {
         $content = new Content();
 
-        if (!array_key_exists(static::KEY_SLUG, $data)) {
-            throw new ContentException('Unfortunately no slug is configured.');
-        }
-
-        if (!array_key_exists(static::KEY_TITLE, $data)) {
-            throw new ContentException('Unfortunately no title is configured.');
-        }
-
-        if (!array_key_exists(static::KEY_DESCRIPTION, $data)) {
-            throw new ContentException('Unfortunately no description is configured.');
+        if (!array_key_exists(static::KEY_POST_DATE, $data)) {
+            throw new ContentException('Unfortunately no post date is configured.');
         }
 
         if (!array_key_exists(static::KEY_LOCALE, $data)) {
-            throw new ContentException('Unfortunately no description is configured.');
+            throw new ContentException('Unfortunately no locale is configured.');
+        }
+
+        if (!array_key_exists(static::KEY_LOCALE, $data)) {
+            throw new ContentException('Unfortunately no status is configured.');
         }
 
         $content
-            ->setSlug($data[static::KEY_SLUG])
-            ->setTitle($data[static::KEY_TITLE])
-            ->setDescription($data[static::KEY_DESCRIPTION]);
+            // ToDo: think about validation of the date and maybe accept different formats. -> Util
+            ->setPostDate(\DateTime::createFromFormat('Y-m-d', $data[static::KEY_POST_DATE]))
+            ->setLocale($data[static::KEY_LOCALE])
+            ->setStatus($data[static::KEY_STATUS]);
 
-        if (array_key_exists(static::KEY_CATEGORIES, $data)) {
-            $content->setCategories($data[static::KEY_CATEGORIES]);
+        return $this->fromLocaleData($content);
+    }
+
+    private function fromLocaleData(Content $content): Content
+    {
+        $localeCollection = [];
+        foreach ($content->getLocale() as $key => $value) {
+            $locale = new Locale();
+
+            if (!array_key_exists(static::KEY_SLUG, $value)) {
+                throw new ContentException("Unfortunately no slug is configured for locale.");
+            }
+
+            if (!array_key_exists(static::KEY_TITLE, $value)) {
+                throw new ContentException('Unfortunately no title is configured for locale.');
+            }
+
+            if (!array_key_exists(static::KEY_DESCRIPTION, $value)) {
+                throw new ContentException('Unfortunately no description is configured for locale.');
+            }
+
+            if (array_key_exists(static::KEY_CATEGORIES, $value)) {
+                $locale->setCategories($value[static::KEY_CATEGORIES]);
+            }
+
+            if (array_key_exists(static::KEY_TAGS, $value)) {
+                $locale->setTags($value[static::KEY_TAGS]);
+            }
+
+            if (array_key_exists(static::KEY_REDIRECT, $value)) {
+                $locale->setRedirect($value[static::KEY_REDIRECT]);
+            }
+
+            $locale
+                ->setLanguage($key)
+                ->setSlug($value[static::KEY_SLUG])
+                ->setTitle($value[static::KEY_TITLE])
+                ->setDescription($value[static::KEY_DESCRIPTION]);
+
+            if (isset($value[static::KEY_META]) && is_array($value[self::KEY_META])) {
+                // ToDo: Chain of Functions calling one another may not be that nice.
+                //  Maybe Find a nicer solution -> Don't forget that each locale has its own meta.
+                $locale->setMeta($this->fromMetaData($value[static::KEY_META]));
+            }
+            $localeCollection[$key] = $locale;
+
         }
 
-        if (array_key_exists(static::KEY_TAGS, $data)) {
-            $content->setTags($data[static::KEY_TAGS]);
+        return $content->setLocale($localeCollection);
+    }
+
+    private function fromMetaData(array $data): Meta
+    {
+        $meta = new Meta();
+
+        if (isset($data['keywords']) && is_string($data['keywords'])) {
+            $meta->setKeywords($data['keywords']);
         }
 
-        if (array_key_exists(static::KEY_REDIRECT, $data)) {
-            $content->setRedirect($data[static::KEY_REDIRECT]);
+        if (isset($data['author']) && is_string($data['author'])) {
+            $meta->setAuthor($data['author']);
         }
 
-        return $content;
+        if (isset($data['publisher']) && is_string($data['publisher'])) {
+            $meta->setPublisher($data['publisher']);
+        }
+
+        if (isset($data['robots']) && is_string($data['robots'])) {
+            $meta->setRobots($data['robots']);
+        }
+
+        if (isset($data['custom']) && is_array($data['custom'])) {
+            $meta->setCustom($data['custom']);
+        }
+
+        return $meta;
     }
 }
