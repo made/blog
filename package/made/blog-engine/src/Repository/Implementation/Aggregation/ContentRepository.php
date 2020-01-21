@@ -19,7 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\Aggregation;
 
-use Made\Blog\Engine\Model\Content;
+use Made\Blog\Engine\Model\Content\Content;
 use Made\Blog\Engine\Repository\ContentRepositoryInterface;
 
 /**

@@ -26,15 +26,15 @@ use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Content\Content;
-use Made\Blog\Engine\Repository\ContentRepositoryInterface;
+use Made\Blog\Engine\Repository\ContentFileRepositoryInterface;
 use Made\Blog\Engine\Repository\Mapper\ContentMapper;
 use Made\Blog\Engine\Service\ContentService;
+use Psr\Log\LoggerInterface;
 
-class ContentRepository implements ContentRepositoryInterface
+class ContentRepository implements ContentFileRepositoryInterface
 {
     // ToDo: array_column to get a summary of the categories and tags of all posts :)
     //  for Methods like getAllCategories() or getAllTags()
-
     /**
      * @var Configuration
      */
@@ -46,14 +46,22 @@ class ContentRepository implements ContentRepositoryInterface
     private $contentMapper;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * ContentRepository constructor.
      * @param Configuration $configuration
      * @param ContentMapper $contentMapper
+     * @param LoggerInterface $logger
      */
-    public function __construct(Configuration $configuration, ContentMapper $contentMapper)
+    public function __construct(Configuration $configuration, ContentMapper $contentMapper, ?LoggerInterface $logger)
     {
+        // ToDo: Inject the default locale
         $this->configuration = $configuration;
         $this->contentMapper = $contentMapper;
+        $this->logger = $logger;
     }
 
     /**
@@ -64,15 +72,28 @@ class ContentRepository implements ContentRepositoryInterface
         $path = $this->getPath();
 
         $list = Directory::listCallback($path, function (string $entry): bool {
-            if ('.' === $entry || '..' === $entry) {
+            // ToDo: Maybe put this in the Directory helper class?
+            if ('.' === $entry || '..' === $entry || '.DS_Store' === $entry || '.gitignore' === $entry) {
                 return false;
             }
 
             $contentPath = $this->getContentPath($entry);
             $configurationPath = $this->getConfigurationPath($entry);
 
-            // TODO: Logging if below check is failed.
-            return is_dir($contentPath) && is_file($configurationPath);
+            $requiredFilesExist = is_dir($contentPath) && is_file($configurationPath);
+
+            if (!$requiredFilesExist) {
+                var_dump($contentPath);
+                var_dump($configurationPath);
+                throw new \Exception('Something ain`t right with the configuration for this blog post, sir.');
+                // ToDo: As soon logging works, remove exception and use logging below
+//                $this->logger->warning('Something is not right with the configuration for this blog post.', [
+//                    "content_path" => $contentPath,
+//                    'configuration_path' => $configurationPath
+//                ]);
+            }
+
+            return $requiredFilesExist;
         });
 
         $all = array_map(function (string $entry): ?Content {
@@ -87,7 +108,11 @@ class ContentRepository implements ContentRepositoryInterface
             try {
                 return $this->contentMapper->fromData($data);
             } catch (ContentException $exception) {
-                // ToDo: Logging
+                throw $exception;
+                // ToDo: As soon logging works activate it again :)
+//                $this->logger->error($exception->getMessage(), [
+//                    'data' => $entry
+//                ]);
             }
 
             return null;
@@ -214,6 +239,7 @@ class ContentRepository implements ContentRepositoryInterface
     }
 
     /**
+     * Gets the Path for the folder containing all blog entries
      * @return string
      */
     private function getPath(): string
@@ -226,6 +252,7 @@ class ContentRepository implements ContentRepositoryInterface
 
 
     /**
+     * Gets the Path for the given blog entry
      * @param string $entry
      * @return string
      */

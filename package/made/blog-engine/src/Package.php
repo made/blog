@@ -25,20 +25,19 @@ use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\TagResolverTrait;
 use Made\Blog\Engine\Repository\ContentRepositoryInterface;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\ContentRepository as ContentRepositoryAggregation;
+use Made\Blog\Engine\Repository\Implementation\File\ContentLocaleRepository;
 use Made\Blog\Engine\Repository\Implementation\File\ContentRepository as ContentRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
 use Made\Blog\Engine\Repository\Mapper\ContentMapper;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
-use Made\Blog\Engine\Service\Configuration\ConfigurationService;
-use Made\Blog\Engine\Service\Configuration\Strategy\ConfigurationStrategyInterface;
-use Made\Blog\Engine\Service\Configuration\Strategy\File\FileConfigurationStrategy;
 use Made\Blog\Engine\Service\ContentService;
 use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
 use Pimple\Package\PackageAbstract;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -48,6 +47,8 @@ use Psr\SimpleCache\CacheInterface;
  */
 class Package extends PackageAbstract
 {
+    const LOGGER_NAME = 'made_blog';
+
     use TagResolverTrait;
 
     /**
@@ -185,18 +186,30 @@ class Package extends PackageAbstract
             return new ContentMapper();
         });
 
-        // Then repository.
+        // Register the Content Repository for File implementations
         $this->registerTagAndService(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentRepositoryFile::class, function (Container $container): ContentRepositoryInterface {
             /** @var Configuration $configuration */
             $configuration = $container[Configuration::class];
             /** @var ContentMapper $contentMapper */
             $contentMapper = $container[ContentMapper::class];
+            /** @var LoggerInterface $logger */
+            $logger = null; //$container[LoggerInterface::class]; ToDo: Logger is defined in /src/Package.php, it ain't defined here yet?
 
-            return new ContentRepositoryFile($configuration, $contentMapper);
+            return new ContentRepositoryFile($configuration, $contentMapper, $logger);
         });
 
         // Then alias the implementation.
         $this->registerServiceAlias(ContentRepositoryInterface::class, ContentRepositoryFile::class);
+
+        // Register the Content Repository for File implementations, but using locales
+        $this->registerTagAndService(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentLocaleRepository::class, function (Container $container): ContentRepositoryInterface {
+            /** @var ContentRepositoryFile $contentRepositoryFile */
+            $contentRepositoryFile = $container[ContentRepositoryFile::class];
+            /** @var LoggerInterface $logger */
+            $logger = null; //$container[LoggerInterface::class]; ToDo: Logger is defined in /src/Package.php, it ain't defined here yet?
+
+            return new ContentLocaleRepository($contentRepositoryFile, $logger);
+        });
 
         // Register the Aggregation ContentRepository
         $this->registerTagAndService(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentRepositoryAggregation::class, function (Container $container): ContentRepositoryInterface {
