@@ -19,40 +19,42 @@
 
 namespace Made\Blog\Engine\Repository;
 
-use Made\Blog\Engine\Model\Content\Content;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
 
-interface ContentRepositoryInterface
+interface PostConfigurationRepositoryInterface
 {
-    const TAG_CONTENT_REPOSITORY = 'repository.content';
+    const TAG_POST_REPOSITORY = 'repository.post';
 
     /**
-     * @return array|Content[]
+     * @return array|PostConfiguration[]
      */
     public function getAll(): array;
 
     /**
-     * Get any post content from slug name.
+     * Get any post configuration from slug name.
      * @param string $name
-     * @return Content|null
+     * @return PostConfiguration|null
      */
-    public function getOneBySlug(string $name): ?Content;
+    public function getOneBySlug(string $name): ?PostConfiguration;
 
     /**
-     * Get any redirect post content from slug name.
+     * Get any redirect post configuration from slug name.
      * @param string $name
-     * @return Content|null
+     * @return PostConfiguration|null
      */
-    public function getOneBySlugRedirect(string $name): ?Content;
+    public function getOneBySlugRedirect(string $name): ?PostConfiguration;
 
     /**
+     * Get any redirect post configuration from one or more categories.
      * @param string ...$category
-     * @return array|Content[]
+     * @return array|PostConfiguration[]
      */
     public function getAllByCategory(string ...$category): array;
 
     /**
+     * Get any redirect post configuration from one or more tags.
      * @param string ...$tag
-     * @return array|Content[]
+     * @return array|PostConfiguration[]
      */
     public function getAllByTag(string ...$tag): array;
 }

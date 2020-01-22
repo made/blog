@@ -17,9 +17,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Model\Content;
+namespace Made\Blog\Engine\Model\Configuration\Post;
 
-class Meta
+class MetaConfiguration
 {
     /**
      * @var string
@@ -56,9 +56,9 @@ class Meta
 
     /**
      * @param string $keywords
-     * @return Meta
+     * @return MetaConfiguration
      */
-    public function setKeywords(string $keywords): Meta
+    public function setKeywords(string $keywords): MetaConfiguration
     {
         $this->keywords = $keywords;
         return $this;
@@ -74,9 +74,9 @@ class Meta
 
     /**
      * @param string $author
-     * @return Meta
+     * @return MetaConfiguration
      */
-    public function setAuthor(string $author): Meta
+    public function setAuthor(string $author): MetaConfiguration
     {
         $this->author = $author;
         return $this;
@@ -92,9 +92,9 @@ class Meta
 
     /**
      * @param string $publisher
-     * @return Meta
+     * @return MetaConfiguration
      */
-    public function setPublisher(string $publisher): Meta
+    public function setPublisher(string $publisher): MetaConfiguration
     {
         $this->publisher = $publisher;
         return $this;
@@ -110,9 +110,9 @@ class Meta
 
     /**
      * @param string $robots
-     * @return Meta
+     * @return MetaConfiguration
      */
-    public function setRobots(string $robots): Meta
+    public function setRobots(string $robots): MetaConfiguration
     {
         $this->robots = $robots;
         return $this;
@@ -128,9 +128,9 @@ class Meta
 
     /**
      * @param array $custom
-     * @return Meta
+     * @return MetaConfiguration
      */
-    public function setCustom(array $custom): Meta
+    public function setCustom(array $custom): MetaConfiguration
     {
         $this->custom = $custom;
         return $this;

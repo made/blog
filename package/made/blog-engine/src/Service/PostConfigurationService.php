@@ -15,35 +15,46 @@
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
  */
 
-use Cache\Cache;
+namespace Made\Blog\Engine\Service;
+
 use Made\Blog\Engine\Model\Configuration;
-use Monolog\Logger;
-use Slim\Views\Twig;
+use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 
-return [
-    Logger::class => [
-        'name' => 'app',
-        'filename' => dirname(__DIR__) . '/var/log/app.log',
-    ],
+class PostConfigurationService
+{
+    /**
+     * ToDo: Make this configurable later.
+     * @var string
+     */
+    const PATH_POSTS = '/posts';
 
-    Twig::class => [
-        'cache' => false,
-    ],
+    /**
+     * Name of the configuration file which is needed for each blog post
+     *
+     * @var string
+     */
+    const PATH_CONFIGURATION = 'configuration.json';
 
-    Configuration::class => [
-        Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__),
-        Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
-        // ToDo: add supported languages for blog posts
-    ],
+    /**
+     * @var Configuration
+     */
+    private $configuration;
 
-    // ToDo: Use a class later here.
-    'posts' => require dirname(__DIR__) . '/app/configuration.post.php',
+    /**
+     * @var PostConfigurationRepositoryInterface
+     */
+    private $postConfigurationRepository;
 
-    Cache::class => [
-        'path' => dirname(__DIR__) . '/var/cache',
-        'time' => strtotime('-24 Hour'),
-    ],
-];
+    /**
+     * PostConfigurationService constructor.
+     * @param Configuration $configuration
+     * @param PostConfigurationRepositoryInterface $postConfigurationRepository
+     */
+    public function __construct(Configuration $configuration, PostConfigurationRepositoryInterface $postConfigurationRepository)
+    {
+        $this->configuration = $configuration;
+        $this->postConfigurationRepository = $postConfigurationRepository;
+    }
+}

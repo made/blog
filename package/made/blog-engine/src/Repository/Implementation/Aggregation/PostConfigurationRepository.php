@@ -17,78 +17,68 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Model\Content;
+namespace Made\Blog\Engine\Repository\Implementation\Aggregation;
 
-use DateTime;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
+use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 
-class Content
+/**
+ * Class PostConfigurationRepository
+ * @package Made\Blog\Engine\Repository\Implementation\Aggregation
+ */
+class PostConfigurationRepository implements PostConfigurationRepositoryInterface
 {
     /**
-     * @var DateTime
+     * @var array
      */
-    private $postDate;
+    private $implementations;
 
     /**
-     * @var Locale[]
+     * PostConfigurationRepository constructor.
+     * @param array $implementations
      */
-    private $locale;
-
-    /**
-     * @var bool
-     */
-    private $status;
-
-    /**
-     * @return DateTime
-     */
-    public function getPostDate(): DateTime
+    public function __construct(array $implementations)
     {
-        return $this->postDate;
+        $this->implementations = $implementations;
     }
 
     /**
-     * @param DateTime $postDate
-     * @return Content
+     * @inheritDoc
      */
-    public function setPostDate(DateTime $postDate): Content
+    public function getAll(): array
     {
-        $this->postDate = $postDate;
-        return $this;
+        // TODO: Implement getAll() method.
     }
 
     /**
-     * @return Locale[]
+     * @inheritDoc
      */
-    public function getLocale(): array
+    public function getOneBySlug(string $name): ?PostConfiguration
     {
-        return $this->locale;
+        // TODO: Implement getOneBySlug() method.
     }
 
     /**
-     * @param Locale[] $locale
-     * @return Content
+     * @inheritDoc
      */
-    public function setLocale(array $locale): Content
+    public function getOneBySlugRedirect(string $name): ?PostConfiguration
     {
-        $this->locale = $locale;
-        return $this;
+        // TODO: Implement getOneBySlugRedirect() method.
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
-    public function isStatus(): bool
+    public function getAllByCategory(string ...$category): array
     {
-        return $this->status;
+        // TODO: Implement getAllByCategory() method.
     }
 
     /**
-     * @param bool $status
-     * @return Content
+     * @inheritDoc
      */
-    public function setStatus(bool $status): Content
+    public function getAllByTag(string ...$tag): array
     {
-        $this->status = $status;
-        return $this;
+        // TODO: Implement getAllByTag() method.
     }
 }

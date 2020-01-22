@@ -9,8 +9,8 @@ vendor/
 
 # Content
 
-/content/*
-!/content/.gitignore
+/posts/*
+!/posts/.gitignore
 
 # Temporary
 

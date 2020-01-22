@@ -17,11 +17,13 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Exception;
+namespace Made\Blog\Engine\Repository;
 
-use Exception;
-
-class ContentException extends Exception
+/**
+ * Interface PostConfigurationFileRepositoryInterface
+ * @package Made\Blog\Engine\Repository\Implementation\File
+ */
+interface PostConfigurationFileRepositoryInterface extends PostConfigurationRepositoryInterface
 {
 
 }

@@ -17,14 +17,11 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Repository;
+namespace Made\Blog\Engine\Exception;
 
-/**
- * ToDo: Please seriously rename this class later :)
- * Interface ContentRepoInterfaceRENAME
- * @package Made\Blog\Engine\Repository\Implementation\File
- */
-interface ContentFileRepositoryInterface extends ContentRepositoryInterface
+use Exception;
+
+class PostConfigurationException extends Exception
 {
 
 }

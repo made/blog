@@ -17,45 +17,78 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Service;
+namespace Made\Blog\Engine\Model\Configuration\Post;
 
-use Made\Blog\Engine\Model\Configuration;
-use Made\Blog\Engine\Repository\ContentRepositoryInterface;
+use DateTime;
 
-class ContentService
+class PostConfiguration
 {
     /**
-     * ToDo: Make this configurable later.
-     * @var string
+     * @var DateTime
      */
-    const PATH_CONTENT = '/content';
+    private $postDate;
 
     /**
-     * Name of the configuration file which is needed for each blog post
-     *
-     * @var string
+     * @var LocaleConfiguration[]
      */
-    const PATH_CONFIGURATION = 'configuration.json';
+    private $locale;
 
     /**
-     * @var Configuration
+     * @var bool
      */
-    private $configuration;
+    private $status;
 
     /**
-     * @var ContentRepositoryInterface
+     * @return DateTime
      */
-    private $contentRepository;
-
-    /**
-     * ContentService constructor.
-     * @param Configuration $configuration
-     * @param ContentRepositoryInterface $contentRepository
-     */
-    public function __construct(Configuration $configuration, ContentRepositoryInterface $contentRepository)
+    public function getPostDate(): DateTime
     {
-        $this->configuration = $configuration;
-        $this->contentRepository = $contentRepository;
+        return $this->postDate;
     }
 
+    /**
+     * @param DateTime $postDate
+     * @return PostConfiguration
+     */
+    public function setPostDate(DateTime $postDate): PostConfiguration
+    {
+        $this->postDate = $postDate;
+        return $this;
+    }
+
+    /**
+     * @return LocaleConfiguration[]
+     */
+    public function getLocale(): array
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @param LocaleConfiguration[] $locale
+     * @return PostConfiguration
+     */
+    public function setLocale(array $locale): PostConfiguration
+    {
+        $this->locale = $locale;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isStatus(): bool
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param bool $status
+     * @return PostConfiguration
+     */
+    public function setStatus(bool $status): PostConfiguration
+    {
+        $this->status = $status;
+        return $this;
+    }
 }

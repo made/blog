@@ -23,16 +23,16 @@ use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\TagResolverTrait;
-use Made\Blog\Engine\Repository\ContentRepositoryInterface;
-use Made\Blog\Engine\Repository\Implementation\Aggregation\ContentRepository as ContentRepositoryAggregation;
-use Made\Blog\Engine\Repository\Implementation\File\ContentLocaleRepository;
-use Made\Blog\Engine\Repository\Implementation\File\ContentRepository as ContentRepositoryFile;
+use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
+use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationRepository as PostConfigurationRepositoryAggregation;
+use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository;
+use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
-use Made\Blog\Engine\Repository\Mapper\ContentMapper;
+use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
-use Made\Blog\Engine\Service\ContentService;
+use Made\Blog\Engine\Service\PostConfigurationService;
 use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
@@ -79,7 +79,7 @@ class Package extends PackageAbstract
         $this->registerCacheStuff();
 
         $this->registerDataLayerTheme();
-        $this->registerDataLayerContent();
+        $this->registerDataLayerPostConfiguration();
 
         $this->registerThemeService();
         $this->registerContentService();
@@ -179,43 +179,43 @@ class Package extends PackageAbstract
     /**
      * @throws PackageException
      */
-    private function registerDataLayerContent(): void
+    private function registerDataLayerPostConfiguration(): void
     {
         // First register mapper.
-        $this->registerService(ContentMapper::class, function (Container $container): ContentMapper {
-            return new ContentMapper();
+        $this->registerService(PostConfigurationMapper::class, function (Container $container): PostConfigurationMapper {
+            return new PostConfigurationMapper();
         });
 
-        // Register the Content Repository for File implementations
-        $this->registerTagAndService(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentRepositoryFile::class, function (Container $container): ContentRepositoryInterface {
+        // Register the Post Repository for File implementations
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container): PostConfigurationRepositoryInterface {
             /** @var Configuration $configuration */
             $configuration = $container[Configuration::class];
-            /** @var ContentMapper $contentMapper */
-            $contentMapper = $container[ContentMapper::class];
+            /** @var PostConfigurationMapper $postConfigurationMapper */
+            $postConfigurationMapper = $container[PostConfigurationMapper::class];
             /** @var LoggerInterface $logger */
             $logger = null; //$container[LoggerInterface::class]; ToDo: Logger is defined in /src/Package.php, it ain't defined here yet?
 
-            return new ContentRepositoryFile($configuration, $contentMapper, $logger);
+            return new PostConfigurationRepositoryFile($configuration, $postConfigurationMapper, $logger);
         });
 
         // Then alias the implementation.
-        $this->registerServiceAlias(ContentRepositoryInterface::class, ContentRepositoryFile::class);
+        $this->registerServiceAlias(PostConfigurationRepositoryInterface::class, PostConfigurationRepositoryFile::class);
 
         // Register the Content Repository for File implementations, but using locales
-        $this->registerTagAndService(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentLocaleRepository::class, function (Container $container): ContentRepositoryInterface {
-            /** @var ContentRepositoryFile $contentRepositoryFile */
-            $contentRepositoryFile = $container[ContentRepositoryFile::class];
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_REPOSITORY, PostConfigurationLocaleRepository::class, function (Container $container): PostConfigurationRepositoryInterface {
+            /** @var PostConfigurationRepositoryFile $postConfigurationRepository */
+            $postConfigurationRepository = $container[PostConfigurationRepositoryFile::class];
             /** @var LoggerInterface $logger */
             $logger = null; //$container[LoggerInterface::class]; ToDo: Logger is defined in /src/Package.php, it ain't defined here yet?
 
-            return new ContentLocaleRepository($contentRepositoryFile, $logger);
+            return new PostConfigurationLocaleRepository($postConfigurationRepository, $logger);
         });
 
         // Register the Aggregation ContentRepository
-        $this->registerTagAndService(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentRepositoryAggregation::class, function (Container $container): ContentRepositoryInterface {
-            $classList = $this->resolveTag(ContentRepositoryInterface::TAG_CONTENT_REPOSITORY, ContentRepositoryInterface::class, [ContentRepositoryAggregation::class]);
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_REPOSITORY, PostConfigurationRepositoryAggregation::class, function (Container $container): PostConfigurationRepositoryInterface {
+            $classList = $this->resolveTag(PostConfigurationRepositoryInterface::TAG_POST_REPOSITORY, PostConfigurationRepositoryInterface::class, [PostConfigurationRepositoryAggregation::class]);
 
-            return new ContentRepositoryAggregation($classList);
+            return new PostConfigurationRepositoryAggregation($classList);
         });
     }
 
@@ -233,13 +233,13 @@ class Package extends PackageAbstract
 
     private function registerContentService(): void
     {
-        $this->registerService(ContentService::class, function (Container $container): ContentService {
+        $this->registerService(PostConfigurationService::class, function (Container $container): PostConfigurationService {
             /** @var Configuration $configuration */
             $configuration = $container[Configuration::class];
-            /** @var ContentRepositoryInterface $contentRepository */
-            $contentRepository = $container[ContentRepositoryInterface::class];
+            /** @var PostConfigurationRepositoryInterface $postConfigurationRepository */
+            $postConfigurationRepository = $container[PostConfigurationRepositoryInterface::class];
 
-            return new ContentService($configuration, $contentRepository);
+            return new PostConfigurationService($configuration, $postConfigurationRepository);
         });
     }
 }

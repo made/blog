@@ -17,9 +17,9 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Model\Content;
+namespace Made\Blog\Engine\Model\Configuration\Post;
 
-class Locale
+class LocaleConfiguration
 {
     /**
      * @var string
@@ -42,7 +42,7 @@ class Locale
     private $description;
 
     /**
-     * @var Meta
+     * @var MetaConfiguration
      */
     private $meta;
 
@@ -71,9 +71,9 @@ class Locale
 
     /**
      * @param string $language
-     * @return Locale
+     * @return LocaleConfiguration
      */
-    public function setLanguage(string $language): Locale
+    public function setLanguage(string $language): LocaleConfiguration
     {
         $this->language = $language;
         return $this;
@@ -89,9 +89,9 @@ class Locale
 
     /**
      * @param string $slug
-     * @return Locale
+     * @return LocaleConfiguration
      */
-    public function setSlug(string $slug): Locale
+    public function setSlug(string $slug): LocaleConfiguration
     {
         $this->slug = $slug;
         return $this;
@@ -107,9 +107,9 @@ class Locale
 
     /**
      * @param string $title
-     * @return Locale
+     * @return LocaleConfiguration
      */
-    public function setTitle(string $title): Locale
+    public function setTitle(string $title): LocaleConfiguration
     {
         $this->title = $title;
         return $this;
@@ -125,27 +125,27 @@ class Locale
 
     /**
      * @param string $description
-     * @return Locale
+     * @return LocaleConfiguration
      */
-    public function setDescription(string $description): Locale
+    public function setDescription(string $description): LocaleConfiguration
     {
         $this->description = $description;
         return $this;
     }
 
     /**
-     * @return Meta
+     * @return MetaConfiguration
      */
-    public function getMeta(): Meta
+    public function getMeta(): MetaConfiguration
     {
         return $this->meta;
     }
 
     /**
-     * @param Meta $meta
-     * @return Locale
+     * @param MetaConfiguration $meta
+     * @return LocaleConfiguration
      */
-    public function setMeta(Meta $meta): Locale
+    public function setMeta(MetaConfiguration $meta): LocaleConfiguration
     {
         $this->meta = $meta;
         return $this;
@@ -161,9 +161,9 @@ class Locale
 
     /**
      * @param array $categories
-     * @return Locale
+     * @return LocaleConfiguration
      */
-    public function setCategories(array $categories): Locale
+    public function setCategories(array $categories): LocaleConfiguration
     {
         $this->categories = $categories;
         return $this;
@@ -179,9 +179,9 @@ class Locale
 
     /**
      * @param array $tags
-     * @return Locale
+     * @return LocaleConfiguration
      */
-    public function setTags(array $tags): Locale
+    public function setTags(array $tags): LocaleConfiguration
     {
         $this->tags = $tags;
         return $this;
@@ -197,9 +197,9 @@ class Locale
 
     /**
      * @param array $redirect
-     * @return Locale
+     * @return LocaleConfiguration
      */
-    public function setRedirect(array $redirect): Locale
+    public function setRedirect(array $redirect): LocaleConfiguration
     {
         $this->redirect = $redirect;
         return $this;

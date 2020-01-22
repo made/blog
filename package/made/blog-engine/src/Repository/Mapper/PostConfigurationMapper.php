@@ -19,12 +19,12 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
-use Made\Blog\Engine\Exception\ContentException;
-use Made\Blog\Engine\Model\Content\Content;
-use Made\Blog\Engine\Model\Content\Locale;
-use Made\Blog\Engine\Model\Content\Meta;
+use Made\Blog\Engine\Exception\PostConfigurationException;
+use Made\Blog\Engine\Model\Configuration\Post\LocaleConfiguration;
+use Made\Blog\Engine\Model\Configuration\Post\MetaConfiguration;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
 
-class ContentMapper
+class PostConfigurationMapper
 {
     const KEY_SLUG = 'slug';
     const KEY_POST_DATE = 'post_date';
@@ -39,50 +39,50 @@ class ContentMapper
 
     /**
      * @param array $data
-     * @return Content
-     * @throws ContentException
+     * @return PostConfiguration
+     * @throws PostConfigurationException
      */
     public function fromData(array $data)
     {
-        $content = new Content();
+        $postConfiguration = new PostConfiguration();
 
         if (!array_key_exists(static::KEY_POST_DATE, $data)) {
-            throw new ContentException('Unfortunately no post date is configured.');
+            throw new PostConfigurationException('Unfortunately no post date is configured.');
         }
 
         if (!array_key_exists(static::KEY_LOCALE, $data)) {
-            throw new ContentException('Unfortunately no locale is configured.');
+            throw new PostConfigurationException('Unfortunately no locale is configured.');
         }
 
         if (!array_key_exists(static::KEY_LOCALE, $data)) {
-            throw new ContentException('Unfortunately no status is configured.');
+            throw new PostConfigurationException('Unfortunately no status is configured.');
         }
 
-        $content
+        $postConfiguration
             // ToDo: think about validation of the date and maybe accept different formats. -> Util
             ->setPostDate(\DateTime::createFromFormat('Y-m-d', $data[static::KEY_POST_DATE]))
             ->setLocale($data[static::KEY_LOCALE])
             ->setStatus($data[static::KEY_STATUS]);
 
-        return $this->fromLocaleData($content);
+        return $this->fromLocaleData($postConfiguration);
     }
 
-    private function fromLocaleData(Content $content): Content
+    private function fromLocaleData(PostConfiguration $postConfiguration): PostConfiguration
     {
         $localeCollection = [];
-        foreach ($content->getLocale() as $key => $value) {
-            $locale = new Locale();
+        foreach ($postConfiguration->getLocale() as $key => $value) {
+            $locale = new LocaleConfiguration();
 
             if (!array_key_exists(static::KEY_SLUG, $value)) {
-                throw new ContentException("Unfortunately no slug is configured for locale.");
+                throw new PostConfigurationException("Unfortunately no slug is configured for locale.");
             }
 
             if (!array_key_exists(static::KEY_TITLE, $value)) {
-                throw new ContentException('Unfortunately no title is configured for locale.');
+                throw new PostConfigurationException('Unfortunately no title is configured for locale.');
             }
 
             if (!array_key_exists(static::KEY_DESCRIPTION, $value)) {
-                throw new ContentException('Unfortunately no description is configured for locale.');
+                throw new PostConfigurationException('Unfortunately no description is configured for locale.');
             }
 
             if (array_key_exists(static::KEY_CATEGORIES, $value)) {
@@ -112,12 +112,12 @@ class ContentMapper
 
         }
 
-        return $content->setLocale($localeCollection);
+        return $postConfiguration->setLocale($localeCollection);
     }
 
-    private function fromMetaData(array $data): Meta
+    private function fromMetaData(array $data): MetaConfiguration
     {
-        $meta = new Meta();
+        $meta = new MetaConfiguration();
 
         if (isset($data['keywords']) && is_string($data['keywords'])) {
             $meta->setKeywords($data['keywords']);

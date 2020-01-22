@@ -19,24 +19,22 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\ContentException;
-use Made\Blog\Engine\Model\Content\Content;
-use Made\Blog\Engine\Repository\ContentFileRepositoryInterface;
+use Made\Blog\Engine\Exception\PostConfigurationException;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
+use Made\Blog\Engine\Repository\PostConfigurationFileRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
-class ContentLocaleRepository implements ContentFileRepositoryInterface
+class PostConfigurationLocaleRepository implements PostConfigurationFileRepositoryInterface
 {
-    // ToDo: Idea -> Providing a possibility to enable/disable multilingual blogs.
-    //  Config still needs the same format with its input in locale, but only the default language is used.
-    //  If it's deactivated, then the URL routes does not have the locale ex. /en, /de, /pl, etc in it.
-    //  If they are disabled, ContentRepository is ALWAYS used, if it's enabled, then ContentLocaleRepository.
-    //  Otherwise this class makes no sense except using the getAll() function.
-    //  Let us discuss this.
+    // ToDo: Idea -> If there are only 'en' entries in the locale of all blog posts, then the slug should not contain the
+    //  locale (ex. /en/how-to-x would be /how-to-x)
+    //  Like this the configuration stays the same for non-multilingual and multilingual sites.
+    //  Always use the PostConfigurationLocaleRepository, since the default locale is always given to this repository.
 
     /**
-     * @var ContentRepository
+     * @var PostConfigurationRepository
      */
-    private $contentRepository;
+    private $postConfigurationRepository;
 
     /**
      * @var string
@@ -49,19 +47,19 @@ class ContentLocaleRepository implements ContentFileRepositoryInterface
     private $logger;
 
     /**
-     * ContentLocaleRepository constructor.
-     * @param ContentRepository $contentRepository
+     * PostConfigurationLocaleRepository constructor.
+     * @param PostConfigurationRepository $postConfigurationRepository
      * @param LoggerInterface $logger
      */
-    public function __construct(ContentRepository $contentRepository, ?LoggerInterface $logger)
+    public function __construct(PostConfigurationRepository $postConfigurationRepository, ?LoggerInterface $logger)
     {
-        $this->contentRepository = $contentRepository;
+        $this->postConfigurationRepository = $postConfigurationRepository;
         $this->logger = $logger;
     }
 
     /**
      * @param string $locale
-     * @return ContentLocaleRepository
+     * @return PostConfigurationLocaleRepository
      */
     public function setLocale(string $locale)
     {
@@ -74,42 +72,42 @@ class ContentLocaleRepository implements ContentFileRepositoryInterface
      */
     public function getAll(): array
     {
-        $all = $this->contentRepository->getAll();
+        $all = $this->postConfigurationRepository->getAll();
         $locale = $this->locale;
 
-        $contentCollection = array_filter($all, function (Content $content) use ($locale): ?Content {
-            if (!isset($content->getLocale()[$locale])) {
+        $postConfigurationCollection = array_filter($all, function (PostConfiguration $postConfiguration) use ($locale): ?PostConfiguration {
+            if (!isset($postConfiguration->getLocale()[$locale])) {
                 return null;
             }
 
-            return $content;
+            return $postConfiguration;
 
         }, ARRAY_FILTER_USE_BOTH);
 
-        if (empty($contentCollection)) {
+        if (empty($postConfigurationCollection)) {
             // ToDo: Logging
-            throw new ContentException('Unfortunately no content was found for locale ' . $locale);
+            throw new PostConfigurationException('Unfortunately no blog posts found for locale ' . $locale);
         }
 
-        return array_values($contentCollection);
+        return array_values($postConfigurationCollection);
     }
 
     /**
      * @inheritDoc
      */
-    public function getOneBySlug(string $name): ?Content
+    public function getOneBySlug(string $name): ?PostConfiguration
     {
         // Slug always needs a locale
-        return $this->contentRepository->getOneBySlug($name);
+        return $this->postConfigurationRepository->getOneBySlug($name);
     }
 
     /**
      * @inheritDoc
      */
-    public function getOneBySlugRedirect(string $name): ?Content
+    public function getOneBySlugRedirect(string $name): ?PostConfiguration
     {
         // Slug Redirect always needs a locale
-        return $this->contentRepository->getOneBySlugRedirect($name);
+        return $this->postConfigurationRepository->getOneBySlugRedirect($name);
     }
 
     /**
@@ -118,7 +116,7 @@ class ContentLocaleRepository implements ContentFileRepositoryInterface
     public function getAllByCategory(string ...$category): array
     {
         // Category always needs a locale
-        return $this->contentRepository->getAllByCategory($category);
+        return $this->postConfigurationRepository->getAllByCategory($category);
     }
 
     /**
@@ -127,6 +125,6 @@ class ContentLocaleRepository implements ContentFileRepositoryInterface
     public function getAllByTag(string ...$tag): array
     {
         // Tags always needs a locale
-        return $this->contentRepository->getAllByTag($tag);
+        return $this->postConfigurationRepository->getAllByTag($tag);
     }
 }

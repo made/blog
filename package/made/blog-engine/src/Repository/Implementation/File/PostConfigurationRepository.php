@@ -19,19 +19,19 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\ContentException;
+use Made\Blog\Engine\Exception\PostConfigurationException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
-use Made\Blog\Engine\Model\Content\Content;
-use Made\Blog\Engine\Repository\ContentFileRepositoryInterface;
-use Made\Blog\Engine\Repository\Mapper\ContentMapper;
-use Made\Blog\Engine\Service\ContentService;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
+use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
+use Made\Blog\Engine\Repository\PostConfigurationFileRepositoryInterface;
+use Made\Blog\Engine\Service\PostConfigurationService;
 use Psr\Log\LoggerInterface;
 
-class ContentRepository implements ContentFileRepositoryInterface
+class PostConfigurationRepository implements PostConfigurationFileRepositoryInterface
 {
     // ToDo: array_column to get a summary of the categories and tags of all posts :)
     //  for Methods like getAllCategories() or getAllTags()
@@ -41,9 +41,9 @@ class ContentRepository implements ContentFileRepositoryInterface
     private $configuration;
 
     /**
-     * @var ContentMapper
+     * @var PostConfigurationMapper
      */
-    private $contentMapper;
+    private $postConfigurationMapper;
 
     /**
      * @var LoggerInterface
@@ -51,16 +51,16 @@ class ContentRepository implements ContentFileRepositoryInterface
     private $logger;
 
     /**
-     * ContentRepository constructor.
+     * PostConfigurationRepository constructor.
      * @param Configuration $configuration
-     * @param ContentMapper $contentMapper
+     * @param PostConfigurationMapper $postConfigurationMapper
      * @param LoggerInterface $logger
      */
-    public function __construct(Configuration $configuration, ContentMapper $contentMapper, ?LoggerInterface $logger)
+    public function __construct(Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, ?LoggerInterface $logger)
     {
         // ToDo: Inject the default locale
         $this->configuration = $configuration;
-        $this->contentMapper = $contentMapper;
+        $this->postConfigurationMapper = $postConfigurationMapper;
         $this->logger = $logger;
     }
 
@@ -77,13 +77,13 @@ class ContentRepository implements ContentFileRepositoryInterface
                 return false;
             }
 
-            $contentPath = $this->getContentPath($entry);
+            $postConfigurationPath = $this->getPostPath($entry);
             $configurationPath = $this->getConfigurationPath($entry);
 
-            $requiredFilesExist = is_dir($contentPath) && is_file($configurationPath);
+            $requiredFilesExist = is_dir($postConfigurationPath) && is_file($configurationPath);
 
             if (!$requiredFilesExist) {
-                var_dump($contentPath);
+                var_dump($postConfigurationPath);
                 var_dump($configurationPath);
                 throw new \Exception('Something ain`t right with the configuration for this blog post, sir.');
                 // ToDo: As soon logging works, remove exception and use logging below
@@ -96,7 +96,7 @@ class ContentRepository implements ContentFileRepositoryInterface
             return $requiredFilesExist;
         });
 
-        $all = array_map(function (string $entry): ?Content {
+        $all = array_map(function (string $entry): ?PostConfiguration {
             $configurationPath = $this->getConfigurationPath($entry);
 
             $data = $this->getContent($configurationPath);
@@ -106,8 +106,8 @@ class ContentRepository implements ContentFileRepositoryInterface
             }
 
             try {
-                return $this->contentMapper->fromData($data);
-            } catch (ContentException $exception) {
+                return $this->postConfigurationMapper->fromData($data);
+            } catch (PostConfigurationException $exception) {
                 throw $exception;
                 // ToDo: As soon logging works activate it again :)
 //                $this->logger->error($exception->getMessage(), [
@@ -124,7 +124,7 @@ class ContentRepository implements ContentFileRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneBySlug(string $slug, string $locale = null): ?Content
+    public function getOneBySlug(string $slug, string $locale = null): ?PostConfiguration
     {
         if ($locale === null) {
             // ToDo: LocaleService should be injected into the constructor and used as class property
@@ -134,15 +134,15 @@ class ContentRepository implements ContentFileRepositoryInterface
 
         $all = $this->getAll();
 
-        return array_reduce($all, function (?Content $carry, Content $content) use ($slug, $locale): ?Content {
-            if (!isset($content->getLocale()[$locale])) {
-                throw new ContentException('Unfortunately no content for this locale');
+        return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $postConfiguration) use ($slug, $locale): ?PostConfiguration {
+            if (!isset($postConfiguration->getLocale()[$locale])) {
+                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
             }
 
-            $slugInCurrentLocale = $content->getLocale()[$locale]->getSlug();
+            $slugInCurrentLocale = $postConfiguration->getLocale()[$locale]->getSlug();
 
             if (null === $carry && $slugInCurrentLocale === $slug) {
-                $carry = $content;
+                $carry = $postConfiguration;
             }
 
             return $carry;
@@ -154,7 +154,7 @@ class ContentRepository implements ContentFileRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneBySlugRedirect(string $slugRedirect, string $locale = null): ?Content
+    public function getOneBySlugRedirect(string $slugRedirect, string $locale = null): ?PostConfiguration
     {
         if ($locale === null) {
             // ToDo: LocaleService should be injected into the constructor and used as class property
@@ -164,15 +164,15 @@ class ContentRepository implements ContentFileRepositoryInterface
 
         $all = $this->getAll();
 
-        return array_reduce($all, function (?Content $carry, Content $content) use ($slugRedirect, $locale): ?Content {
-            if (!isset($content->getLocale()[$locale])) {
-                throw new ContentException('Unfortunately no content for this locale');
+        return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $postConfiguration) use ($slugRedirect, $locale): ?PostConfiguration {
+            if (!isset($postConfiguration->getLocale()[$locale])) {
+                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
             }
 
-            $redirectInCurrentLocale = $content->getLocale()[$locale]->getRedirect();
+            $redirectInCurrentLocale = $postConfiguration->getLocale()[$locale]->getRedirect();
 
             if (null === $carry && in_array($slugRedirect, $redirectInCurrentLocale)) {
-                $carry = $content;
+                $carry = $postConfiguration;
             }
 
             return $carry;
@@ -194,16 +194,16 @@ class ContentRepository implements ContentFileRepositoryInterface
         $locale = 'en';
         $all = $this->getAll();
 
-        return array_filter($all, function (Content $content) use ($category, $locale): ?Content {
-            if (!isset($content->getLocale()[$locale])) {
-                throw new ContentException('Unfortunately no content for this locale');
+        return array_filter($all, function (PostConfiguration $postConfiguration) use ($category, $locale): ?PostConfiguration {
+            if (!isset($postConfiguration->getLocale()[$locale])) {
+                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
             }
 
-            $categoryInCurrentLocale = $content->getLocale()[$locale]->getCategories();
+            $categoryInCurrentLocale = $postConfiguration->getLocale()[$locale]->getCategories();
 
 
             if (array_intersect($category, $categoryInCurrentLocale)) {
-                return $content;
+                return $postConfiguration;
             }
             return null;
         });
@@ -224,15 +224,15 @@ class ContentRepository implements ContentFileRepositoryInterface
         $locale = 'en';
         $all = $this->getAll();
 
-        return array_filter($all, function (Content $content) use ($tag, $locale): ?Content {
-            if (!isset($content->getLocale()[$locale])) {
-                throw new ContentException('Unfortunately no content for this locale');
+        return array_filter($all, function (PostConfiguration $postConfiguration) use ($tag, $locale): ?PostConfiguration {
+            if (!isset($postConfiguration->getLocale()[$locale])) {
+                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
             }
 
-            $tagsInCurrentLocale = $content->getLocale()[$locale]->getTags();
+            $tagsInCurrentLocale = $postConfiguration->getLocale()[$locale]->getTags();
 
             if (array_intersect($tag, $tagsInCurrentLocale)) {
-                return $content;
+                return $postConfiguration;
             }
             return null;
         });
@@ -246,17 +246,17 @@ class ContentRepository implements ContentFileRepositoryInterface
     {
         return Path::join(...[
             $this->configuration->getRootDirectory(),
-            ContentService::PATH_CONTENT,
+            PostConfigurationService::PATH_POSTS,
         ]);
     }
 
 
     /**
-     * Gets the Path for the given blog entry
+     * Gets the Path for the given blog post
      * @param string $entry
      * @return string
      */
-    private function getContentPath(string $entry): string
+    private function getPostPath(string $entry): string
     {
         $path = $this->getPath();
 
@@ -272,11 +272,11 @@ class ContentRepository implements ContentFileRepositoryInterface
      */
     private function getConfigurationPath(string $entry): string
     {
-        $path = $this->getContentPath($entry);
+        $path = $this->getPostPath($entry);
 
         return Path::join(...[
             $path,
-            ContentService::PATH_CONFIGURATION,
+            PostConfigurationService::PATH_CONFIGURATION,
         ]);
     }
 
