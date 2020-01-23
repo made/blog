@@ -25,5 +25,5 @@ namespace Made\Blog\Engine\Repository;
  */
 interface PostConfigurationFileRepositoryInterface extends PostConfigurationRepositoryInterface
 {
-
+// ToDo: Remove this class and reverse
 }

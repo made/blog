@@ -30,6 +30,7 @@ interface PostConfigurationRepositoryInterface
      */
     public function getAll(): array;
 
+    // ToDo: Remove all from here
     /**
      * Get any post configuration from slug name.
      * @param string $name

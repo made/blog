@@ -23,6 +23,10 @@ use DateTime;
 
 class PostConfiguration
 {
+    // ToDo: Define a post id which is on global scope of the blog post
+    //  post_id -> will be the folder name for the file implementation, database will be an ID
+    // private $postId;
+
     /**
      * @var DateTime
      */
@@ -34,6 +38,7 @@ class PostConfiguration
     private $locale;
 
     /**
+     * ToDo: 'draft, publish'
      * @var bool
      */
     private $status;

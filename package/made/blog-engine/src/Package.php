@@ -207,7 +207,7 @@ class Package extends PackageAbstract
             $postConfigurationRepository = $container[PostConfigurationRepositoryFile::class];
             /** @var LoggerInterface $logger */
             $logger = null; //$container[LoggerInterface::class]; ToDo: Logger is defined in /src/Package.php, it ain't defined here yet?
-
+            // ToDo: Inject default locale into below repository.
             return new PostConfigurationLocaleRepository($postConfigurationRepository, $logger);
         });
 

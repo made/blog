@@ -33,6 +33,9 @@ use Psr\Log\LoggerInterface;
 
 class PostConfigurationRepository implements PostConfigurationFileRepositoryInterface
 {
+    // ToDo: Default order for all results is post_date DESC
+
+
     // ToDo: array_column to get a summary of the categories and tags of all posts :)
     //  for Methods like getAllCategories() or getAllTags()
     /**
@@ -73,7 +76,7 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
 
         $list = Directory::listCallback($path, function (string $entry): bool {
             // ToDo: Maybe put this in the Directory helper class?
-            if ('.' === $entry || '..' === $entry || '.DS_Store' === $entry || '.gitignore' === $entry) {
+            if ('.' === $entry || '..' === $entry) {
                 return false;
             }
 
@@ -81,6 +84,11 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
             $configurationPath = $this->getConfigurationPath($entry);
 
             $requiredFilesExist = is_dir($postConfigurationPath) && is_file($configurationPath);
+
+            // ToDo: Use something like below to identify an id an map it to the object
+//            if (!array_key_exists(PostConfigurationMapper::KEY_PATH, $entry)) {
+//                $entry[PostConfigurationMapper::KEY_PATH] = $themePath;
+//            }
 
             if (!$requiredFilesExist) {
                 var_dump($postConfigurationPath);
@@ -118,9 +126,27 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
             return null;
         }, $list);
 
+        // ToDo: Array Filter to remove empty values.
+
         return array_values($all);
     }
+    
+    public function getOneById()
+    {
+        // ToDo: implement search for the id => Folder name for file implementation
+    }
 
+    public function getAllByPostDate()
+    {
+        // ToDo: implement search for the date
+    }
+
+    public function getAllByStatus(...$status)
+    {
+        // ToDo: implement search for the status
+    }
+
+// ToDo: Move all below in the Post Configuration Locale Repository
     /**
      * @inheritDoc
      */
@@ -147,8 +173,6 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
 
             return $carry;
         }, null);
-        // ToDo: Maybe think about also searching for redirect slugs if nothing is found above.
-        //  Maybe an extra Repository Layer for this (Proxy).
     }
 
     /**
@@ -185,12 +209,8 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
      */
     public function getAllByCategory(string ...$category): array
     {
-        // ToDo: Maybe also find a way to override the locale with a function parameter
-        //  Since splat operator is used, no optional parameters can be passed
-        //  Like this the function ain't that flexible
-
         // ToDo: LocaleService should be injected into the constructor and used as class property
-        //  $this->locale = $localeService->getLocale();
+        //  $this->localeService->getLocale(); -> yes just do this.
         $locale = 'en';
         $all = $this->getAll();
 
@@ -215,12 +235,8 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
      */
     public function getAllByTag(string ...$tag): array
     {
-        // ToDo: Maybe also find a way to override the locale with a function parameter
-        //  Since splat operator is used, no optional parameters can be passed
-        //  Like this the function ain't that flexible
-
         // ToDo: LocaleService should be injected into the constructor and used as class property
-        //  $this->locale = $localeService->getLocale();
+        //  $this->localeService->getLocale(); -> yes just do this.
         $locale = 'en';
         $all = $this->getAll();
 

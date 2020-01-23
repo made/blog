@@ -25,12 +25,13 @@ use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 class PostConfigurationService
 {
     /**
-     * ToDo: Make this configurable later.
+     * ToDo: Make this configurable.
      * @var string
      */
     const PATH_POSTS = '/posts';
 
     /**
+     * ToDo: Make this configurable later.
      * Name of the configuration file which is needed for each blog post
      *
      * @var string
