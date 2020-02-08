@@ -19,84 +19,61 @@
 
 namespace Made\Blog\Engine\Model\Configuration\Post;
 
-use DateTime;
-use Made\Blog\Engine\Exception\PostConfigurationException;
-
-class PostConfiguration
+class MetaCustomElementConfiguration
 {
-    public const ACCEPTED_STATUS = ['draft', 'review', 'publish'];
-
-    /**
-     * @var DateTime
-     */
-    private $postDate;
-
-    /**
-     * @var LocaleConfiguration[]
-     */
-    private $locale;
-
     /**
      * @var string
      */
-    private $status;
+    private $elementType;
 
     /**
-     * @return DateTime
+     * @var MetaCustomAttributeConfiguration[]
      */
-    public function getPostDate(): DateTime
-    {
-        return $this->postDate;
-    }
-
-    /**
-     * @param DateTime $postDate
-     * @return PostConfiguration
-     */
-    public function setPostDate(DateTime $postDate): PostConfiguration
-    {
-        $this->postDate = $postDate;
-        return $this;
-    }
-
-    /**
-     * @return LocaleConfiguration[]
-     */
-    public function getLocale(): array
-    {
-        return $this->locale;
-    }
-
-    /**
-     * @param LocaleConfiguration[] $locale
-     * @return PostConfiguration
-     */
-    public function setLocale(array $locale): PostConfiguration
-    {
-        $this->locale = $locale;
-        return $this;
-    }
+    private $attributes;
 
     /**
      * @return string
      */
-    public function getStatus(): string
+    public function getElementType(): string
     {
-        return $this->status;
+        return $this->elementType;
     }
 
     /**
-     * @param string $status
-     * @return PostConfiguration
-     * @throws PostConfigurationException
+     * @param string $elementType
+     * @return MetaCustomElementConfiguration
      */
-    public function setStatus(string $status): PostConfiguration
+    public function setElementType(string $elementType): MetaCustomElementConfiguration
     {
-        if (!in_array(strtolower($status), self::ACCEPTED_STATUS)) {
-            throw new PostConfigurationException("status $status not valid.");
-        }
-        $this->status = $status;
-        
+        $this->elementType = $elementType;
+        return $this;
+    }
+
+    /**
+     * @return MetaCustomAttributeConfiguration[]
+     */
+    public function getAttributes(): array
+    {
+        return $this->attributes;
+    }
+
+    /**
+     * @param MetaCustomAttributeConfiguration[] $attributes
+     * @return MetaCustomElementConfiguration
+     */
+    public function setAttributes(array $attributes): MetaCustomElementConfiguration
+    {
+        $this->attributes = $attributes;
+        return $this;
+    }
+
+    /**
+     * @param MetaCustomAttributeConfiguration $attributes
+     * @return MetaCustomElementConfiguration
+     */
+    public function addAttribute(MetaCustomAttributeConfiguration $attributes): MetaCustomElementConfiguration
+    {
+        $this->attributes[] = $attributes;
         return $this;
     }
 }

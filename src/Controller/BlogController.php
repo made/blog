@@ -22,6 +22,7 @@ namespace App\Controller;
 
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
+use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -36,12 +37,15 @@ use Slim\Views\Twig;
 class BlogController implements ControllerInterface
 {
     const ROUTE_SLUG = 'blog.slug';
+    const ROUTE_POST_CONFIG_TEST = 'blog.post_config_test';
 
     /**
      * @inheritDoc
      */
     public static function register(App $app): void
     {
+        $app->get('/post_config_test', BlogController::class . ':postConfigurationTestAction')
+            ->setName(BlogController::ROUTE_POST_CONFIG_TEST);
         $app->get('/{slug:.*}', BlogController::class . ':slugAction')
             ->setName(BlogController::ROUTE_SLUG);
     }
@@ -57,13 +61,21 @@ class BlogController implements ControllerInterface
     private $logger;
 
     /**
+     * @var PostConfigurationRepository
+     */
+    private $configurationRepository;
+
+    /**
      * BlogController constructor.
      * @param Twig $twig
+     * @param LoggerInterface $logger
+     * @param PostConfigurationRepository $configurationRepository
      */
-    public function __construct(Twig $twig, LoggerInterface $logger)
+    public function __construct(Twig $twig, LoggerInterface $logger, PostConfigurationRepository $configurationRepository)
     {
         $this->twig = $twig;
         $this->logger = $logger;
+        $this->configurationRepository = $configurationRepository;
     }
 
     /**
@@ -88,6 +100,29 @@ class BlogController implements ControllerInterface
         }
 
         $this->logger->info($line);
+
+        return $response;
+    }
+
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     */
+    public function postConfigurationTestAction(ServerRequestInterface $request, ResponseInterface $response)
+    {
+        ini_set('xdebug.var_display_max_depth', '10');
+        ini_set('xdebug.var_display_max_children', '256');
+        ini_set('xdebug.var_display_max_data', '1024');
+
+        $res = $this->configurationRepository->getAll();
+        echo "<pre>";
+        var_dump($res);
+        echo "</pre>";
+        $response->getBody()
+            ->write('ok');
+
 
         return $response;
     }

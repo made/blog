@@ -187,7 +187,7 @@ class Package extends PackageAbstract
         });
 
         // Register the Post Repository for File implementations
-        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container): PostConfigurationRepositoryInterface {
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container): PostConfigurationRepositoryInterface {
             /** @var Configuration $configuration */
             $configuration = $container[Configuration::class];
             /** @var PostConfigurationMapper $postConfigurationMapper */
@@ -202,7 +202,7 @@ class Package extends PackageAbstract
         $this->registerServiceAlias(PostConfigurationRepositoryInterface::class, PostConfigurationRepositoryFile::class);
 
         // Register the Content Repository for File implementations, but using locales
-        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_REPOSITORY, PostConfigurationLocaleRepository::class, function (Container $container): PostConfigurationRepositoryInterface {
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationLocaleRepository::class, function (Container $container): PostConfigurationRepositoryInterface {
             /** @var PostConfigurationRepositoryFile $postConfigurationRepository */
             $postConfigurationRepository = $container[PostConfigurationRepositoryFile::class];
             /** @var LoggerInterface $logger */
@@ -212,8 +212,8 @@ class Package extends PackageAbstract
         });
 
         // Register the Aggregation ContentRepository
-        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_REPOSITORY, PostConfigurationRepositoryAggregation::class, function (Container $container): PostConfigurationRepositoryInterface {
-            $classList = $this->resolveTag(PostConfigurationRepositoryInterface::TAG_POST_REPOSITORY, PostConfigurationRepositoryInterface::class, [PostConfigurationRepositoryAggregation::class]);
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryAggregation::class, function (Container $container): PostConfigurationRepositoryInterface {
+            $classList = $this->resolveTag(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryInterface::class, [PostConfigurationRepositoryAggregation::class]);
 
             return new PostConfigurationRepositoryAggregation($classList);
         });

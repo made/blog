@@ -21,6 +21,7 @@
 namespace App;
 
 use App\Controller\BlogController;
+use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Service\ThemeService;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -137,7 +138,9 @@ class Package extends PackageAbstract
             /** @var Logger $logger */
             $logger = $container[Logger::class];
 
-            return new BlogController($twig, $logger);
+            $repository = $container[PostConfigurationRepositoryInterface::class];
+
+            return new BlogController($twig, $logger, $repository);
         });
 
         BlogController::register($this->app);

@@ -17,44 +17,57 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Repository;
+namespace Made\Blog\Engine\Model\Configuration\Post;
 
-use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
-
-interface PostConfigurationRepositoryInterface
+/**
+ * Class MetaCustomAttributeConfiguration
+ * @package Made\Blog\Engine\Model\Configuration\Post
+ */
+class MetaCustomAttributeConfiguration
 {
-    const TAG_POST_CONFIGURATION_REPOSITORY = 'repository.post_configuration';
+    /**
+     * @var string
+     */
+    private $attribute;
 
     /**
-     * @return array|PostConfiguration[]
+     * @var string
      */
-    public function getAll(): array;
+    private $value;
 
     /**
-     * Get any post configuration from slug name.
-     * @param string $name
-     * @return PostConfiguration|null
+     * @return string
      */
-    public function getOneBySlug(string $name): ?PostConfiguration;
+    public function getAttribute(): string
+    {
+        return $this->attribute;
+    }
 
     /**
-     * Get any redirect post configuration from slug name.
-     * @param string $name
-     * @return PostConfiguration|null
+     * @param string $attribute
+     * @return MetaCustomAttributeConfiguration
      */
-    public function getOneBySlugRedirect(string $name): ?PostConfiguration;
+    public function setAttribute(string $attribute): MetaCustomAttributeConfiguration
+    {
+        $this->attribute = $attribute;
+        return $this;
+    }
 
     /**
-     * Get any redirect post configuration from one or more categories.
-     * @param string ...$category
-     * @return array|PostConfiguration[]
+     * @return string
      */
-    public function getAllByCategory(string ...$category): array;
+    public function getValue(): string
+    {
+        return $this->value;
+    }
 
     /**
-     * Get any redirect post configuration from one or more tags.
-     * @param string ...$tag
-     * @return array|PostConfiguration[]
+     * @param string $value
+     * @return MetaCustomAttributeConfiguration
      */
-    public function getAllByTag(string ...$tag): array;
+    public function setValue(string $value): MetaCustomAttributeConfiguration
+    {
+        $this->value = $value;
+        return $this;
+    }
 }

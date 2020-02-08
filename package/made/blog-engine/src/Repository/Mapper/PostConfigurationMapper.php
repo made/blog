@@ -22,6 +22,8 @@ namespace Made\Blog\Engine\Repository\Mapper;
 use Made\Blog\Engine\Exception\PostConfigurationException;
 use Made\Blog\Engine\Model\Configuration\Post\LocaleConfiguration;
 use Made\Blog\Engine\Model\Configuration\Post\MetaConfiguration;
+use Made\Blog\Engine\Model\Configuration\Post\MetaCustomAttributeConfiguration;
+use Made\Blog\Engine\Model\Configuration\Post\MetaCustomElementConfiguration;
 use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
 
 class PostConfigurationMapper
@@ -54,7 +56,7 @@ class PostConfigurationMapper
             throw new PostConfigurationException('Unfortunately no locale is configured.');
         }
 
-        if (!array_key_exists(static::KEY_LOCALE, $data)) {
+        if (!array_key_exists(static::KEY_STATUS, $data)) {
             throw new PostConfigurationException('Unfortunately no status is configured.');
         }
 
@@ -104,8 +106,6 @@ class PostConfigurationMapper
                 ->setDescription($value[static::KEY_DESCRIPTION]);
 
             if (isset($value[static::KEY_META]) && is_array($value[self::KEY_META])) {
-                // ToDo: Chain of Functions calling one another may not be that nice.
-                //  Maybe Find a nicer solution -> Don't forget that each locale has its own meta.
                 $locale->setMeta($this->fromMetaData($value[static::KEY_META]));
             }
             $localeCollection[$key] = $locale;
@@ -119,26 +119,58 @@ class PostConfigurationMapper
     {
         $meta = new MetaConfiguration();
 
-        if (isset($data['keywords']) && is_string($data['keywords'])) {
+        if (!empty($data['keywords']) && is_string($data['keywords'])) {
             $meta->setKeywords($data['keywords']);
         }
 
-        if (isset($data['author']) && is_string($data['author'])) {
+        if (!empty($data['author']) && is_string($data['author'])) {
             $meta->setAuthor($data['author']);
         }
 
-        if (isset($data['publisher']) && is_string($data['publisher'])) {
+        if (!empty($data['publisher']) && is_string($data['publisher'])) {
             $meta->setPublisher($data['publisher']);
         }
 
-        if (isset($data['robots']) && is_string($data['robots'])) {
+        if (!empty($data['robots']) && is_string($data['robots'])) {
             $meta->setRobots($data['robots']);
         }
 
-        if (isset($data['custom']) && is_array($data['custom'])) {
-            $meta->setCustom($data['custom']);
+        if (!empty($data['custom']) && is_array($data['custom'])) {
+            $meta->setCustom($this->fromCustomData($data['custom']));
         }
 
         return $meta;
+    }
+
+    /**
+     * @param array $data
+     * @return MetaCustomElementConfiguration[]
+     */
+    private function fromCustomData(array $data): array
+    {
+        $elementCollection = [];
+        foreach ($data as $array) {
+            $element = new MetaCustomElementConfiguration();
+            $element->setElementType('meta');
+
+            // ToDo: Either we should define a list of accepted types.
+            //  or add a boolean like "endingTag" because some elements need one :)
+            if (!empty($array['type'])) {
+                $element->setElementType($array['type']);
+                $elementCollection[] = $element;
+                continue;
+            }
+
+            foreach ($array as $key => $value) {
+                $attribute = new MetaCustomAttributeConfiguration();
+                $attribute
+                    ->setAttribute($key)
+                    ->setValue($value);
+                $element->addAttribute($attribute);
+            }
+            $elementCollection[] = $element;
+        }
+
+        return $elementCollection;
     }
 }

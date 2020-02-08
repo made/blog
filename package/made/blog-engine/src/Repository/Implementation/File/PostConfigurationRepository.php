@@ -77,23 +77,17 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
                 return false;
             }
 
-            $postConfigurationPath = $this->getPostPath($entry);
-            $configurationPath = $this->getConfigurationPath($entry);
+            $postFolderPath = $this->getPostPath($entry);
+            $postConfigurationFilePath = $this->getConfigurationPath($entry);
 
-            $requiredFilesExist = is_dir($postConfigurationPath) && is_file($configurationPath);
-
-            if (!$requiredFilesExist) {
-                var_dump($postConfigurationPath);
-                var_dump($configurationPath);
-                throw new \Exception('Something ain`t right with the configuration for this blog post, sir.');
-                // ToDo: As soon logging works, remove exception and use logging below
-//                $this->logger->warning('Something is not right with the configuration for this blog post.', [
-//                    "content_path" => $contentPath,
-//                    'configuration_path' => $configurationPath
-//                ]);
+            if (!is_dir($postFolderPath) && !is_file($postConfigurationFilePath)) {
+                throw new PostConfigurationException('Something ain`t right with the configuration for this blog post, sir.', [
+                    'post_folder_path' => $postFolderPath,
+                    'post_configuration_file_path' => $postConfigurationFilePath,
+                ]);
             }
 
-            return $requiredFilesExist;
+            return true;
         });
 
         $all = array_map(function (string $entry): ?PostConfiguration {
@@ -109,13 +103,8 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
                 return $this->postConfigurationMapper->fromData($data);
             } catch (PostConfigurationException $exception) {
                 throw $exception;
-                // ToDo: As soon logging works activate it again :)
-//                $this->logger->error($exception->getMessage(), [
-//                    'data' => $entry
-//                ]);
             }
 
-            return null;
         }, $list);
 
         return array_values($all);

@@ -42,7 +42,7 @@ class MetaConfiguration
     private $robots;
 
     /**
-     * @var array
+     * @var MetaCustomElementConfiguration[]
      */
     private $custom;
 
@@ -119,7 +119,7 @@ class MetaConfiguration
     }
 
     /**
-     * @return array
+     * @return MetaCustomElementConfiguration[]
      */
     public function getCustom(): array
     {
@@ -127,7 +127,7 @@ class MetaConfiguration
     }
 
     /**
-     * @param array $custom
+     * @param MetaCustomElementConfiguration[] $custom
      * @return MetaConfiguration
      */
     public function setCustom(array $custom): MetaConfiguration
