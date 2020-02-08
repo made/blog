@@ -23,13 +23,13 @@ use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\TagResolverTrait;
-use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationRepository as PostConfigurationRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
+use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\PostConfigurationService;
@@ -200,6 +200,7 @@ class Package extends PackageAbstract
 
         // Then alias the implementation.
         $this->registerServiceAlias(PostConfigurationRepositoryInterface::class, PostConfigurationRepositoryFile::class);
+//        $this->registerServiceAlias(PostConfigurationRepositoryInterface::class, PostConfigurationLocaleRepository::class);
 
         // Register the Content Repository for File implementations, but using locales
         $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationLocaleRepository::class, function (Container $container): PostConfigurationRepositoryInterface {
@@ -207,7 +208,7 @@ class Package extends PackageAbstract
             $postConfigurationRepository = $container[PostConfigurationRepositoryFile::class];
             /** @var LoggerInterface $logger */
             $logger = null; //$container[LoggerInterface::class]; ToDo: Logger is defined in /src/Package.php, it ain't defined here yet?
-
+            // ToDo: Inject default locale into below repository.
             return new PostConfigurationLocaleRepository($postConfigurationRepository, $logger);
         });
 

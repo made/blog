@@ -27,6 +27,22 @@ class PostConfiguration
     public const ACCEPTED_STATUS = ['draft', 'review', 'publish'];
 
     /**
+     * ToDo: will be the folder name for the file implementation, database will be an ID
+     * @var string
+     */
+    private $postId;
+
+    /**
+     * @var string
+     */
+    private $status;
+
+    /**
+     * @var string
+     */
+    private $path;
+
+    /**
      * @var DateTime
      */
     private $postDate;
@@ -37,9 +53,66 @@ class PostConfiguration
     private $locale;
 
     /**
-     * @var string
+     * @param string $status
+     * @return PostConfiguration
+     * @throws PostConfigurationException
      */
-    private $status;
+    public function setStatus(string $status): PostConfiguration
+    {
+        if (!in_array(strtolower($status), self::ACCEPTED_STATUS)) {
+            throw new PostConfigurationException("status $status not valid.");
+        }
+        $this->status = $status;
+
+        return $this;
+    }
+
+
+    // generated methods
+
+    /**
+     * @return string
+     */
+    public function getPostId(): string
+    {
+        return $this->postId;
+    }
+
+    /**
+     * @param string $postId
+     * @return PostConfiguration
+     */
+    public function setPostId(string $postId): PostConfiguration
+    {
+        $this->postId = $postId;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPath(): string
+    {
+        return $this->path;
+    }
+
+    /**
+     * @param string $path
+     * @return PostConfiguration
+     */
+    public function setPath(string $path): PostConfiguration
+    {
+        $this->path = $path;
+        return $this;
+    }
 
     /**
      * @return DateTime
@@ -77,26 +150,4 @@ class PostConfiguration
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param string $status
-     * @return PostConfiguration
-     * @throws PostConfigurationException
-     */
-    public function setStatus(string $status): PostConfiguration
-    {
-        if (!in_array(strtolower($status), self::ACCEPTED_STATUS)) {
-            throw new PostConfigurationException("status $status not valid.");
-        }
-        $this->status = $status;
-        
-        return $this;
-    }
 }

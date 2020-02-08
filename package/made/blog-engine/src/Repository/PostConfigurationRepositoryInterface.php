@@ -29,32 +29,4 @@ interface PostConfigurationRepositoryInterface
      * @return array|PostConfiguration[]
      */
     public function getAll(): array;
-
-    /**
-     * Get any post configuration from slug name.
-     * @param string $name
-     * @return PostConfiguration|null
-     */
-    public function getOneBySlug(string $name): ?PostConfiguration;
-
-    /**
-     * Get any redirect post configuration from slug name.
-     * @param string $name
-     * @return PostConfiguration|null
-     */
-    public function getOneBySlugRedirect(string $name): ?PostConfiguration;
-
-    /**
-     * Get any redirect post configuration from one or more categories.
-     * @param string ...$category
-     * @return array|PostConfiguration[]
-     */
-    public function getAllByCategory(string ...$category): array;
-
-    /**
-     * Get any redirect post configuration from one or more tags.
-     * @param string ...$tag
-     * @return array|PostConfiguration[]
-     */
-    public function getAllByTag(string ...$tag): array;
 }

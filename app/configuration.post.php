@@ -19,6 +19,7 @@
  */
 
 // ToDo: implement the correct information here - for now this is just a draft
+//  The actual custom things here are not post specific, they are site specific...
 return [
     'default' => [
         'locale' => [

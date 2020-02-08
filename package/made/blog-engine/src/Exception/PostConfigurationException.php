@@ -20,8 +20,36 @@
 namespace Made\Blog\Engine\Exception;
 
 use Exception;
+use Throwable;
 
 class PostConfigurationException extends Exception
 {
+    /**
+     * @var array
+     */
+    private $context;
 
+    /**
+     * @return array
+     */
+    public function getContext(): array
+    {
+        return $this->context;
+    }
+
+    public function __construct($message, array $context = [], $code = 0, Throwable $previous = null)
+    {
+        $this->context = $context;
+        parent::__construct($message, $code, $previous);
+    }
+
+    /**
+     * @param array $context
+     * @return PostConfigurationException
+     */
+    public function setContext(array $context): PostConfigurationException
+    {
+        $this->context = $context;
+        return $this;
+    }
 }

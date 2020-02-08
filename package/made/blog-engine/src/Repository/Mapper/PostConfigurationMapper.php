@@ -28,8 +28,10 @@ use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
 
 class PostConfigurationMapper
 {
-    const KEY_SLUG = 'slug';
+    const KEY_ID = 'id';
     const KEY_POST_DATE = 'post_date';
+    const KEY_PATH = 'path';
+    const KEY_SLUG = 'slug';
     const KEY_STATUS = 'status';
     const KEY_TITLE = 'title';
     const KEY_DESCRIPTION = 'description';
@@ -62,6 +64,8 @@ class PostConfigurationMapper
 
         $postConfiguration
             // ToDo: think about validation of the date and maybe accept different formats. -> Util
+            ->setPostId(basename($data[static::KEY_PATH]))
+            ->setPath($data[static::KEY_PATH])
             ->setPostDate(\DateTime::createFromFormat('Y-m-d', $data[static::KEY_POST_DATE]))
             ->setLocale($data[static::KEY_LOCALE])
             ->setStatus($data[static::KEY_STATUS]);

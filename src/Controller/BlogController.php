@@ -22,6 +22,8 @@ namespace App\Controller;
 
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
+use Made\Blog\Engine\Exception\PostConfigurationException;
+use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -44,7 +46,7 @@ class BlogController implements ControllerInterface
      */
     public static function register(App $app): void
     {
-        $app->get('/post_config_test', BlogController::class . ':postConfigurationTestAction')
+        $app->get('/post_config_test/{locale}', BlogController::class . ':postConfigurationTestAction')
             ->setName(BlogController::ROUTE_POST_CONFIG_TEST);
         $app->get('/{slug:.*}', BlogController::class . ':slugAction')
             ->setName(BlogController::ROUTE_SLUG);
@@ -106,23 +108,38 @@ class BlogController implements ControllerInterface
 
 
     /**
+     * ToDo: This test action should later be deleted!!!
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    public function postConfigurationTestAction(ServerRequestInterface $request, ResponseInterface $response)
+    public function postConfigurationTestAction(ServerRequestInterface $request, ResponseInterface $response, array $args)
     {
         ini_set('xdebug.var_display_max_depth', '10');
         ini_set('xdebug.var_display_max_children', '256');
         ini_set('xdebug.var_display_max_data', '1024');
+        try {
 
-        $res = $this->configurationRepository->getAll();
-        echo "<pre>";
-        var_dump($res);
-        echo "</pre>";
+            // ToDo: This should automatically be set via slug (/en/*) or from the language fallback in the config
+//            $this->configurationRepository->setLocale($args['locale']);
+
+//            $res = $this->configurationRepository->getAllByPostDate(new \DateTime());
+//            $res = $this->configurationRepository->getAllByStatus('publish', 'draft');
+//            $res = $this->configurationRepository->getAllByStatus(['publish', 'draft']);
+//            $res = $this->configurationRepository->getAllByStatus('DRAFT');
+            $res = $this->configurationRepository->getAll();
+            echo "<pre>";
+            var_dump($res);
+            echo "</pre>";
+        } catch (PostConfigurationException $exception) {
+            echo "<pre><h1>Important Context</h1>";
+            var_dump($exception->getContext());
+            echo "</pre>";
+            throw $exception;
+        }
+
         $response->getBody()
             ->write('ok');
-
 
         return $response;
     }

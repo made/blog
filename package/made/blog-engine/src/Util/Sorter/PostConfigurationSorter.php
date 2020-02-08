@@ -17,13 +17,37 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Made\Blog\Engine\Repository;
+namespace Made\Blog\Engine\Util\Sorter;
 
-/**
- * Interface PostConfigurationFileRepositoryInterface
- * @package Made\Blog\Engine\Repository\Implementation\File
- */
-interface PostConfigurationFileRepositoryInterface extends PostConfigurationRepositoryInterface
+use Made\Blog\Engine\Exception\PostConfigurationException;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
+
+class PostConfigurationSorter
 {
+    public const ORDER_DESC = 'DESC';
+    public const ORDER_ASC = 'ASC';
 
+    /**
+     * @param array $posts
+     * @param string $order
+     * @return array|PostConfiguration[]
+     */
+    public static function sortByPostDate(array $posts, string $order = self::ORDER_DESC): array
+    {
+        usort($posts, function ($a, $b) use ($order) {
+            /** @var PostConfiguration $a */
+            /** @var PostConfiguration $b */
+            if ($a->getPostDate() === $b->getPostDate()) return 0;
+
+            if ($order === 'DESC') {
+                return $a->getPostDate() > $b->getPostDate() ? -1 : 1;
+            } else if ($order === 'ASC') {
+                return $a->getPostDate() < $b->getPostDate() ? -1 : 1;
+            } else {
+                throw new PostConfigurationException("$order is not valid.");
+            }
+        });
+
+        return $posts;
+    }
 }

@@ -21,16 +21,18 @@ namespace Made\Blog\Engine\Repository\Implementation\File;
 
 use Made\Blog\Engine\Exception\PostConfigurationException;
 use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
-use Made\Blog\Engine\Repository\PostConfigurationFileRepositoryInterface;
+use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
-class PostConfigurationLocaleRepository implements PostConfigurationFileRepositoryInterface
+class PostConfigurationLocaleRepository implements PostConfigurationRepositoryInterface
 {
     // ToDo: Idea -> If there are only 'en' entries in the locale of all blog posts, then the slug should not contain the
     //  locale (ex. /en/how-to-x would be /how-to-x)
     //  Like this the configuration stays the same for non-multilingual and multilingual sites.
     //  Always use the PostConfigurationLocaleRepository, since the default locale is always given to this repository.
 
+    // ToDo: array_column to get a summary of the categories and tags of all posts :)
+    //  for Methods like getAllCategories() or getAllTags()
     /**
      * @var PostConfigurationRepository
      */
@@ -92,39 +94,109 @@ class PostConfigurationLocaleRepository implements PostConfigurationFileReposito
         return array_values($postConfigurationCollection);
     }
 
+
     /**
-     * @inheritDoc
+     * Get any post configuration from slug name.
+     * @param string $slug
+     * @return PostConfiguration|null
      */
-    public function getOneBySlug(string $name): ?PostConfiguration
+    public function getOneBySlug(string $slug): ?PostConfiguration
     {
-        // Slug always needs a locale
-        return $this->postConfigurationRepository->getOneBySlug($name);
+        $locale = $this->locale;
+
+        $all = $this->postConfigurationRepository->getAll();
+
+        return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $postConfiguration) use ($slug, $locale): ?PostConfiguration {
+            if (!isset($postConfiguration->getLocale()[$locale])) {
+                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
+            }
+
+            $slugInCurrentLocale = $postConfiguration->getLocale()[$locale]->getSlug();
+
+            if (null === $carry && $slugInCurrentLocale === $slug) {
+                $carry = $postConfiguration;
+            }
+
+            return $carry;
+        }, null);
     }
 
     /**
-     * @inheritDoc
+     * Get any redirect post configuration from slug name.
+     * @param string $slugRedirect
+     * @return PostConfiguration|null
      */
-    public function getOneBySlugRedirect(string $name): ?PostConfiguration
+    public function getOneBySlugRedirect(string $slugRedirect): ?PostConfiguration
     {
-        // Slug Redirect always needs a locale
-        return $this->postConfigurationRepository->getOneBySlugRedirect($name);
+        $locale = $this->locale;
+
+        $all = $this->postConfigurationRepository->getAll();
+
+        return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $postConfiguration) use ($slugRedirect, $locale): ?PostConfiguration {
+            if (!isset($postConfiguration->getLocale()[$locale])) {
+                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
+            }
+
+            $redirectInCurrentLocale = $postConfiguration->getLocale()[$locale]->getRedirect();
+
+            if (null === $carry && in_array($slugRedirect, $redirectInCurrentLocale)) {
+                $carry = $postConfiguration;
+            }
+
+            return $carry;
+        }, null);
     }
 
     /**
-     * @inheritDoc
+     * Get any redirect post configuration from one or more categories.
+     * @param string ...$category
+     * @return array|PostConfiguration[]
      */
     public function getAllByCategory(string ...$category): array
     {
-        // Category always needs a locale
-        return $this->postConfigurationRepository->getAllByCategory($category);
+        // ToDo: LocaleService should be injected into the constructor and used as class property
+        //  $this->localeService->getLocale(); -> yes just do this.
+        $locale = $this->locale;
+        $all = $this->postConfigurationRepository->getAll();
+
+        return array_filter($all, function (PostConfiguration $postConfiguration) use ($category, $locale): ?PostConfiguration {
+            if (!isset($postConfiguration->getLocale()[$locale])) {
+                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
+            }
+
+            $categoryInCurrentLocale = $postConfiguration->getLocale()[$locale]->getCategories();
+
+
+            if (array_intersect($category, $categoryInCurrentLocale)) {
+                return $postConfiguration;
+            }
+            return null;
+        });
     }
 
     /**
-     * @inheritDoc
+     * Get any redirect post configuration from one or more tags.
+     * @param string ...$tag
+     * @return array|PostConfiguration[]
      */
     public function getAllByTag(string ...$tag): array
     {
-        // Tags always needs a locale
-        return $this->postConfigurationRepository->getAllByTag($tag);
+        // ToDo: LocaleService should be injected into the constructor and used as class property
+        //  $this->localeService->getLocale(); -> yes just do this.
+        $locale = $this->locale;
+        $all = $this->postConfigurationRepository->getAll();
+
+        return array_filter($all, function (PostConfiguration $postConfiguration) use ($tag, $locale): ?PostConfiguration {
+            if (!isset($postConfiguration->getLocale()[$locale])) {
+                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
+            }
+
+            $tagsInCurrentLocale = $postConfiguration->getLocale()[$locale]->getTags();
+
+            if (array_intersect($tag, $tagsInCurrentLocale)) {
+                return $postConfiguration;
+            }
+            return null;
+        });
     }
 }

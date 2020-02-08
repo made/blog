@@ -19,6 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
+use DateTime;
 use Made\Blog\Engine\Exception\PostConfigurationException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
@@ -27,14 +28,13 @@ use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
-use Made\Blog\Engine\Repository\PostConfigurationFileRepositoryInterface;
+use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Service\PostConfigurationService;
+use Made\Blog\Engine\Util\Sorter\PostConfigurationSorter;
 use Psr\Log\LoggerInterface;
 
-class PostConfigurationRepository implements PostConfigurationFileRepositoryInterface
+class PostConfigurationRepository implements PostConfigurationRepositoryInterface
 {
-    // ToDo: array_column to get a summary of the categories and tags of all posts :)
-    //  for Methods like getAllCategories() or getAllTags()
     /**
      * @var Configuration
      */
@@ -72,8 +72,8 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
         $path = $this->getPath();
 
         $list = Directory::listCallback($path, function (string $entry): bool {
-            // ToDo: Maybe put this in the Directory helper class?
-            if ('.' === $entry || '..' === $entry || '.DS_Store' === $entry || '.gitignore' === $entry) {
+            // ToDo: Maybe put this directly in the Directory helper class?
+            if ('.' === $entry || '..' === $entry) {
                 return false;
             }
 
@@ -81,10 +81,12 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
             $postConfigurationFilePath = $this->getConfigurationPath($entry);
 
             if (!is_dir($postFolderPath) && !is_file($postConfigurationFilePath)) {
-                throw new PostConfigurationException('Something ain`t right with the configuration for this blog post, sir.', [
-                    'post_folder_path' => $postFolderPath,
-                    'post_configuration_file_path' => $postConfigurationFilePath,
-                ]);
+                // ToDo: Throwing an exception here will interrupt the flow, perfect would be logging.
+//                throw new PostConfigurationException('Something ain`t right with the configuration for this blog post, sir.', [
+//                    'post_folder_path' => $postFolderPath,
+//                    'post_configuration_file_path' => $postConfigurationFilePath,
+//                ]);
+                return false;
             }
 
             return true;
@@ -92,12 +94,13 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
 
         $all = array_map(function (string $entry): ?PostConfiguration {
             $configurationPath = $this->getConfigurationPath($entry);
-
             $data = $this->getContent($configurationPath);
 
             if (empty($data)) {
                 return null;
             }
+
+            $data[PostConfigurationMapper::KEY_PATH] = $this->getPostPath($entry);
 
             try {
                 return $this->postConfigurationMapper->fromData($data);
@@ -107,123 +110,64 @@ class PostConfigurationRepository implements PostConfigurationFileRepositoryInte
 
         }, $list);
 
-        return array_values($all);
+        $filteredResult = array_filter($all);
+        return PostConfigurationSorter::sortByPostDate($filteredResult);
     }
 
     /**
-     * @inheritDoc
+     * A case insensitive search for a single post with an id. The first found post is returned.
+     * @param string $id
+     * @return PostConfiguration|null
      */
-    public function getOneBySlug(string $slug, string $locale = null): ?PostConfiguration
+    public function getOneById(string $id)
     {
-        if ($locale === null) {
-            // ToDo: LocaleService should be injected into the constructor and used as class property
-            //  $this->locale = $localeService->getLocale();
-            $locale = 'en';
+        $all = $this->getAll();
+
+        foreach ($all as $post) {
+            if (strtolower($id) === strtolower($post->getPostId())) {
+                return $post;
+            }
         }
 
-        $all = $this->getAll();
-
-        return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $postConfiguration) use ($slug, $locale): ?PostConfiguration {
-            if (!isset($postConfiguration->getLocale()[$locale])) {
-                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
-            }
-
-            $slugInCurrentLocale = $postConfiguration->getLocale()[$locale]->getSlug();
-
-            if (null === $carry && $slugInCurrentLocale === $slug) {
-                $carry = $postConfiguration;
-            }
-
-            return $carry;
-        }, null);
-        // ToDo: Maybe think about also searching for redirect slugs if nothing is found above.
-        //  Maybe an extra Repository Layer for this (Proxy).
+        return null;
     }
 
     /**
-     * @inheritDoc
+     * Get all the posts by a specific date.
+     * @param DateTime $dateTime
+     * @return array
      */
-    public function getOneBySlugRedirect(string $slugRedirect, string $locale = null): ?PostConfiguration
+    public function getAllByPostDate(DateTime $dateTime)
     {
-        if ($locale === null) {
-            // ToDo: LocaleService should be injected into the constructor and used as class property
-            //  $this->locale = $localeService->getLocale();
-            $locale = 'en';
-        }
-
         $all = $this->getAll();
 
-        return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $postConfiguration) use ($slugRedirect, $locale): ?PostConfiguration {
-            if (!isset($postConfiguration->getLocale()[$locale])) {
-                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
+        return array_filter($all, function ($postConfiguration) use ($dateTime) {
+            /** @var PostConfiguration $postConfiguration */
+            if ($postConfiguration->getPostDate()->format('Ymd') === $dateTime->format('Ymd')) {
+                var_dump($dateTime);
+                return true;
             }
-
-            $redirectInCurrentLocale = $postConfiguration->getLocale()[$locale]->getRedirect();
-
-            if (null === $carry && in_array($slugRedirect, $redirectInCurrentLocale)) {
-                $carry = $postConfiguration;
-            }
-
-            return $carry;
-        }, null);
-    }
-
-    /**
-     * // ToDo: Only english locale works at the moment when calling the method directly
-     * @inheritDoc
-     */
-    public function getAllByCategory(string ...$category): array
-    {
-        // ToDo: Maybe also find a way to override the locale with a function parameter
-        //  Since splat operator is used, no optional parameters can be passed
-        //  Like this the function ain't that flexible
-
-        // ToDo: LocaleService should be injected into the constructor and used as class property
-        //  $this->locale = $localeService->getLocale();
-        $locale = 'en';
-        $all = $this->getAll();
-
-        return array_filter($all, function (PostConfiguration $postConfiguration) use ($category, $locale): ?PostConfiguration {
-            if (!isset($postConfiguration->getLocale()[$locale])) {
-                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
-            }
-
-            $categoryInCurrentLocale = $postConfiguration->getLocale()[$locale]->getCategories();
-
-
-            if (array_intersect($category, $categoryInCurrentLocale)) {
-                return $postConfiguration;
-            }
-            return null;
+            return false;
         });
     }
 
     /**
-     * // ToDo: Only english locale works at the moment when calling the method directly
-     * @inheritDoc
+     * Gets all posts by status (case insensitive)
+     * @param mixed ...$status
+     * @return array
      */
-    public function getAllByTag(string ...$tag): array
+    public function getAllByStatus(...$status)
     {
-        // ToDo: Maybe also find a way to override the locale with a function parameter
-        //  Since splat operator is used, no optional parameters can be passed
-        //  Like this the function ain't that flexible
-
-        // ToDo: LocaleService should be injected into the constructor and used as class property
-        //  $this->locale = $localeService->getLocale();
-        $locale = 'en';
         $all = $this->getAll();
+        $cleanedStatus = [];
+        // Flatten the input to a single array
+        array_walk_recursive($status, function ($a) use (&$cleanedStatus) {
+            $cleanedStatus[] = strtolower($a);
+        });
 
-        return array_filter($all, function (PostConfiguration $postConfiguration) use ($tag, $locale): ?PostConfiguration {
-            if (!isset($postConfiguration->getLocale()[$locale])) {
-                throw new PostConfigurationException('Unfortunately no posts found for this locale.');
-            }
-
-            $tagsInCurrentLocale = $postConfiguration->getLocale()[$locale]->getTags();
-
-            if (array_intersect($tag, $tagsInCurrentLocale)) {
-                return $postConfiguration;
-            }
-            return null;
+        return array_filter($all, function ($postConfiguration) use ($cleanedStatus) {
+            /** @var PostConfiguration $postConfiguration */
+            return in_array(strtolower($postConfiguration->getStatus()), $cleanedStatus);
         });
     }
 
