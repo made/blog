@@ -26,28 +26,28 @@ use Pimple\Package\PackageAbstract;
 /**
  * Trait TagResolverTrait
  *
- * TODO: Move this over to the pimple-package-utility composer package at some point. For now, traits are good for this use-case.
+ * TODO: Use pimple-package-utility v1.1 when available.
  *
  * @package Made\Blog\Engine\Package
  */
 trait TagResolverTrait
 {
     /**
-     * Resolve to the first service with given tag.
-     *
      * @param string $tagName
      * @param string|null $parentClassName
      * @param array|null $excludeClassName
      * @return array
      * @throws PackageException
      */
-    protected function resolveTag(string $tagName, ?string $parentClassName = null, array $excludeClassName = null): array
+    protected function resolveTag(string $tagName, ?string $parentClassName = null, ?array $excludeClassName = null): array
     {
-        if (!isset($this->container) || !method_exists($this, 'hasTagSupport')) {
+        if (!$this instanceof PackageAbstract || !isset($this->container) || !method_exists($this, 'hasTagSupport')) {
             throw new PackageException('Container not found.');
         }
 
-        $this->hasTagSupport(true);
+        if (!$this->hasTagSupport(true)) {
+            return [];
+        }
 
         /** @var ArrayObject $tag */
         $tag = $this->container[PackageAbstract::SERVICE_NAME_TAG];
@@ -59,10 +59,10 @@ trait TagResolverTrait
                 if (null !== $excludeClassName && in_array($serviceName, $excludeClassName)) {
                     return $carry;
                 }
-                
+
                 $service = $this->container[$serviceName] ?? null;
 
-                if (null === $parentClassName || (null !== $parentClassName && is_subclass_of($service, $parentClassName))) {
+                if (null === $parentClassName || (null !== $parentClassName && is_subclass_of($service, $parentClassName, true))) {
                     $carry[$serviceName] = $service;
                 }
 

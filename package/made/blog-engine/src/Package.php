@@ -47,8 +47,6 @@ use Psr\SimpleCache\CacheInterface;
  */
 class Package extends PackageAbstract
 {
-    const LOGGER_NAME = 'made_blog';
-
     use TagResolverTrait;
 
     /**
