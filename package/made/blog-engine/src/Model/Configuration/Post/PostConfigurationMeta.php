@@ -37,6 +37,11 @@ class PostConfigurationMeta
     private $publisher;
 
     /**
+     * @var string|null
+     */
+    private $description;
+
+    /**
      * @var array|string[]|null
      */
     private $keywords;
@@ -52,90 +57,108 @@ class PostConfigurationMeta
     private $customMeta;
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getKeywords(): string
-    {
-        return $this->keywords;
-    }
-
-    /**
-     * @param string $keywords
-     * @return PostConfigurationMeta
-     */
-    public function setKeywords(string $keywords): PostConfigurationMeta
-    {
-        $this->keywords = $keywords;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAuthor(): string
+    public function getAuthor(): ?string
     {
         return $this->author;
     }
 
     /**
-     * @param string $author
+     * @param string|null $author
      * @return PostConfigurationMeta
      */
-    public function setAuthor(string $author): PostConfigurationMeta
+    public function setAuthor(?string $author): PostConfigurationMeta
     {
         $this->author = $author;
         return $this;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getPublisher(): string
+    public function getPublisher(): ?string
     {
         return $this->publisher;
     }
 
     /**
-     * @param string $publisher
+     * @param string|null $publisher
      * @return PostConfigurationMeta
      */
-    public function setPublisher(string $publisher): PostConfigurationMeta
+    public function setPublisher(?string $publisher): PostConfigurationMeta
     {
         $this->publisher = $publisher;
         return $this;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getRobots(): string
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    /**
+     * @param string|null $description
+     * @return PostConfigurationMeta
+     */
+    public function setDescription(?string $description): PostConfigurationMeta
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    /**
+     * @return array|string[]|null
+     */
+    public function getKeywords()
+    {
+        return $this->keywords;
+    }
+
+    /**
+     * @param array|string[]|null $keywords
+     * @return PostConfigurationMeta
+     */
+    public function setKeywords($keywords)
+    {
+        $this->keywords = $keywords;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRobots(): ?string
     {
         return $this->robots;
     }
 
     /**
-     * @param string $robots
+     * @param string|null $robots
      * @return PostConfigurationMeta
      */
-    public function setRobots(string $robots): PostConfigurationMeta
+    public function setRobots(?string $robots): PostConfigurationMeta
     {
         $this->robots = $robots;
         return $this;
     }
 
     /**
-     * @return PostConfigurationMetaCustom[]
+     * @return array|PostConfigurationMetaCustom[]|null
      */
-    public function getCustomMeta(): array
+    public function getCustomMeta(): ?array
     {
         return $this->customMeta;
     }
 
     /**
-     * @param PostConfigurationMetaCustom[] $customMeta
+     * @param array|PostConfigurationMetaCustom[]|null $customMeta
      * @return PostConfigurationMeta
      */
-    public function setCustomMeta(array $customMeta): PostConfigurationMeta
+    public function setCustomMeta(?array $customMeta): PostConfigurationMeta
     {
         $this->customMeta = $customMeta;
         return $this;

@@ -36,12 +36,12 @@ class PostConfigurationLocale
     /**
      * @var string
      */
-    private $status;
+    private $locale;
 
     /**
      * @var string
      */
-    private $locale;
+    private $status;
 
     /**
      * @var DateTime
@@ -59,29 +59,24 @@ class PostConfigurationLocale
     private $title;
 
     /**
-     * @var string
-     */
-    private $description;
-
-    /**
      * @var PostConfigurationMeta
      */
     private $meta;
 
     /**
-     * @var array|string[]
+     * @var array|string[]|null
      */
     private $categories;
 
     /**
-     * @var array|string[]
+     * @var array|string[]|null
      */
     private $tags;
 
     /**
-     * @var array|string[]
+     * @var array|string[]|null
      */
-    private $redirects;
+    private $redirectSlugs;
 
     /**
      * @return string
@@ -104,24 +99,6 @@ class PostConfigurationLocale
     /**
      * @return string
      */
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param string $status
-     * @return PostConfigurationLocale
-     */
-    public function setStatus(string $status): PostConfigurationLocale
-    {
-        $this->status = $status;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
     public function getLocale(): string
     {
         return $this->locale;
@@ -134,6 +111,24 @@ class PostConfigurationLocale
     public function setLocale(string $locale): PostConfigurationLocale
     {
         $this->locale = $locale;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string $status
+     * @return PostConfigurationLocale
+     */
+    public function setStatus(string $status): PostConfigurationLocale
+    {
+        $this->status = $status;
         return $this;
     }
 
@@ -192,24 +187,6 @@ class PostConfigurationLocale
     }
 
     /**
-     * @return string
-     */
-    public function getDescription(): string
-    {
-        return $this->description;
-    }
-
-    /**
-     * @param string $description
-     * @return PostConfigurationLocale
-     */
-    public function setDescription(string $description): PostConfigurationLocale
-    {
-        $this->description = $description;
-        return $this;
-    }
-
-    /**
      * @return PostConfigurationMeta
      */
     public function getMeta(): PostConfigurationMeta
@@ -228,56 +205,56 @@ class PostConfigurationLocale
     }
 
     /**
-     * @return array|string[]
+     * @return array|string[]|null
      */
-    public function getCategories(): array
+    public function getCategories(): ?array
     {
         return $this->categories;
     }
 
     /**
-     * @param array|string[] $categories
+     * @param array|string[]|null $categories
      * @return PostConfigurationLocale
      */
-    public function setCategories(array $categories): PostConfigurationLocale
+    public function setCategories(?array $categories): PostConfigurationLocale
     {
         $this->categories = $categories;
         return $this;
     }
 
     /**
-     * @return array|string[]
+     * @return array|string[]|null
      */
-    public function getTags(): array
+    public function getTags(): ?array
     {
         return $this->tags;
     }
 
     /**
-     * @param array|string[] $tags
+     * @param array|string[]|null $tags
      * @return PostConfigurationLocale
      */
-    public function setTags(array $tags): PostConfigurationLocale
+    public function setTags(?array $tags): PostConfigurationLocale
     {
         $this->tags = $tags;
         return $this;
     }
 
     /**
-     * @return array|string[]
+     * @return array|string[]|null
      */
-    public function getRedirects(): array
+    public function getRedirectSlugs(): ?array
     {
-        return $this->redirects;
+        return $this->redirectSlugs;
     }
 
     /**
-     * @param array|string[] $redirects
+     * @param array|string[]|null $redirectSlugs
      * @return PostConfigurationLocale
      */
-    public function setRedirects(array $redirects): PostConfigurationLocale
+    public function setRedirectSlugs(?array $redirectSlugs): PostConfigurationLocale
     {
-        $this->redirects = $redirects;
+        $this->redirectSlugs = $redirectSlugs;
         return $this;
     }
 }

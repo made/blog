@@ -133,6 +133,10 @@ class Package extends PackageAbstract
             'path' => dirname(__DIR__) . '/var/cache',
         ]);
 
+        $this->registerConfiguration(Psr16Cache::class, [
+            'cache_expiry_time' => strtotime('+1 Day', 0),
+        ]);
+
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
         $this->registerService(Logger::class, function (Container $container) use ($configuration): Logger {
@@ -161,11 +165,15 @@ class Package extends PackageAbstract
             return new Cache($settings['path']);
         });
 
-        $this->registerService(Psr16Cache::class, function (Container $container): Psr16Cache {
+        $this->registerService(Psr16Cache::class, function (Container $container) use ($configuration): Psr16Cache {
+            /** @var array $settings */
+            $settings = $configuration[Psr16Cache::class];
+
             /** @var Cache $cache */
             $cache = $container[Cache::class];
 
-            return new Psr16Cache($cache);
+            return (new Psr16Cache($cache))
+                ->setCacheExpiryTime($settings['cache_expiry_time']);
         });
 
         // Alias the implementation.
