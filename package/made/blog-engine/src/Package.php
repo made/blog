@@ -72,15 +72,34 @@ class Package extends PackageAbstract
             $this->addConfigurationSupport();
         }
 
-        $this->registerConfigurationStuff();
+        if (!$this->checkPackagePrerequisite(true)) {
+            return;
+        }
 
-        $this->registerCacheStuff();
+        $this->registerConfigurationStuff();
 
         $this->registerDataLayerTheme();
         $this->registerDataLayerPostConfiguration();
 
         $this->registerThemeService();
         $this->registerContentService();
+    }
+
+    /**
+     * @param bool $shouldThrow
+     * @return bool
+     * @throws PackageException
+     */
+    private function checkPackagePrerequisite(bool $shouldThrow = false): bool
+    {
+        $packagePrerequisite = (isset($this->container[LoggerInterface::class]) && ($this->container[LoggerInterface::class] instanceof LoggerInterface))
+            && (isset($this->container[CacheInterface::class]) && ($this->container[CacheInterface::class] instanceof CacheInterface));
+
+        if (!$packagePrerequisite && $shouldThrow) {
+            throw new PackageException('Container does not have package prerequsite!');
+        }
+
+        return $packagePrerequisite;
     }
 
     /**
@@ -103,40 +122,6 @@ class Package extends PackageAbstract
                 ->setRootDirectory($settings[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
                 ->setTheme($settings[Configuration::CONFIGURATION_NAME_THEME]);
         });
-    }
-
-    /**
-     * @throws PackageException
-     */
-    private function registerCacheStuff(): void
-    {
-        // TODO: Rather use a constant for some stuff inside this function. Not sure where to place them, thought.
-
-        $this->registerConfiguration(Cache::class, [
-            'path' => dirname(__DIR__, 4) . '/var/cache',
-        ]);
-
-        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
-
-        $this->registerService(Cache::class, function (Container $container) use ($configuration): Cache {
-            /** @var array $settings */
-            $settings = $configuration[Cache::class];
-
-            // TODO: Make the path relative to the root directory.
-            $path = $settings['path'];
-
-            return new Cache($path);
-        });
-
-        $this->registerService(Psr16Cache::class, function (Container $container): Psr16Cache {
-            /** @var Cache $cache */
-            $cache = $container[Cache::class];
-
-            return new Psr16Cache($cache);
-        });
-
-        // Alias the implementation.
-        $this->registerServiceAlias(CacheInterface::class, Psr16Cache::class);
     }
 
     /**

@@ -21,6 +21,8 @@
 namespace App;
 
 use App\Controller\BlogController;
+use Cache\Cache;
+use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Service\ThemeService;
 use Monolog\Handler\RotatingFileHandler;
@@ -29,9 +31,11 @@ use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
 use Pimple\Package\PackageAbstract;
 use Psr\Log\LoggerInterface;
+use Psr\SimpleCache\CacheInterface;
 use Slim\App;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
+use Twig\Extension\DebugExtension;
 
 /**
  * Class Package
@@ -74,7 +78,8 @@ class Package extends PackageAbstract
             return $this->app;
         });
 
-        $this->register3rdPartyDependency();
+        $this->registerClientDependency();
+        $this->registerPackageDependency();
 
         $this->registerController();
     }
@@ -82,16 +87,11 @@ class Package extends PackageAbstract
     /**
      * @throws PackageException
      */
-    private function register3rdPartyDependency(): void
+    private function registerClientDependency(): void
     {
         $this->registerConfiguration(Twig::class, [
             // TODO: Complete option list with defaults.
             'cache' => false,
-        ]);
-
-        $this->registerConfiguration(Logger::class, [
-            'name' => 'app',
-            'filename' => dirname(__DIR__) . '/var/log/app.log',
         ]);
 
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
@@ -106,11 +106,34 @@ class Package extends PackageAbstract
             $twig = Twig::create($themeService->getPathAndNamespace(), $settings);
             $themeService->updateLoader($twig->getLoader());
 
+            $twigEnvironment = $twig->getEnvironment();
+
+            if ($twigEnvironment->isDebug()) {
+                $twigEnvironment->addExtension(new DebugExtension());
+            }
+
             return $twig;
         });
 
         $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
         $this->app->add($twigMiddleware);
+    }
+
+    /**
+     * @throws PackageException
+     */
+    private function registerPackageDependency(): void
+    {
+        $this->registerConfiguration(Logger::class, [
+            'name' => 'app',
+            'filename' => dirname(__DIR__) . '/var/log/app.log',
+        ]);
+
+        $this->registerConfiguration(Cache::class, [
+            'path' => dirname(__DIR__) . '/var/cache',
+        ]);
+
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
         $this->registerService(Logger::class, function (Container $container) use ($configuration): Logger {
             /** @var array $settings */
@@ -128,7 +151,25 @@ class Package extends PackageAbstract
             return $logger;
         });
 
+        // Alias the implementation.
         $this->registerServiceAlias(LoggerInterface::class, Logger::class);
+
+        $this->registerService(Cache::class, function (Container $container) use ($configuration): Cache {
+            /** @var array $settings */
+            $settings = $configuration[Cache::class];
+
+            return new Cache($settings['path']);
+        });
+
+        $this->registerService(Psr16Cache::class, function (Container $container): Psr16Cache {
+            /** @var Cache $cache */
+            $cache = $container[Cache::class];
+
+            return new Psr16Cache($cache);
+        });
+
+        // Alias the implementation.
+        $this->registerServiceAlias(CacheInterface::class, Psr16Cache::class);
     }
 
     private function registerController(): void
