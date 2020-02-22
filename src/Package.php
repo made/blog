@@ -45,11 +45,12 @@ class Package extends PackageAbstract
 
     /**
      * Package constructor.
+     * @param Container $container
      * @param App $app
      */
-    public function __construct(App $app)
+    public function __construct(Container $container, App $app)
     {
-        parent::__construct(null);
+        parent::__construct($container);
 
         $this->app = $app;
     }

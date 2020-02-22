@@ -28,5 +28,5 @@ use Slim\App;
 // Keep the namespace near the package class or use an alias for better readability.
 return [
     10 => new Made\Blog\Engine\Package($container),
-    90 => new Package($app),
+    90 => new Package($container, $app),
 ];
