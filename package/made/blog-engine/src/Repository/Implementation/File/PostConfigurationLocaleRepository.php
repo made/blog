@@ -94,7 +94,6 @@ class PostConfigurationLocaleRepository implements PostConfigurationRepositoryIn
         return array_values($postConfigurationCollection);
     }
 
-
     /**
      * Get any post configuration from slug name.
      * @param string $slug

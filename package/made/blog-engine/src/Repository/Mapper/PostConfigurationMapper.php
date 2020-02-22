@@ -26,8 +26,20 @@ use Made\Blog\Engine\Model\Configuration\Post\MetaCustomAttributeConfiguration;
 use Made\Blog\Engine\Model\Configuration\Post\MetaCustomElementConfiguration;
 use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
 
+/**
+ * Class PostConfigurationMapper
+ *
+ * @TODO Refactor.
+ * @package Made\Blog\Engine\Repository\Mapper
+ */
 class PostConfigurationMapper
 {
+    /**
+     * TODO: Add a check for from...() and to...().
+     */
+    public const ACCEPTED_STATUS = ['draft', 'review', 'publish'];
+
+
     const KEY_ID = 'id';
     const KEY_POST_DATE = 'post_date';
     const KEY_PATH = 'path';
@@ -64,9 +76,9 @@ class PostConfigurationMapper
 
         $postConfiguration
             // ToDo: think about validation of the date and maybe accept different formats. -> Util
-            ->setPostId(basename($data[static::KEY_PATH]))
+            ->setId(basename($data[static::KEY_PATH]))
             ->setPath($data[static::KEY_PATH])
-            ->setPostDate(\DateTime::createFromFormat('Y-m-d', $data[static::KEY_POST_DATE]))
+            ->setDate(\DateTime::createFromFormat('Y-m-d', $data[static::KEY_POST_DATE]))
             ->setLocale($data[static::KEY_LOCALE])
             ->setStatus($data[static::KEY_STATUS]);
 

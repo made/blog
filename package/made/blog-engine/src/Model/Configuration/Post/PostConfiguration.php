@@ -20,17 +20,15 @@
 namespace Made\Blog\Engine\Model\Configuration\Post;
 
 use DateTime;
-use Made\Blog\Engine\Exception\PostConfigurationException;
 
 class PostConfiguration
 {
-    public const ACCEPTED_STATUS = ['draft', 'review', 'publish'];
-
     /**
-     * ToDo: will be the folder name for the file implementation, database will be an ID
+     * info: will be the folder name for the file implementation, database will be an ID
+     *
      * @var string
      */
-    private $postId;
+    private $id;
 
     /**
      * @var string
@@ -45,46 +43,28 @@ class PostConfiguration
     /**
      * @var DateTime
      */
-    private $postDate;
+    private $date;
 
     /**
-     * @var LocaleConfiguration[]
+     * @var array|LocaleConfiguration[]
      */
     private $locale;
 
     /**
-     * @param string $status
-     * @return PostConfiguration
-     * @throws PostConfigurationException
-     */
-    public function setStatus(string $status): PostConfiguration
-    {
-        if (!in_array(strtolower($status), self::ACCEPTED_STATUS)) {
-            throw new PostConfigurationException("status $status not valid.");
-        }
-        $this->status = $status;
-
-        return $this;
-    }
-
-
-    // generated methods
-
-    /**
      * @return string
      */
-    public function getPostId(): string
+    public function getId(): string
     {
-        return $this->postId;
+        return $this->id;
     }
 
     /**
-     * @param string $postId
+     * @param string $id
      * @return PostConfiguration
      */
-    public function setPostId(string $postId): PostConfiguration
+    public function setId(string $id): PostConfiguration
     {
-        $this->postId = $postId;
+        $this->id = $id;
         return $this;
     }
 
@@ -94,6 +74,16 @@ class PostConfiguration
     public function getStatus(): string
     {
         return $this->status;
+    }
+
+    /**
+     * @param string $status
+     * @return PostConfiguration
+     */
+    public function setStatus(string $status): PostConfiguration
+    {
+        $this->status = $status;
+        return $this;
     }
 
     /**
@@ -117,23 +107,23 @@ class PostConfiguration
     /**
      * @return DateTime
      */
-    public function getPostDate(): DateTime
+    public function getDate(): DateTime
     {
-        return $this->postDate;
+        return $this->date;
     }
 
     /**
-     * @param DateTime $postDate
+     * @param DateTime $date
      * @return PostConfiguration
      */
-    public function setPostDate(DateTime $postDate): PostConfiguration
+    public function setDate(DateTime $date): PostConfiguration
     {
-        $this->postDate = $postDate;
+        $this->date = $date;
         return $this;
     }
 
     /**
-     * @return LocaleConfiguration[]
+     * @return array|LocaleConfiguration[]
      */
     public function getLocale(): array
     {
@@ -141,7 +131,7 @@ class PostConfiguration
     }
 
     /**
-     * @param LocaleConfiguration[] $locale
+     * @param array|LocaleConfiguration[] $locale
      * @return PostConfiguration
      */
     public function setLocale(array $locale): PostConfiguration
@@ -149,5 +139,4 @@ class PostConfiguration
         $this->locale = $locale;
         return $this;
     }
-
 }

@@ -115,8 +115,8 @@ class Package extends PackageAbstract
             return $twig;
         });
 
-        $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
-        $this->app->add($twigMiddleware);
+//        $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
+//        $this->app->add($twigMiddleware);
     }
 
     /**

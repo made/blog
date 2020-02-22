@@ -81,6 +81,8 @@ class BlogController implements ControllerInterface
     }
 
     /**
+     * /{slug:.*}
+     *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @param array $args
@@ -108,7 +110,9 @@ class BlogController implements ControllerInterface
 
 
     /**
-     * ToDo: This test action should later be deleted!!!
+     * /post_config_test/{locale}
+     *
+     * ToDo: This test action should be deleted later!!!
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
@@ -124,10 +128,10 @@ class BlogController implements ControllerInterface
 //            $this->configurationRepository->setLocale($args['locale']);
 
 //            $res = $this->configurationRepository->getAllByPostDate(new \DateTime());
-//            $res = $this->configurationRepository->getAllByStatus('publish', 'draft');
-//            $res = $this->configurationRepository->getAllByStatus(['publish', 'draft']);
+            $res = $this->configurationRepository->getAllByStatus('publish', 'draft');
+//            $res = $this->configurationRepository->getAllByStatus(...['publish', 'draft']);
 //            $res = $this->configurationRepository->getAllByStatus('DRAFT');
-            $res = $this->configurationRepository->getAll();
+//            $res = $this->configurationRepository->getAll();
             echo "<pre>";
             var_dump($res);
             echo "</pre>";

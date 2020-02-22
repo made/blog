@@ -56,7 +56,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      * @param PostConfigurationMapper $postConfigurationMapper
      * @param LoggerInterface $logger
      */
-    public function __construct(Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, ?LoggerInterface $logger)
+    public function __construct(Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, LoggerInterface $logger)
     {
         // ToDo: Inject the default locale
         $this->configuration = $configuration;
@@ -92,6 +92,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             return true;
         });
 
+        /** @var array|array[] $all */
         $all = array_map(function (string $entry): ?PostConfiguration {
             $configurationPath = $this->getConfigurationPath($entry);
             $data = $this->getContent($configurationPath);
@@ -105,13 +106,18 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             try {
                 return $this->postConfigurationMapper->fromData($data);
             } catch (PostConfigurationException $exception) {
-                throw $exception;
+                // TODO: Logging.
             }
 
+            return null;
         }, $list);
 
-        $filteredResult = array_filter($all);
-        return PostConfigurationSorter::sortByPostDate($filteredResult);
+        /** @var array|PostConfiguration[] $all */
+        $all = array_filter($all, function (?PostConfiguration $postConfiguration): bool {
+            return null !== $postConfiguration;
+        });
+
+        return PostConfigurationSorter::sortByPostDate($all);
     }
 
     /**
@@ -119,55 +125,52 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      * @param string $id
      * @return PostConfiguration|null
      */
-    public function getOneById(string $id)
+    public function getOneById(string $id): ?PostConfiguration
     {
         $all = $this->getAll();
 
-        foreach ($all as $post) {
-            if (strtolower($id) === strtolower($post->getPostId())) {
-                return $post;
+        return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $postConfiguration) use ($id): ?PostConfiguration {
+            if (null === $carry && strtolower($id) === strtolower($postConfiguration->getId())) {
+                return $postConfiguration;
             }
-        }
 
-        return null;
+            return $carry;
+        }, null);
     }
 
     /**
      * Get all the posts by a specific date.
      * @param DateTime $dateTime
-     * @return array
+     * @return array|PostConfiguration[]
      */
-    public function getAllByPostDate(DateTime $dateTime)
+    public function getAllByPostDate(DateTime $dateTime): array
     {
         $all = $this->getAll();
 
-        return array_filter($all, function ($postConfiguration) use ($dateTime) {
-            /** @var PostConfiguration $postConfiguration */
-            if ($postConfiguration->getPostDate()->format('Ymd') === $dateTime->format('Ymd')) {
-                var_dump($dateTime);
-                return true;
-            }
-            return false;
+        return array_filter($all, function (PostConfiguration $postConfiguration) use ($dateTime): bool {
+            $postConfigurationDate = $postConfiguration->getDate();
+
+            return $postConfigurationDate->format('Ymd') === $dateTime->format('Ymd');
         });
     }
 
     /**
      * Gets all posts by status (case insensitive)
-     * @param mixed ...$status
+     * @param string ...$status
      * @return array
      */
-    public function getAllByStatus(...$status)
+    public function getAllByStatus(string ...$status): array
     {
         $all = $this->getAll();
-        $cleanedStatus = [];
-        // Flatten the input to a single array
-        array_walk_recursive($status, function ($a) use (&$cleanedStatus) {
-            $cleanedStatus[] = strtolower($a);
-        });
 
-        return array_filter($all, function ($postConfiguration) use ($cleanedStatus) {
-            /** @var PostConfiguration $postConfiguration */
-            return in_array(strtolower($postConfiguration->getStatus()), $cleanedStatus);
+        $status = array_map(function (string $status): string {
+            return strtolower($status);
+        }, $status);
+
+        return array_filter($all, function (PostConfiguration $postConfiguration) use ($status): bool {
+            $postConfigurationStatus = strtolower($postConfiguration->getStatus());
+
+            return in_array($postConfigurationStatus, $status);
         });
     }
 

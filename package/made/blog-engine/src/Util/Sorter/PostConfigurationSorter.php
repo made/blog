@@ -22,32 +22,41 @@ namespace Made\Blog\Engine\Util\Sorter;
 use Made\Blog\Engine\Exception\PostConfigurationException;
 use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
 
+/**
+ * Class PostConfigurationSorter
+ *
+ * @package Made\Blog\Engine\Util\Sorter
+ */
 class PostConfigurationSorter
 {
     public const ORDER_DESC = 'DESC';
     public const ORDER_ASC = 'ASC';
 
     /**
-     * @param array $posts
-     * @param string $order
+     * @param array|PostConfiguration[] $all
+     * @param string|null $order
      * @return array|PostConfiguration[]
      */
-    public static function sortByPostDate(array $posts, string $order = self::ORDER_DESC): array
+    public static function sortByPostDate(array $all, ?string $order = null): array
     {
-        usort($posts, function ($a, $b) use ($order) {
-            /** @var PostConfiguration $a */
-            /** @var PostConfiguration $b */
-            if ($a->getPostDate() === $b->getPostDate()) return 0;
+        if (null === $order) {
+            $order = static::ORDER_DESC;
+        }
 
-            if ($order === 'DESC') {
-                return $a->getPostDate() > $b->getPostDate() ? -1 : 1;
-            } else if ($order === 'ASC') {
-                return $a->getPostDate() < $b->getPostDate() ? -1 : 1;
+        usort($all, function (PostConfiguration $a, PostConfiguration $b) use ($order) {
+            if ($a->getDate() === $b->getDate()) {
+                return 0;
+            }
+
+            if ($order === static::ORDER_DESC) {
+                return $a->getDate() > $b->getDate() ? -1 : 1;
+            } else if ($order === static::ORDER_ASC) {
+                return $a->getDate() < $b->getDate() ? -1 : 1;
             } else {
-                throw new PostConfigurationException("$order is not valid.");
+                throw new PostConfigurationException("Order '$order' is not valid.");
             }
         });
 
-        return $posts;
+        return $all;
     }
 }

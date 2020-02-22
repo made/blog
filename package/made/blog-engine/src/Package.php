@@ -76,7 +76,7 @@ class Package extends PackageAbstract
             return;
         }
 
-        $this->registerConfigurationStuff();
+        $this->registerConfigurationObject();
 
         $this->registerDataLayerTheme();
         $this->registerDataLayerPostConfiguration();
@@ -105,7 +105,7 @@ class Package extends PackageAbstract
     /**
      * @throws PackageException
      */
-    private function registerConfigurationStuff(): void
+    private function registerConfigurationObject(): void
     {
         $this->registerConfiguration(Configuration::class, [
             Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__, 4),
@@ -144,8 +144,8 @@ class Package extends PackageAbstract
             return new ThemeRepository($configuration, $themeMapper);
         });
 
-        // Then alias the implementation.
-        $this->registerServiceAlias(ThemeRepositoryInterface::class, ThemeRepository::class);
+        // Then use a lazy service.
+        $this->registerServiceLazy(ThemeRepositoryInterface::class, ThemeRepository::class);
 
         // Then proxy.
         $this->container->extend(ThemeRepositoryInterface::class, function (ThemeRepositoryInterface $themeRepository, Container $container): ThemeRepositoryInterface {
@@ -176,7 +176,7 @@ class Package extends PackageAbstract
             /** @var PostConfigurationMapper $postConfigurationMapper */
             $postConfigurationMapper = $container[PostConfigurationMapper::class];
             /** @var LoggerInterface $logger */
-            $logger = null; //$container[LoggerInterface::class]; ToDo: Logger is defined in /src/Package.php, it ain't defined here yet?
+            $logger = $container[LoggerInterface::class];
 
             return new PostConfigurationRepositoryFile($configuration, $postConfigurationMapper, $logger);
         });
@@ -224,6 +224,27 @@ class Package extends PackageAbstract
             $postConfigurationRepository = $container[PostConfigurationRepositoryInterface::class];
 
             return new PostConfigurationService($configuration, $postConfigurationRepository);
+        });
+    }
+
+    /**
+     * @param string $serviceName
+     * @param string $serviceNameLazy
+     * @throws PackageException
+     */
+    protected function registerServiceLazy(string $serviceName, string $serviceNameLazy): void
+    {
+        $this->registerConfiguration($serviceName, [
+            'implementation' => $serviceNameLazy,
+        ]);
+
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
+
+        $this->registerService($serviceName, function (Container $container) use ($configuration, $serviceName) {
+            /** @var array $settings */
+            $settings = $configuration[$serviceName];
+
+            return $container[$settings['implementation']];
         });
     }
 }
