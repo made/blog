@@ -163,7 +163,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationRepositoryIn
                 throw new PostConfigurationException('Unfortunately no posts found for this locale.');
             }
 
-            $categoryInCurrentLocale = $postConfiguration->getLocale()[$locale]->getCategories();
+            $categoryInCurrentLocale = $postConfiguration->getLocale()[$locale]->getCategory();
 
 
             if (array_intersect($category, $categoryInCurrentLocale)) {

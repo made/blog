@@ -19,38 +19,43 @@
 
 namespace Made\Blog\Engine\Model\Configuration\Post;
 
-class MetaCustomElementConfiguration
+/**
+ * Class PostConfigurationMetaCustom
+ *
+ * @package Made\Blog\Engine\Model\Configuration\Post
+ */
+class PostConfigurationMetaCustom
 {
     /**
      * @var string
      */
-    private $elementType;
+    private $element;
 
     /**
-     * @var MetaCustomAttributeConfiguration[]
+     * @var array|string[]
      */
     private $attributes;
 
     /**
      * @return string
      */
-    public function getElementType(): string
+    public function getElement(): string
     {
-        return $this->elementType;
+        return $this->element;
     }
 
     /**
-     * @param string $elementType
-     * @return MetaCustomElementConfiguration
+     * @param string $element
+     * @return PostConfigurationMetaCustom
      */
-    public function setElementType(string $elementType): MetaCustomElementConfiguration
+    public function setElement(string $element): PostConfigurationMetaCustom
     {
-        $this->elementType = $elementType;
+        $this->element = $element;
         return $this;
     }
 
     /**
-     * @return MetaCustomAttributeConfiguration[]
+     * @return array|string[]
      */
     public function getAttributes(): array
     {
@@ -58,22 +63,12 @@ class MetaCustomElementConfiguration
     }
 
     /**
-     * @param MetaCustomAttributeConfiguration[] $attributes
-     * @return MetaCustomElementConfiguration
+     * @param array|string[] $attributes
+     * @return PostConfigurationMetaCustom
      */
-    public function setAttributes(array $attributes): MetaCustomElementConfiguration
+    public function setAttributes(array $attributes): PostConfigurationMetaCustom
     {
         $this->attributes = $attributes;
-        return $this;
-    }
-
-    /**
-     * @param MetaCustomAttributeConfiguration $attributes
-     * @return MetaCustomElementConfiguration
-     */
-    public function addAttribute(MetaCustomAttributeConfiguration $attributes): MetaCustomElementConfiguration
-    {
-        $this->attributes[] = $attributes;
         return $this;
     }
 }

@@ -20,10 +20,10 @@
 namespace Made\Blog\Engine\Repository\Mapper;
 
 use Made\Blog\Engine\Exception\PostConfigurationException;
-use Made\Blog\Engine\Model\Configuration\Post\LocaleConfiguration;
-use Made\Blog\Engine\Model\Configuration\Post\MetaConfiguration;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationLocale;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationMeta;
 use Made\Blog\Engine\Model\Configuration\Post\MetaCustomAttributeConfiguration;
-use Made\Blog\Engine\Model\Configuration\Post\MetaCustomElementConfiguration;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationMetaCustom;
 use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
 
 /**
@@ -89,7 +89,7 @@ class PostConfigurationMapper
     {
         $localeCollection = [];
         foreach ($postConfiguration->getLocale() as $key => $value) {
-            $locale = new LocaleConfiguration();
+            $locale = new PostConfigurationLocale();
 
             if (!array_key_exists(static::KEY_SLUG, $value)) {
                 throw new PostConfigurationException("Unfortunately no slug is configured for locale.");
@@ -104,7 +104,7 @@ class PostConfigurationMapper
             }
 
             if (array_key_exists(static::KEY_CATEGORIES, $value)) {
-                $locale->setCategories($value[static::KEY_CATEGORIES]);
+                $locale->setCategory($value[static::KEY_CATEGORIES]);
             }
 
             if (array_key_exists(static::KEY_TAGS, $value)) {
@@ -116,7 +116,7 @@ class PostConfigurationMapper
             }
 
             $locale
-                ->setLanguage($key)
+                ->setLocale($key)
                 ->setSlug($value[static::KEY_SLUG])
                 ->setTitle($value[static::KEY_TITLE])
                 ->setDescription($value[static::KEY_DESCRIPTION]);
@@ -131,9 +131,9 @@ class PostConfigurationMapper
         return $postConfiguration->setLocale($localeCollection);
     }
 
-    private function fromMetaData(array $data): MetaConfiguration
+    private function fromMetaData(array $data): PostConfigurationMeta
     {
-        $meta = new MetaConfiguration();
+        $meta = new PostConfigurationMeta();
 
         if (!empty($data['keywords']) && is_string($data['keywords'])) {
             $meta->setKeywords($data['keywords']);
@@ -152,7 +152,7 @@ class PostConfigurationMapper
         }
 
         if (!empty($data['custom']) && is_array($data['custom'])) {
-            $meta->setCustom($this->fromCustomData($data['custom']));
+            $meta->setCustomMeta($this->fromCustomData($data['custom']));
         }
 
         return $meta;
@@ -160,19 +160,19 @@ class PostConfigurationMapper
 
     /**
      * @param array $data
-     * @return MetaCustomElementConfiguration[]
+     * @return PostConfigurationMetaCustom[]
      */
     private function fromCustomData(array $data): array
     {
         $elementCollection = [];
         foreach ($data as $array) {
-            $element = new MetaCustomElementConfiguration();
-            $element->setElementType('meta');
+            $element = new PostConfigurationMetaCustom();
+            $element->setElement('meta');
 
             // ToDo: Either we should define a list of accepted types.
             //  or add a boolean like "endingTag" because some elements need one :)
             if (!empty($array['type'])) {
-                $element->setElementType($array['type']);
+                $element->setElement($array['type']);
                 $elementCollection[] = $element;
                 continue;
             }

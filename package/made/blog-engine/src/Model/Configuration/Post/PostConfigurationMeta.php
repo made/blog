@@ -19,32 +19,37 @@
 
 namespace Made\Blog\Engine\Model\Configuration\Post;
 
-class MetaConfiguration
+/**
+ * Class PostConfigurationMeta
+ *
+ * @package Made\Blog\Engine\Model\Configuration\Post
+ */
+class PostConfigurationMeta
 {
     /**
-     * @var string
-     */
-    private $keywords;
-
-    /**
-     * @var string
+     * @var string|null
      */
     private $author;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $publisher;
 
     /**
-     * @var string
+     * @var array|string[]|null
+     */
+    private $keywords;
+
+    /**
+     * @var string|null
      */
     private $robots;
 
     /**
-     * @var MetaCustomElementConfiguration[]
+     * @var array|PostConfigurationMetaCustom[]|null
      */
-    private $custom;
+    private $customMeta;
 
     /**
      * @return string
@@ -56,9 +61,9 @@ class MetaConfiguration
 
     /**
      * @param string $keywords
-     * @return MetaConfiguration
+     * @return PostConfigurationMeta
      */
-    public function setKeywords(string $keywords): MetaConfiguration
+    public function setKeywords(string $keywords): PostConfigurationMeta
     {
         $this->keywords = $keywords;
         return $this;
@@ -74,9 +79,9 @@ class MetaConfiguration
 
     /**
      * @param string $author
-     * @return MetaConfiguration
+     * @return PostConfigurationMeta
      */
-    public function setAuthor(string $author): MetaConfiguration
+    public function setAuthor(string $author): PostConfigurationMeta
     {
         $this->author = $author;
         return $this;
@@ -92,9 +97,9 @@ class MetaConfiguration
 
     /**
      * @param string $publisher
-     * @return MetaConfiguration
+     * @return PostConfigurationMeta
      */
-    public function setPublisher(string $publisher): MetaConfiguration
+    public function setPublisher(string $publisher): PostConfigurationMeta
     {
         $this->publisher = $publisher;
         return $this;
@@ -110,29 +115,29 @@ class MetaConfiguration
 
     /**
      * @param string $robots
-     * @return MetaConfiguration
+     * @return PostConfigurationMeta
      */
-    public function setRobots(string $robots): MetaConfiguration
+    public function setRobots(string $robots): PostConfigurationMeta
     {
         $this->robots = $robots;
         return $this;
     }
 
     /**
-     * @return MetaCustomElementConfiguration[]
+     * @return PostConfigurationMetaCustom[]
      */
-    public function getCustom(): array
+    public function getCustomMeta(): array
     {
-        return $this->custom;
+        return $this->customMeta;
     }
 
     /**
-     * @param MetaCustomElementConfiguration[] $custom
-     * @return MetaConfiguration
+     * @param PostConfigurationMetaCustom[] $customMeta
+     * @return PostConfigurationMeta
      */
-    public function setCustom(array $custom): MetaConfiguration
+    public function setCustomMeta(array $customMeta): PostConfigurationMeta
     {
-        $this->custom = $custom;
+        $this->customMeta = $customMeta;
         return $this;
     }
 }

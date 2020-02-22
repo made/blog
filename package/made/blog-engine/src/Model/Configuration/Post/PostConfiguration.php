@@ -19,34 +19,20 @@
 
 namespace Made\Blog\Engine\Model\Configuration\Post;
 
-use DateTime;
-
+/**
+ * Class PostConfiguration
+ *
+ * @package Made\Blog\Engine\Model\Configuration\Post
+ */
 class PostConfiguration
 {
     /**
-     * info: will be the folder name for the file implementation, database will be an ID
-     *
      * @var string
      */
     private $id;
 
     /**
-     * @var string
-     */
-    private $status;
-
-    /**
-     * @var string
-     */
-    private $path;
-
-    /**
-     * @var DateTime
-     */
-    private $date;
-
-    /**
-     * @var array|LocaleConfiguration[]
+     * @var array|PostConfigurationLocale[]
      */
     private $locale;
 
@@ -69,61 +55,7 @@ class PostConfiguration
     }
 
     /**
-     * @return string
-     */
-    public function getStatus(): string
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param string $status
-     * @return PostConfiguration
-     */
-    public function setStatus(string $status): PostConfiguration
-    {
-        $this->status = $status;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPath(): string
-    {
-        return $this->path;
-    }
-
-    /**
-     * @param string $path
-     * @return PostConfiguration
-     */
-    public function setPath(string $path): PostConfiguration
-    {
-        $this->path = $path;
-        return $this;
-    }
-
-    /**
-     * @return DateTime
-     */
-    public function getDate(): DateTime
-    {
-        return $this->date;
-    }
-
-    /**
-     * @param DateTime $date
-     * @return PostConfiguration
-     */
-    public function setDate(DateTime $date): PostConfiguration
-    {
-        $this->date = $date;
-        return $this;
-    }
-
-    /**
-     * @return array|LocaleConfiguration[]
+     * @return array|PostConfigurationLocale[]
      */
     public function getLocale(): array
     {
@@ -131,12 +63,22 @@ class PostConfiguration
     }
 
     /**
-     * @param array|LocaleConfiguration[] $locale
+     * @param array|PostConfigurationLocale[] $locale
      * @return PostConfiguration
      */
     public function setLocale(array $locale): PostConfiguration
     {
         $this->locale = $locale;
+        return $this;
+    }
+
+    /**
+     * @param PostConfigurationLocale $locale
+     * @return PostConfiguration
+     */
+    public function addLocale(PostConfigurationLocale $locale): PostConfiguration
+    {
+        $this->locale[$locale->getLocale()] = $locale;
         return $this;
     }
 }
