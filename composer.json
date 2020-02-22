@@ -9,8 +9,11 @@
     "ext-json": "*",
     "slim/slim": "^4.0",
     "slim/psr7": "^0.6.0",
+    "pimple/pimple": "^3.2",
     "slim/twig-view": "^3.0",
     "monolog/monolog": "^2.0",
+    "gameplayjdk/php-file-cache": "^1.0",
+    "gameplayjdk/pimple-package-utility": "^1.0",
     "made/blog-engine": "dev-master"
   },
   "authors": [
