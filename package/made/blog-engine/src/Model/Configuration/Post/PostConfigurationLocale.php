@@ -28,6 +28,10 @@ use DateTime;
  */
 class PostConfigurationLocale
 {
+    const STATUS_DRAFT = 'draft';
+    const STATUS_REVIEW = 'review';
+    const STATUS_PUBLISHED = 'published';
+
     /**
      * @var string
      */
@@ -76,7 +80,7 @@ class PostConfigurationLocale
     /**
      * @var array|string[]|null
      */
-    private $redirectSlugs;
+    private $slugRedirects;
 
     /**
      * @return string
@@ -243,18 +247,18 @@ class PostConfigurationLocale
     /**
      * @return array|string[]|null
      */
-    public function getRedirectSlugs(): ?array
+    public function getSlugRedirects(): ?array
     {
-        return $this->redirectSlugs;
+        return $this->slugRedirects;
     }
 
     /**
-     * @param array|string[]|null $redirectSlugs
+     * @param array|string[]|null $slugRedirects
      * @return PostConfigurationLocale
      */
-    public function setRedirectSlugs(?array $redirectSlugs): PostConfigurationLocale
+    public function setSlugRedirects(?array $slugRedirects): PostConfigurationLocale
     {
-        $this->redirectSlugs = $redirectSlugs;
+        $this->slugRedirects = $slugRedirects;
         return $this;
     }
 }

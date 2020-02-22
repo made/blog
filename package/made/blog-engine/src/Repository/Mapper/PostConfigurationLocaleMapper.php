@@ -42,12 +42,12 @@ class PostConfigurationLocaleMapper
     const KEY_META = 'meta';
     const KEY_CATEGORIES = 'categories';
     const KEY_TAGS = 'tags';
-    const KEY_REDIRECT_SLUGS = 'redirect_slugs';
+    const KEY_SLUG_REDIRECTS = 'redirect_slugs';
 
     const STATUS_VALID = [
         'draft',
         'review',
-        'publish',
+        'published',
     ];
 
     const DTS_FORMAT = 'Y-m-d';
@@ -137,8 +137,8 @@ class PostConfigurationLocaleMapper
         }
 
         // Optional:
-        if (isset($data[static::KEY_REDIRECT_SLUGS]) && is_array($data[static::KEY_REDIRECT_SLUGS]) && !empty($redirects = $this->normalizeValueArray($data[static::KEY_REDIRECT_SLUGS], true))) {
-            $postConfigurationLocale->setRedirectSlugs($redirects);
+        if (isset($data[static::KEY_SLUG_REDIRECTS]) && is_array($data[static::KEY_SLUG_REDIRECTS]) && !empty($redirects = $this->normalizeValueArray($data[static::KEY_SLUG_REDIRECTS], true))) {
+            $postConfigurationLocale->setSlugRedirects($redirects);
         }
 
         return $postConfigurationLocale;
@@ -180,7 +180,7 @@ class PostConfigurationLocaleMapper
         );
         $data[static::KEY_CATEGORIES] = $postConfigurationLocale->getCategories();
         $data[static::KEY_TAGS] = $postConfigurationLocale->getTags();
-        $data[static::KEY_REDIRECT_SLUGS] = $postConfigurationLocale->getRedirectSlugs();
+        $data[static::KEY_SLUG_REDIRECTS] = $postConfigurationLocale->getSlugRedirects();
 
         return $data;
     }

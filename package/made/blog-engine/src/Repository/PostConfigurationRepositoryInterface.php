@@ -36,16 +36,4 @@ interface PostConfigurationRepositoryInterface
      * @return PostConfiguration|null
      */
     public function getOneById(string $id): ?PostConfiguration;
-
-    /**
-     * @param DateTime $dateTime
-     * @return array|PostConfiguration[]
-     */
-    public function getAllByPostDate(DateTime $dateTime): array;
-
-    /**
-     * @param string ...$status
-     * @return array|PostConfiguration[]
-     */
-    public function getAllByStatus(string ...$status): array;
 }

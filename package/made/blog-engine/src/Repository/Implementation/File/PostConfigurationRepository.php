@@ -19,7 +19,6 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use DateTime;
 use Made\Blog\Engine\Exception\PostConfigurationException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
@@ -27,12 +26,21 @@ use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
+use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationLocale;
+use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Service\PostConfigurationService;
 use Made\Blog\Engine\Util\Sorter\PostConfigurationSorter;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class PostConfigurationRepository
+ *
+ * @TODO Formatting is really messed up... please fix it.
+ * @TODO Tidy up the docblocks, use more inheritdoc and put the docblocks into the interfaces, where they belong.
+ * @package Made\Blog\Engine\Repository\Implementation\File
+ */
 class PostConfigurationRepository implements PostConfigurationRepositoryInterface
 {
     /**
@@ -56,9 +64,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      * @param PostConfigurationMapper $postConfigurationMapper
      * @param LoggerInterface $logger
      */
-    public function __construct(Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, LoggerInterface $logger)
-    {
-        // ToDo: Inject the default locale
+    public function __construct(
+        Configuration $configuration,
+        PostConfigurationMapper $postConfigurationMapper,
+        LoggerInterface $logger
+    ) {
         $this->configuration = $configuration;
         $this->postConfigurationMapper = $postConfigurationMapper;
         $this->logger = $logger;
@@ -71,25 +81,17 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     {
         $path = $this->getPath();
 
+        /** @var array|string[] $list */
         $list = Directory::listCallback($path, function (string $entry): bool {
-            // ToDo: Maybe put this directly in the Directory helper class?
             if ('.' === $entry || '..' === $entry) {
                 return false;
             }
 
-            $postFolderPath = $this->getPostPath($entry);
-            $postConfigurationFilePath = $this->getConfigurationPath($entry);
+            $postPath = $this->getPostPath($entry);
+            $configurationPath = $this->getConfigurationPath($entry);
 
-            if (!is_dir($postFolderPath) && !is_file($postConfigurationFilePath)) {
-                // ToDo: Throwing an exception here will interrupt the flow, perfect would be logging.
-//                throw new PostConfigurationException('Something ain`t right with the configuration for this blog post, sir.', [
-//                    'post_folder_path' => $postFolderPath,
-//                    'post_configuration_file_path' => $postConfigurationFilePath,
-//                ]);
-                return false;
-            }
-
-            return true;
+            // TODO: Logging.
+            return is_dir($postPath) && is_file($configurationPath);
         });
 
         /** @var array|array[] $all */
@@ -101,7 +103,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 return null;
             }
 
-            $data[PostConfigurationMapper::KEY_PATH] = $this->getPostPath($entry);
+            $data[PostConfigurationMapper::KEY_ID] = $this->getPostPath($entry);
+            $data = $this->provisionIntersectingData($data);
 
             try {
                 return $this->postConfigurationMapper->fromData($data);
@@ -122,6 +125,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
     /**
      * A case insensitive search for a single post with an id. The first found post is returned.
+     *
      * @param string $id
      * @return PostConfiguration|null
      */
@@ -129,49 +133,48 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     {
         $all = $this->getAll();
 
-        return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $postConfiguration) use ($id): ?PostConfiguration {
-            if (null === $carry && strtolower($id) === strtolower($postConfiguration->getId())) {
-                return $postConfiguration;
-            }
+        return array_reduce($all,
+            function (?PostConfiguration $carry, PostConfiguration $one) use ($id): ?PostConfiguration {
+                if (null === $carry && strtolower($id) === strtolower($one->getId())) {
+                    return $one;
+                }
 
-            return $carry;
-        }, null);
+                return $carry;
+            }, null);
     }
 
     /**
-     * Get all the posts by a specific date.
-     * @param DateTime $dateTime
-     * @return array|PostConfiguration[]
-     */
-    public function getAllByPostDate(DateTime $dateTime): array
-    {
-        $all = $this->getAll();
-
-        return array_filter($all, function (PostConfiguration $postConfiguration) use ($dateTime): bool {
-            $postConfigurationDate = $postConfiguration->getDate();
-
-            return $postConfigurationDate->format('Ymd') === $dateTime->format('Ymd');
-        });
-    }
-
-    /**
-     * Gets all posts by status (case insensitive)
-     * @param string ...$status
+     * Provision some data to save typing it into the file by hand. Just for those of us, who are lazy, you know.
+     *
+     * @param array $data
      * @return array
      */
-    public function getAllByStatus(string ...$status): array
+    private function provisionIntersectingData(array $data): array
     {
-        $all = $this->getAll();
+        // Pull the locale data from the node.
+        foreach ($data[PostConfigurationMapper::KEY_LOCALE] as $locale => $localeData) {
+            $localeData[PostConfigurationLocaleMapper::KEY_ID] = $data[PostConfigurationMapper::KEY_ID];
 
-        $status = array_map(function (string $status): string {
-            return strtolower($status);
-        }, $status);
+            // Set the locale to the one defined by the key, if not already set or not equal.
+            if (!isset($localeData[PostConfigurationLocaleMapper::KEY_LOCALE])
+                || $locale !== $localeData[PostConfigurationLocaleMapper::KEY_LOCALE]) {
+                $localeData[PostConfigurationLocaleMapper::KEY_LOCALE] = $locale;
+            }
 
-        return array_filter($all, function (PostConfiguration $postConfiguration) use ($status): bool {
-            $postConfigurationStatus = strtolower($postConfiguration->getStatus());
+            // Set the status to 'draft' when no status is set or the set status is not valid.
+            if (!isset($localeData[PostConfigurationLocaleMapper::KEY_STATUS])
+                || !in_array($localeData[PostConfigurationLocaleMapper::KEY_STATUS],
+                    PostConfigurationLocaleMapper::STATUS_VALID, true)) {
+                $localeData[PostConfigurationLocaleMapper::KEY_STATUS] = PostConfigurationLocale::STATUS_DRAFT;
+            }
 
-            return in_array($postConfigurationStatus, $status);
-        });
+            // INFO: Maybe some more? Lemme know.
+
+            // Pull it back into the node.
+            $data[PostConfigurationMapper::KEY_LOCALE][$locale] = $localeData;
+        }
+
+        return $data;
     }
 
     /**
