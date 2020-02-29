@@ -168,6 +168,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
             // INFO: Maybe some more? Lemme know.
 
+            if (!isset($localeData[PostConfigurationLocaleMapper::KEY_TEMPLATE])
+                && isset($data[PostConfigurationLocaleMapper::KEY_TEMPLATE])) {
+                $localeData[PostConfigurationLocaleMapper::KEY_TEMPLATE] = $data[PostConfigurationLocaleMapper::KEY_TEMPLATE];
+            }
+
             // Pull it back into the node.
             $data[PostConfigurationMapper::KEY_LOCALE_LIST][$locale] = $localeData;
         }

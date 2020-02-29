@@ -21,6 +21,7 @@ namespace Made\Blog\Engine\Service\PostContentProvider\Implementation\File;
 
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Model\PostContent;
+use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Made\Blog\Engine\Service\PostContentProviderInterface;
 
 /**
@@ -40,7 +41,7 @@ class PostContentProvider implements PostContentProviderInterface
      */
     public function accept(string $origin): bool
     {
-        // TODO: Implement accept() method.
+        return PostConfigurationRepositoryFile::class === $origin;
     }
 
     /**

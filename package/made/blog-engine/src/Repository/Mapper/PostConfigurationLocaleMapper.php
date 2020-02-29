@@ -43,6 +43,7 @@ class PostConfigurationLocaleMapper
     const KEY_CATEGORY_LIST = 'category';
     const KEY_TAG_LIST = 'tag';
     const KEY_SLUG_REDIRECT_LIST = 'slug_redirect';
+    const KEY_TEMPLATE = 'template';
 
     const STATUS_VALID = [
         PostConfigurationLocale::STATUS_DRAFT,
@@ -148,6 +149,13 @@ class PostConfigurationLocaleMapper
             $postConfigurationLocale->setSlugRedirectList($slugRedirectList);
         }
 
+        // Required:
+        if (isset($data[static::KEY_TEMPLATE]) && is_string($data[static::KEY_TEMPLATE])) {
+            $postConfigurationLocale->setTemplate($data[static::KEY_TEMPLATE]);
+        } else {
+            throw new MapperException('Missing key: ' . static::KEY_TEMPLATE);
+        }
+
         return $postConfigurationLocale;
     }
 
@@ -176,6 +184,7 @@ class PostConfigurationLocaleMapper
         $data = [];
 
         $data[static::KEY_ID] = $postConfigurationLocale->getId();
+        $data[static::KEY_ORIGIN] = $postConfigurationLocale->getOrigin();
         $data[static::KEY_LOCALE] = $postConfigurationLocale->getLocale();
         $data[static::KEY_STATUS] = $postConfigurationLocale->getStatus();
         $data[static::KEY_DATE] = $postConfigurationLocale->getDate()
@@ -188,6 +197,7 @@ class PostConfigurationLocaleMapper
         $data[static::KEY_CATEGORY_LIST] = $postConfigurationLocale->getCategoryList();
         $data[static::KEY_TAG_LIST] = $postConfigurationLocale->getTagList();
         $data[static::KEY_SLUG_REDIRECT_LIST] = $postConfigurationLocale->getSlugRedirectList();
+        $data[static::KEY_TEMPLATE] = $postConfigurationLocale->getTemplate();
 
         return $data;
     }

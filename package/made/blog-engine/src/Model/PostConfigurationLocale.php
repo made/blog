@@ -88,6 +88,11 @@ class PostConfigurationLocale
     private $slugRedirectList;
 
     /**
+     * @var string
+     */
+    private $template;
+
+    /**
      * @return string
      */
     public function getId(): string
@@ -282,6 +287,24 @@ class PostConfigurationLocale
     public function setSlugRedirectList(?array $slugRedirectList): PostConfigurationLocale
     {
         $this->slugRedirectList = $slugRedirectList;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTemplate(): string
+    {
+        return $this->template;
+    }
+
+    /**
+     * @param string $template
+     * @return PostConfigurationLocale
+     */
+    public function setTemplate(string $template): PostConfigurationLocale
+    {
+        $this->template = $template;
         return $this;
     }
 }
