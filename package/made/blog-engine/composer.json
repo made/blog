@@ -2,7 +2,7 @@
   "name": "made/blog-engine",
   "description": "Blog engine library for made/blog.",
   "type": "library",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "minimum-stability": "stable",
   "require": {
     "php": ">=7.1 <7.4",

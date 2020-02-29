@@ -3,7 +3,7 @@
   "description": "Simple blog software for developers.",
   "type": "project",
   "minimum-stability": "stable",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "require": {
     "php": ">=7.1 <7.4",
     "ext-json": "*",
