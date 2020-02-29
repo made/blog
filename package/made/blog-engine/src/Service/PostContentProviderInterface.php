@@ -17,22 +17,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Repository;
+namespace Made\Blog\Engine\Service;
 
-use Made\Blog\Engine\Model\PostConfiguration;
+use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Model\PostContent;
 
-interface PostConfigurationRepositoryInterface
+/**
+ * Interface PostContentProviderInterface
+ *
+ * @package Made\Blog\Engine\Service
+ */
+interface PostContentProviderInterface
 {
-    const TAG_POST_CONFIGURATION_REPOSITORY = 'repository.post_configuration';
+    const TAG_POST_CONTENT_PROVIDER = 'provider.post_content';
 
     /**
-     * @return array|PostConfiguration[]
+     * @param string $origin
+     * @return bool
      */
-    public function getAll(): array;
+    public function accept(string $origin): bool;
 
     /**
-     * @param string $id
-     * @return PostConfiguration|null
+     * @param PostConfigurationLocale $postConfigurationLocale
+     * @return PostContent
      */
-    public function getOneById(string $id): ?PostConfiguration;
+    public function provide(PostConfigurationLocale $postConfigurationLocale): PostContent;
 }

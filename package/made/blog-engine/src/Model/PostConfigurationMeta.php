@@ -17,12 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Model\Configuration\Post;
+namespace Made\Blog\Engine\Model;
 
 /**
  * Class PostConfigurationMeta
  *
- * @package Made\Blog\Engine\Model\Configuration\Post
+ * @package Made\Blog\Engine\Model
  */
 class PostConfigurationMeta
 {
@@ -54,7 +54,7 @@ class PostConfigurationMeta
     /**
      * @var array|PostConfigurationMetaCustom[]|null
      */
-    private $customMeta;
+    private $customMetaList;
 
     /**
      * @return string|null
@@ -149,18 +149,18 @@ class PostConfigurationMeta
     /**
      * @return array|PostConfigurationMetaCustom[]|null
      */
-    public function getCustomMeta(): ?array
+    public function getCustomMetaList(): ?array
     {
-        return $this->customMeta;
+        return $this->customMetaList;
     }
 
     /**
-     * @param array|PostConfigurationMetaCustom[]|null $customMeta
+     * @param array|PostConfigurationMetaCustom[]|null $customMetaList
      * @return PostConfigurationMeta
      */
-    public function setCustomMeta(?array $customMeta): PostConfigurationMeta
+    public function setCustomMetaList(?array $customMetaList): PostConfigurationMeta
     {
-        $this->customMeta = $customMeta;
+        $this->customMetaList = $customMetaList;
         return $this;
     }
 }

@@ -17,39 +17,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Exception;
+namespace Made\Blog\Engine\Model;
 
-use Exception;
-use Throwable;
-
-class PostConfigurationException extends Exception
+/**
+ * Class PostContent
+ *
+ * @package Made\Blog\Engine\Model
+ */
+class PostContent
 {
     /**
-     * @var array
+     * @var string
      */
-    private $context;
+    private $content;
 
     /**
-     * @return array
+     * @return string
      */
-    public function getContext(): array
+    public function getContent(): string
     {
-        return $this->context;
-    }
-
-    public function __construct($message, array $context = [], $code = 0, Throwable $previous = null)
-    {
-        $this->context = $context;
-        parent::__construct($message, $code, $previous);
+        return $this->content;
     }
 
     /**
-     * @param array $context
-     * @return PostConfigurationException
+     * @param string $content
+     * @return PostContent
      */
-    public function setContext(array $context): PostConfigurationException
+    public function setContent(string $content): PostContent
     {
-        $this->context = $context;
+        $this->content = $content;
         return $this;
     }
 }

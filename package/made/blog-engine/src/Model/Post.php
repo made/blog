@@ -17,58 +17,58 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Model\Configuration\Post;
+namespace Made\Blog\Engine\Model;
 
 /**
- * Class PostConfigurationMetaCustom
+ * Class Post
  *
- * @package Made\Blog\Engine\Model\Configuration\Post
+ * @package Made\Blog\Engine\Model
  */
-class PostConfigurationMetaCustom
+class Post
 {
     /**
-     * @var string
+     * @var PostConfigurationLocale
      */
-    private $element;
+    private $configuration;
 
     /**
-     * @var array|string[]
+     * @var PostContent
      */
-    private $attributes;
+    private $content;
 
     /**
-     * @return string
+     * @return PostConfigurationLocale
      */
-    public function getElement(): string
+    public function getConfiguration(): PostConfigurationLocale
     {
-        return $this->element;
+        return $this->configuration;
     }
 
     /**
-     * @param string $element
-     * @return PostConfigurationMetaCustom
+     * @param PostConfigurationLocale $configuration
+     * @return Post
      */
-    public function setElement(string $element): PostConfigurationMetaCustom
+    public function setConfiguration(PostConfigurationLocale $configuration): Post
     {
-        $this->element = $element;
+        $this->configuration = $configuration;
         return $this;
     }
 
     /**
-     * @return array|string[]
+     * @return PostContent
      */
-    public function getAttributes(): array
+    public function getContent(): PostContent
     {
-        return $this->attributes;
+        return $this->content;
     }
 
     /**
-     * @param array|string[] $attributes
-     * @return PostConfigurationMetaCustom
+     * @param PostContent $content
+     * @return Post
      */
-    public function setAttributes(array $attributes): PostConfigurationMetaCustom
+    public function setContent(PostContent $content): Post
     {
-        $this->attributes = $attributes;
+        $this->content = $content;
         return $this;
     }
 }

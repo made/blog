@@ -22,18 +22,25 @@ namespace Made\Blog\Engine;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Package\TagResolverTrait;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationRepository as PostConfigurationRepositoryAggregation;
-use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
-use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository;
+use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository as ThemeRepositoryFile;
+use Made\Blog\Engine\Repository\Implementation\PostConfigurationLocaleRepository;
+use Made\Blog\Engine\Repository\Implementation\PostRepository;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMetaCustomMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMetaMapper;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
+use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
+use Made\Blog\Engine\Repository\PostRepositoryInterface;
+use Made\Blog\Engine\Repository\Proxy\CacheProxyPostConfigurationLocaleRepository;
+use Made\Blog\Engine\Repository\Proxy\CacheProxyPostConfigurationRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
-use Made\Blog\Engine\Service\PostConfigurationService;
+use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\PostContentProvider as PostContentProviderFile;
+use Made\Blog\Engine\Service\PostContentProviderInterface;
+use Made\Blog\Engine\Service\PostContentResolver;
 use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
@@ -81,9 +88,9 @@ class Package extends PackageAbstract
 
         $this->registerDataLayerTheme();
         $this->registerDataLayerPostConfiguration();
+        $this->registerDataLayerPost();
 
         $this->registerThemeService();
-        $this->registerContentService();
     }
 
     /**
@@ -110,20 +117,19 @@ class Package extends PackageAbstract
     {
         $this->registerConfiguration(Configuration::class, [
             Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__, 4),
-            Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
+            Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE => 'en',
         ]);
 
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
-        $this->registerService(Configuration::class,
-            function (Container $container) use ($configuration): Configuration {
-                /** @var array $settings */
-                $settings = $configuration[Configuration::class];
+        $this->registerService(Configuration::class, function (Container $container) use ($configuration): Configuration {
+            /** @var array $settings */
+            $settings = $configuration[Configuration::class];
 
-                return (new Configuration())
-                    ->setRootDirectory($settings[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
-                    ->setTheme($settings[Configuration::CONFIGURATION_NAME_THEME]);
-            });
+            return (new Configuration())
+                ->setRootDirectory($settings[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
+                ->setFallbackLocale($settings[Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE]);
+        });
     }
 
     /**
@@ -131,114 +137,135 @@ class Package extends PackageAbstract
      */
     private function registerDataLayerTheme(): void
     {
-        // First register mapper.
         $this->registerService(ThemeMapper::class, function (Container $container): ThemeMapper {
             return new ThemeMapper();
         });
 
-        // Then repository.
-        $this->registerTagAndService(ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepository::class,
-            function (Container $container): ThemeRepositoryInterface {
-                /** @var Configuration $configuration */
-                $configuration = $container[Configuration::class];
-                /** @var ThemeMapper $themeMapper */
-                $themeMapper = $container[ThemeMapper::class];
+        $this->registerTagAndService(ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepositoryFile::class, function (Container $container): ThemeRepositoryInterface {
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
+            /** @var ThemeMapper $themeMapper */
+            $themeMapper = $container[ThemeMapper::class];
 
-                return new ThemeRepository($configuration, $themeMapper);
-            });
+            return new ThemeRepositoryFile($configuration, $themeMapper);
+        });
 
-        // Then use a lazy service.
-        $this->registerServiceLazy(ThemeRepositoryInterface::class, ThemeRepository::class);
+        $this->registerServiceLazy(ThemeRepositoryInterface::class, ThemeRepositoryFile::class);
 
-        // Then proxy.
-        $this->container->extend(ThemeRepositoryInterface::class,
-            function (ThemeRepositoryInterface $themeRepository, Container $container): ThemeRepositoryInterface {
-                /** @var CacheInterface $cache */
-                $cache = $container[CacheInterface::class];
-                /** @var ThemeMapper $themeMapper */
-                $themeMapper = $container[ThemeMapper::class];
+        $this->container->extend(ThemeRepositoryInterface::class, function (ThemeRepositoryInterface $themeRepository, Container $container): ThemeRepositoryInterface {
+            /** @var CacheInterface $cache */
+            $cache = $container[CacheInterface::class];
 
-                return new CacheProxyThemeRepository($cache, $themeRepository, $themeMapper);
-            });
-
+            return new CacheProxyThemeRepository($cache, $themeRepository);
+        });
     }
 
     /**
-     * @TODO The formatting in here is really messed up. The closure functions should not break the line.
      * @throws PackageException
      */
     private function registerDataLayerPostConfiguration(): void
     {
-        // First register mapper.
-        $this->registerService(PostConfigurationMetaCustomMapper::class,
-            function (Container $container): PostConfigurationMetaCustomMapper {
-                return new PostConfigurationMetaCustomMapper();
-            });
+        $this->registerService(PostConfigurationMetaCustomMapper::class, function (Container $container): PostConfigurationMetaCustomMapper {
+            return new PostConfigurationMetaCustomMapper();
+        });
 
-        $this->registerService(PostConfigurationMetaMapper::class,
-            function (Container $container): PostConfigurationMetaMapper {
-                /** @var PostConfigurationMetaCustomMapper $postConfigurationMetaCustomMapper */
-                $postConfigurationMetaCustomMapper = $container[PostConfigurationMetaCustomMapper::class];
+        $this->registerService(PostConfigurationMetaMapper::class, function (Container $container): PostConfigurationMetaMapper {
+            /** @var PostConfigurationMetaCustomMapper $postConfigurationMetaCustomMapper */
+            $postConfigurationMetaCustomMapper = $container[PostConfigurationMetaCustomMapper::class];
 
-                return new PostConfigurationMetaMapper($postConfigurationMetaCustomMapper);
-            });
+            return new PostConfigurationMetaMapper($postConfigurationMetaCustomMapper);
+        });
 
-        $this->registerService(PostConfigurationLocaleMapper::class,
-            function (Container $container): PostConfigurationLocaleMapper {
-                /** @var PostConfigurationMetaMapper $postConfigurationMetaMapper */
-                $postConfigurationMetaMapper = $container[PostConfigurationMetaMapper::class];
+        $this->registerService(PostConfigurationLocaleMapper::class, function (Container $container): PostConfigurationLocaleMapper {
+            /** @var PostConfigurationMetaMapper $postConfigurationMetaMapper */
+            $postConfigurationMetaMapper = $container[PostConfigurationMetaMapper::class];
 
-                return new PostConfigurationLocaleMapper($postConfigurationMetaMapper);
-            });
+            return new PostConfigurationLocaleMapper($postConfigurationMetaMapper);
+        });
 
-        $this->registerService(PostConfigurationMapper::class,
-            function (Container $container): PostConfigurationMapper {
-                /** @var PostConfigurationLocaleMapper $postConfigurationLocaleMapper */
-                $postConfigurationLocaleMapper = $container[PostConfigurationLocaleMapper::class];
+        $this->registerService(PostConfigurationMapper::class, function (Container $container): PostConfigurationMapper {
+            /** @var PostConfigurationLocaleMapper $postConfigurationLocaleMapper */
+            $postConfigurationLocaleMapper = $container[PostConfigurationLocaleMapper::class];
 
-                return new PostConfigurationMapper($postConfigurationLocaleMapper);
-            });
+            return new PostConfigurationMapper($postConfigurationLocaleMapper);
+        });
 
-        // Register the Post Repository for File implementation.
-        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY,
-            PostConfigurationRepositoryFile::class,
-            function (Container $container): PostConfigurationRepositoryInterface {
-                /** @var Configuration $configuration */
-                $configuration = $container[Configuration::class];
-                /** @var PostConfigurationMapper $postConfigurationMapper */
-                $postConfigurationMapper = $container[PostConfigurationMapper::class];
-                /** @var LoggerInterface $logger */
-                $logger = $container[LoggerInterface::class];
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container): PostConfigurationRepositoryInterface {
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
+            /** @var PostConfigurationMapper $postConfigurationMapper */
+            $postConfigurationMapper = $container[PostConfigurationMapper::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
-                return new PostConfigurationRepositoryFile($configuration, $postConfigurationMapper, $logger);
-            });
+            return new PostConfigurationRepositoryFile($configuration, $postConfigurationMapper, $logger);
+        });
 
-        // Then alias the implementation.
-        $this->registerServiceAlias(PostConfigurationRepositoryInterface::class,
-            PostConfigurationRepositoryFile::class);
-//        $this->registerServiceAlias(PostConfigurationRepositoryInterface::class, PostConfigurationLocaleRepository::class);
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryAggregation::class, function (Container $container): PostConfigurationRepositoryInterface {
+            $serviceList = $this->resolveTag(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryInterface::class, [
+                PostConfigurationRepositoryAggregation::class,
+            ]);
 
-        // Register the Content Repository for File implementations, but using locales
-        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY,
-            PostConfigurationLocaleRepository::class,
-            function (Container $container): PostConfigurationRepositoryInterface {
-                /** @var PostConfigurationRepositoryFile $postConfigurationRepository */
-                $postConfigurationRepository = $container[PostConfigurationRepositoryFile::class];
-                /** @var LoggerInterface $logger */
-                $logger = null; //$container[LoggerInterface::class]; ToDo: Logger is defined in /src/Package.php, it ain't defined here yet?
-                // ToDo: Inject default locale into below repository.
-                return new PostConfigurationLocaleRepository($postConfigurationRepository, $logger);
-            });
+            return new PostConfigurationRepositoryAggregation($serviceList);
+        });
 
-        // Register the Aggregation ContentRepository
-        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY,
-            PostConfigurationRepositoryAggregation::class,
-            function (Container $container): PostConfigurationRepositoryInterface {
-                $classList = $this->resolveTag(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY,
-                    PostConfigurationRepositoryInterface::class, [PostConfigurationRepositoryAggregation::class]);
+        $this->registerServiceLazy(PostConfigurationRepositoryInterface::class, PostConfigurationRepositoryAggregation::class);
 
-                return new PostConfigurationRepositoryAggregation($classList);
-            });
+        $this->container->extend(PostConfigurationRepositoryInterface::class, function (PostConfigurationRepositoryInterface $postConfigurationRepository, Container $container): PostConfigurationRepositoryInterface {
+            /** @var CacheInterface $cache */
+            $cache = $container[CacheInterface::class];
+
+            return new CacheProxyPostConfigurationRepository($cache, $postConfigurationRepository);
+        });
+
+        $this->registerTagAndService(PostConfigurationLocaleRepositoryInterface::TAG_POST_CONFIGURATION_LOCALE_REPOSITORY, PostConfigurationLocaleRepository::class, function (Container $container): PostConfigurationLocaleRepositoryInterface {
+            /** @var PostConfigurationRepositoryInterface $postConfigurationRepository */
+            $postConfigurationRepository = $container[PostConfigurationRepositoryInterface::class];
+            /** @var LoggerInterface $logger */
+
+            return new PostConfigurationLocaleRepository($postConfigurationRepository, $logger);
+        });
+
+        $this->registerServiceLazy(PostConfigurationLocaleRepositoryInterface::class, PostConfigurationLocaleRepository::class);
+
+        $this->container->extend(PostConfigurationLocaleRepositoryInterface::class, function (PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository, Container $container): PostConfigurationLocaleRepositoryInterface {
+            /** @var CacheInterface $cache */
+            $cache = $container[CacheInterface::class];
+
+            return new CacheProxyPostConfigurationLocaleRepository($cache, $postConfigurationLocaleRepository);
+        });
+    }
+
+    /**
+     * @throws PackageException
+     */
+    private function registerDataLayerPost(): void
+    {
+        $this->registerTagAndService(PostContentProviderInterface::TAG_POST_CONTENT_PROVIDER, PostContentProviderFile::class, function (Container $container): PostContentProviderInterface {
+            return new PostContentProviderFile();
+        });
+
+        $this->registerService(PostContentResolver::class, function (Container $container): PostContentResolver {
+            /** @var array|PostContentProviderInterface[] $serviceList */
+            $serviceList = $this->resolveTag(PostContentProviderInterface::TAG_POST_CONTENT_PROVIDER, PostContentProviderInterface::class, null);
+
+            return new PostContentResolver($serviceList);
+        });
+
+        $this->registerTagAndService(PostRepositoryInterface::TAG_POST_REPOSITORY, PostRepository::class, function (Container $container): PostRepositoryInterface {
+            /** @var PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository */
+            $postConfigurationLocaleRepository = $container[PostConfigurationLocaleRepositoryInterface::class];
+            /** @var PostContentResolver $postContentResolver */
+            $postContentResolver = $container[PostContentResolver::class];
+
+            return new PostRepository($postConfigurationLocaleRepository, $postContentResolver);
+        });
+
+        $this->registerServiceLazy(PostRepositoryInterface::class, PostRepository::class);
+
+//        $this->container->extend(PostRepositoryInterface::class, function (PostRepositoryInterface $postRepository, Container $container): PostRepositoryInterface {
+//            return new CacheProxyPostRepository();
+//        });
     }
 
     private function registerThemeService(): void
@@ -253,20 +280,9 @@ class Package extends PackageAbstract
         });
     }
 
-    private function registerContentService(): void
-    {
-        $this->registerService(PostConfigurationService::class,
-            function (Container $container): PostConfigurationService {
-                /** @var Configuration $configuration */
-                $configuration = $container[Configuration::class];
-                /** @var PostConfigurationRepositoryInterface $postConfigurationRepository */
-                $postConfigurationRepository = $container[PostConfigurationRepositoryInterface::class];
-
-                return new PostConfigurationService($configuration, $postConfigurationRepository);
-            });
-    }
-
     /**
+     * TODO: Use gameplayjdk/pimple-package-utility v1.1 when available.
+     *
      * @param string $serviceName
      * @param string $serviceNameLazy
      * @throws PackageException

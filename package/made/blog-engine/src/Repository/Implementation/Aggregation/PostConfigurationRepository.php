@@ -19,27 +19,28 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\Aggregation;
 
-use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
+use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 
 /**
  * Class PostConfigurationRepository
+ *
  * @package Made\Blog\Engine\Repository\Implementation\Aggregation
  */
 class PostConfigurationRepository implements PostConfigurationRepositoryInterface
 {
     /**
-     * @var array
+     * @var array|PostConfigurationRepositoryInterface[]
      */
-    private $implementations;
+    private $postConfigurationRepositoryList;
 
     /**
      * PostConfigurationRepository constructor.
-     * @param array $implementations
+     * @param array|PostConfigurationRepositoryInterface[] $postConfigurationRepositoryList
      */
-    public function __construct(array $implementations)
+    public function __construct(array $postConfigurationRepositoryList)
     {
-        $this->implementations = $implementations;
+        $this->postConfigurationRepositoryList = $postConfigurationRepositoryList;
     }
 
     /**
@@ -47,38 +48,28 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      */
     public function getAll(): array
     {
-        // TODO: Implement getAll() method.
+        $all = [];
+
+        foreach ($this->postConfigurationRepositoryList as $postConfigurationRepository) {
+            array_push($all, ...$postConfigurationRepository->getAll());
+        }
+
+        return $all;
     }
 
     /**
      * @inheritDoc
      */
-    public function getOneBySlug(string $name): ?PostConfiguration
+    public function getOneById(string $id): ?PostConfiguration
     {
-        // TODO: Implement getOneBySlug() method.
-    }
+        $one = null;
 
-    /**
-     * @inheritDoc
-     */
-    public function getOneBySlugRedirect(string $name): ?PostConfiguration
-    {
-        // TODO: Implement getOneBySlugRedirect() method.
-    }
+        foreach ($this->postConfigurationRepositoryList as $postConfigurationRepository) {
+            if (null !== ($one = $postConfigurationRepository->getOneById($id))) {
+                break;
+            }
+        }
 
-    /**
-     * @inheritDoc
-     */
-    public function getAllByCategory(string ...$category): array
-    {
-        // TODO: Implement getAllByCategory() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getAllByTag(string ...$tag): array
-    {
-        // TODO: Implement getAllByTag() method.
+        return $one;
     }
 }

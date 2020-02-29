@@ -19,19 +19,17 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\PostConfigurationException;
+use Made\Blog\Engine\Exception\MapperException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
-use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
-use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationLocale;
+use Made\Blog\Engine\Model\PostConfiguration;
+use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
-use Made\Blog\Engine\Service\PostConfigurationService;
-use Made\Blog\Engine\Util\Sorter\PostConfigurationSorter;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -68,7 +66,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
         Configuration $configuration,
         PostConfigurationMapper $postConfigurationMapper,
         LoggerInterface $logger
-    ) {
+    )
+    {
         $this->configuration = $configuration;
         $this->postConfigurationMapper = $postConfigurationMapper;
         $this->logger = $logger;
@@ -94,7 +93,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             return is_dir($postPath) && is_file($configurationPath);
         });
 
-        /** @var array|array[] $all */
+        /** @var array|PostConfiguration[] $all */
         $all = array_map(function (string $entry): ?PostConfiguration {
             $configurationPath = $this->getConfigurationPath($entry);
             $data = $this->getContent($configurationPath);
@@ -108,39 +107,35 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
             try {
                 return $this->postConfigurationMapper->fromData($data);
-            } catch (PostConfigurationException $exception) {
+            } catch (MapperException $exception) {
                 // TODO: Logging.
             }
 
             return null;
         }, $list);
 
-        /** @var array|PostConfiguration[] $all */
-        $all = array_filter($all, function (?PostConfiguration $postConfiguration): bool {
+        return array_filter($all, function (?PostConfiguration $postConfiguration): bool {
             return null !== $postConfiguration;
         });
-
-        return PostConfigurationSorter::sortByPostDate($all);
     }
 
     /**
      * A case insensitive search for a single post with an id. The first found post is returned.
      *
      * @param string $id
-     * @return PostConfiguration|null
+     * @return \Made\Blog\Engine\Model\PostConfiguration|null
      */
     public function getOneById(string $id): ?PostConfiguration
     {
         $all = $this->getAll();
 
-        return array_reduce($all,
-            function (?PostConfiguration $carry, PostConfiguration $one) use ($id): ?PostConfiguration {
-                if (null === $carry && strtolower($id) === strtolower($one->getId())) {
-                    return $one;
-                }
+        return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $one) use ($id): ?PostConfiguration {
+            if (null === $carry && strtolower($id) === strtolower($one->getId())) {
+                return $one;
+            }
 
-                return $carry;
-            }, null);
+            return $carry;
+        }, null);
     }
 
     /**
@@ -152,8 +147,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     private function provisionIntersectingData(array $data): array
     {
         // Pull the locale data from the node.
-        foreach ($data[PostConfigurationMapper::KEY_LOCALE] as $locale => $localeData) {
+        foreach ($data[PostConfigurationMapper::KEY_LOCALE_LIST] as $locale => $localeData) {
+            // Always set the id of the super page.
             $localeData[PostConfigurationLocaleMapper::KEY_ID] = $data[PostConfigurationMapper::KEY_ID];
+            // Always set the origin to this repository for later content resolution.
+            $localeData[PostConfigurationLocaleMapper::KEY_ORIGIN] = PostConfigurationRepository::class;
 
             // Set the locale to the one defined by the key, if not already set or not equal.
             if (!isset($localeData[PostConfigurationLocaleMapper::KEY_LOCALE])
@@ -171,7 +169,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             // INFO: Maybe some more? Lemme know.
 
             // Pull it back into the node.
-            $data[PostConfigurationMapper::KEY_LOCALE][$locale] = $localeData;
+            $data[PostConfigurationMapper::KEY_LOCALE_LIST][$locale] = $localeData;
         }
 
         return $data;
@@ -185,7 +183,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     {
         return Path::join(...[
             $this->configuration->getRootDirectory(),
-            PostConfigurationService::PATH_POSTS,
+            // TODO: Do it like the theme service did.
+            static::POST_PATH,
         ]);
     }
 

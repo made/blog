@@ -17,14 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Model\Configuration\Post;
+namespace Made\Blog\Engine\Model;
 
 use DateTime;
 
 /**
  * Class PostConfigurationLocale
  *
- * @package Made\Blog\Engine\Model\Configuration\Post
+ * @package Made\Blog\Engine\Model
  */
 class PostConfigurationLocale
 {
@@ -36,6 +36,11 @@ class PostConfigurationLocale
      * @var string
      */
     private $id;
+
+    /**
+     * @var string
+     */
+    private $origin;
 
     /**
      * @var string
@@ -70,17 +75,17 @@ class PostConfigurationLocale
     /**
      * @var array|string[]|null
      */
-    private $categories;
+    private $categoryList;
 
     /**
      * @var array|string[]|null
      */
-    private $tags;
+    private $tagList;
 
     /**
      * @var array|string[]|null
      */
-    private $slugRedirects;
+    private $slugRedirectList;
 
     /**
      * @return string
@@ -97,6 +102,24 @@ class PostConfigurationLocale
     public function setId(string $id): PostConfigurationLocale
     {
         $this->id = $id;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOrigin(): string
+    {
+        return $this->origin;
+    }
+
+    /**
+     * @param string $origin
+     * @return PostConfigurationLocale
+     */
+    public function setOrigin(string $origin): PostConfigurationLocale
+    {
+        $this->origin = $origin;
         return $this;
     }
 
@@ -211,54 +234,54 @@ class PostConfigurationLocale
     /**
      * @return array|string[]|null
      */
-    public function getCategories(): ?array
+    public function getCategoryList(): ?array
     {
-        return $this->categories;
+        return $this->categoryList;
     }
 
     /**
-     * @param array|string[]|null $categories
+     * @param array|string[]|null $categoryList
      * @return PostConfigurationLocale
      */
-    public function setCategories(?array $categories): PostConfigurationLocale
+    public function setCategoryList(?array $categoryList): PostConfigurationLocale
     {
-        $this->categories = $categories;
+        $this->categoryList = $categoryList;
         return $this;
     }
 
     /**
      * @return array|string[]|null
      */
-    public function getTags(): ?array
+    public function getTagList(): ?array
     {
-        return $this->tags;
+        return $this->tagList;
     }
 
     /**
-     * @param array|string[]|null $tags
+     * @param array|string[]|null $tagList
      * @return PostConfigurationLocale
      */
-    public function setTags(?array $tags): PostConfigurationLocale
+    public function setTagList(?array $tagList): PostConfigurationLocale
     {
-        $this->tags = $tags;
+        $this->tagList = $tagList;
         return $this;
     }
 
     /**
      * @return array|string[]|null
      */
-    public function getSlugRedirects(): ?array
+    public function getSlugRedirectList(): ?array
     {
-        return $this->slugRedirects;
+        return $this->slugRedirectList;
     }
 
     /**
-     * @param array|string[]|null $slugRedirects
+     * @param array|string[]|null $slugRedirectList
      * @return PostConfigurationLocale
      */
-    public function setSlugRedirects(?array $slugRedirects): PostConfigurationLocale
+    public function setSlugRedirectList(?array $slugRedirectList): PostConfigurationLocale
     {
-        $this->slugRedirects = $slugRedirects;
+        $this->slugRedirectList = $slugRedirectList;
         return $this;
     }
 }

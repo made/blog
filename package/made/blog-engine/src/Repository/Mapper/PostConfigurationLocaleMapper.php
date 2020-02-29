@@ -21,7 +21,7 @@ namespace Made\Blog\Engine\Repository\Mapper;
 
 use DateTime;
 use Made\Blog\Engine\Exception\MapperException;
-use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationLocale;
+use Made\Blog\Engine\Model\PostConfigurationLocale;
 
 /**
  * Class PostConfigurationLocaleMapper
@@ -33,20 +33,21 @@ class PostConfigurationLocaleMapper
     use NormalizeValueArrayTrait;
 
     const KEY_ID = 'id';
+    const KEY_ORIGIN = 'origin';
     const KEY_LOCALE = 'locale';
     const KEY_STATUS = 'status';
     const KEY_DATE = 'date';
     const KEY_SLUG = 'slug';
     const KEY_TITLE = 'title';
     const KEY_META = 'meta';
-    const KEY_CATEGORIES = 'categories';
-    const KEY_TAGS = 'tags';
-    const KEY_SLUG_REDIRECTS = 'redirect_slugs';
+    const KEY_CATEGORY_LIST = 'category';
+    const KEY_TAG_LIST = 'tag';
+    const KEY_SLUG_REDIRECT_LIST = 'slug_redirect';
 
     const STATUS_VALID = [
-        'draft',
-        'review',
-        'published',
+        PostConfigurationLocale::STATUS_DRAFT,
+        PostConfigurationLocale::STATUS_REVIEW,
+        PostConfigurationLocale::STATUS_PUBLISHED,
     ];
 
     const DTS_FORMAT = 'Y-m-d';
@@ -79,6 +80,13 @@ class PostConfigurationLocaleMapper
             $postConfigurationLocale->setId($data[static::KEY_ID]);
         } else {
             throw new MapperException('Missing key: ' . static::KEY_ID);
+        }
+
+        // Required:
+        if (isset($data[static::KEY_ORIGIN]) && is_string($data[static::KEY_ORIGIN])) {
+            $postConfigurationLocale->setOrigin($data[static::KEY_ORIGIN]);
+        } else {
+            throw new MapperException('Missing key: ' . static::KEY_ORIGIN);
         }
 
         // Required:
@@ -126,18 +134,18 @@ class PostConfigurationLocaleMapper
         }
 
         // Optional:
-        if (isset($data[static::KEY_CATEGORIES]) && is_array($data[static::KEY_CATEGORIES]) && !empty($categories = $this->normalizeValueArray($data[static::KEY_CATEGORIES], true))) {
-            $postConfigurationLocale->setCategories($categories);
+        if (isset($data[static::KEY_CATEGORY_LIST]) && is_array($data[static::KEY_CATEGORY_LIST]) && !empty($categoryList = $this->normalizeValueArray($data[static::KEY_CATEGORY_LIST], true))) {
+            $postConfigurationLocale->setCategoryList($categoryList);
         }
 
         // Optional:
-        if (isset($data[static::KEY_TAGS]) && is_array($data[static::KEY_TAGS]) && !empty($tags = $this->normalizeValueArray($data[static::KEY_TAGS], true))) {
-            $postConfigurationLocale->setTags($tags);
+        if (isset($data[static::KEY_TAG_LIST]) && is_array($data[static::KEY_TAG_LIST]) && !empty($tagList = $this->normalizeValueArray($data[static::KEY_TAG_LIST], true))) {
+            $postConfigurationLocale->setTagList($tagList);
         }
 
         // Optional:
-        if (isset($data[static::KEY_SLUG_REDIRECTS]) && is_array($data[static::KEY_SLUG_REDIRECTS]) && !empty($redirects = $this->normalizeValueArray($data[static::KEY_SLUG_REDIRECTS], true))) {
-            $postConfigurationLocale->setSlugRedirects($redirects);
+        if (isset($data[static::KEY_SLUG_REDIRECT_LIST]) && is_array($data[static::KEY_SLUG_REDIRECT_LIST]) && !empty($slugRedirectList = $this->normalizeValueArray($data[static::KEY_SLUG_REDIRECT_LIST], true))) {
+            $postConfigurationLocale->setSlugRedirectList($slugRedirectList);
         }
 
         return $postConfigurationLocale;
@@ -145,7 +153,7 @@ class PostConfigurationLocaleMapper
 
     /**
      * @param array|array[] $dataArray
-     * @return array|PostConfigurationLocale[]
+     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
      * @throws MapperException
      */
     public function fromDataArray(array $dataArray): array
@@ -177,9 +185,9 @@ class PostConfigurationLocaleMapper
         $data[static::KEY_META] = $this->postConfigurationMetaMapper->toData(
             $postConfigurationLocale->getMeta()
         );
-        $data[static::KEY_CATEGORIES] = $postConfigurationLocale->getCategories();
-        $data[static::KEY_TAGS] = $postConfigurationLocale->getTags();
-        $data[static::KEY_SLUG_REDIRECTS] = $postConfigurationLocale->getSlugRedirects();
+        $data[static::KEY_CATEGORY_LIST] = $postConfigurationLocale->getCategoryList();
+        $data[static::KEY_TAG_LIST] = $postConfigurationLocale->getTagList();
+        $data[static::KEY_SLUG_REDIRECT_LIST] = $postConfigurationLocale->getSlugRedirectList();
 
         return $data;
     }

@@ -26,8 +26,8 @@ namespace Made\Blog\Engine\Model;
  */
 class Configuration
 {
-    const CONFIGURATION_NAME_THEME = 'theme';
     const CONFIGURATION_NAME_ROOT_DIRECTORY = 'root_directory';
+    const CONFIGURATION_NAME_FALLBACK_LOCALE = 'fallback_locale';
 
     /**
      * 'root_directory'
@@ -37,11 +37,11 @@ class Configuration
     private $rootDirectory;
 
     /**
-     * 'theme'
+     * 'fallback_locale'
      *
      * @var string
      */
-    private $theme;
+    private $fallbackLocale;
 
     /**
      * @return bool
@@ -74,18 +74,18 @@ class Configuration
     /**
      * @return string
      */
-    public function getTheme(): string
+    public function getFallbackLocale(): string
     {
-        return $this->theme;
+        return $this->fallbackLocale;
     }
 
     /**
-     * @param string $theme
+     * @param string $fallbackLocale
      * @return Configuration
      */
-    public function setTheme(string $theme): Configuration
+    public function setFallbackLocale(string $fallbackLocale): Configuration
     {
-        $this->theme = $theme;
+        $this->fallbackLocale = $fallbackLocale;
         return $this;
     }
 }

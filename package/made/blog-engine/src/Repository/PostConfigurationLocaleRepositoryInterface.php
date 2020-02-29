@@ -20,7 +20,7 @@
 namespace Made\Blog\Engine\Repository;
 
 use DateTime;
-use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationLocale;
+use Made\Blog\Engine\Model\PostConfigurationLocale;
 
 /**
  * Interface PostConfigurationLocaleRepositoryInterface
@@ -29,52 +29,52 @@ use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationLocale;
  */
 interface PostConfigurationLocaleRepositoryInterface
 {
-    const TAG_POST_CONFIGURATION_REPOSITORY = 'repository.post_configuration_locale';
+    const TAG_POST_CONFIGURATION_LOCALE_REPOSITORY = 'repository.post_configuration_locale';
 
     /**
-     * @return array|PostConfigurationLocale[]
+     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
      */
     public function getAll(): array;
 
     /**
      * @param DateTime $dateTime
-     * @return array|PostConfigurationLocale[]
+     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
      */
     public function getAllByPostDate(DateTime $dateTime): array;
 
     /**
-     * @param string ...$status
-     * @return array|PostConfigurationLocale[]
+     * @param string ...$statusList
+     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
      */
-    public function getAllByStatus(string ...$status): array;
+    public function getAllByStatus(string ...$statusList): array;
 
     /**
-     * @param string ...$category
-     * @return array|PostConfigurationLocale[]
+     * @param string ...$categoryList
+     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
      */
-    public function getAllByCategory(string ...$category): array;
+    public function getAllByCategory(string ...$categoryList): array;
 
     /**
-     * @param string ...$tag
-     * @return array|PostConfigurationLocale[]
+     * @param string ...$tagList
+     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
      */
-    public function getAllByTag(string ...$tag): array;
+    public function getAllByTag(string ...$tagList): array;
 
     /**
      * @param string $id
-     * @return PostConfigurationLocale|null
+     * @return \Made\Blog\Engine\Model\PostConfigurationLocale|null
      */
     public function getOneById(string $id): ?PostConfigurationLocale;
 
     /**
      * @param string $slug
-     * @return PostConfigurationLocale|null
+     * @return \Made\Blog\Engine\Model\PostConfigurationLocale|null
      */
     public function getOneBySlug(string $slug): ?PostConfigurationLocale;
 
     /**
      * @param string $slugRedirect
-     * @return PostConfigurationLocale|null
+     * @return \Made\Blog\Engine\Model\PostConfigurationLocale|null
      */
     public function getOneBySlugRedirect(string $slugRedirect): ?PostConfigurationLocale;
 }

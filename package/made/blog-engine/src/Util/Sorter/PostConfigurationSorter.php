@@ -19,13 +19,15 @@
 
 namespace Made\Blog\Engine\Util\Sorter;
 
-use Made\Blog\Engine\Exception\PostConfigurationException;
-use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
+use Made\Blog\Engine\Exception\PostException;
+use Made\Blog\Engine\Model\PostConfiguration;
 
 /**
  * Class PostConfigurationSorter
  *
  * @package Made\Blog\Engine\Util\Sorter
+ * @TODO Refactor to enable usage on PostConfigurationLocale object array.
+ * @deprecated Unable to use with the new model.
  */
 class PostConfigurationSorter
 {
@@ -53,7 +55,7 @@ class PostConfigurationSorter
             } else if ($order === static::ORDER_ASC) {
                 return $a->getDate() < $b->getDate() ? -1 : 1;
             } else {
-                throw new PostConfigurationException("Order '$order' is not valid.");
+                throw new PostException("Order '$order' is not valid.");
             }
         });
 

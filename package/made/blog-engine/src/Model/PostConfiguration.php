@@ -17,12 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Model\Configuration\Post;
+namespace Made\Blog\Engine\Model;
 
 /**
  * Class PostConfiguration
  *
- * @package Made\Blog\Engine\Model\Configuration\Post
+ * @package Made\Blog\Engine\Model
  */
 class PostConfiguration
 {
@@ -34,7 +34,7 @@ class PostConfiguration
     /**
      * @var array|PostConfigurationLocale[]
      */
-    private $locale;
+    private $localeList;
 
     /**
      * @return string
@@ -57,18 +57,18 @@ class PostConfiguration
     /**
      * @return array|PostConfigurationLocale[]
      */
-    public function getLocale(): array
+    public function getLocaleList(): array
     {
-        return $this->locale;
+        return $this->localeList;
     }
 
     /**
-     * @param array|PostConfigurationLocale[] $locale
+     * @param array|PostConfigurationLocale[] $localeList
      * @return PostConfiguration
      */
-    public function setLocale(array $locale): PostConfiguration
+    public function setLocaleList(array $localeList): PostConfiguration
     {
-        $this->locale = $locale;
+        $this->localeList = $localeList;
         return $this;
     }
 
@@ -78,7 +78,7 @@ class PostConfiguration
      */
     public function addLocale(PostConfigurationLocale $locale): PostConfiguration
     {
-        $this->locale[$locale->getLocale()] = $locale;
+        $this->localeList[$locale->getLocale()] = $locale;
         return $this;
     }
 }

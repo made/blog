@@ -20,7 +20,7 @@
 namespace Made\Blog\Engine\Repository\Mapper;
 
 use Made\Blog\Engine\Exception\MapperException;
-use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
+use Made\Blog\Engine\Model\PostConfiguration;
 
 /**
  * Class PostConfigurationMapper
@@ -30,7 +30,7 @@ use Made\Blog\Engine\Model\Configuration\Post\PostConfiguration;
 class PostConfigurationMapper
 {
     const KEY_ID = 'id';
-    const KEY_LOCALE = 'locale';
+    const KEY_LOCALE_LIST = 'locale';
 
     /**
      * @var PostConfigurationLocaleMapper
@@ -63,12 +63,12 @@ class PostConfigurationMapper
         }
 
         // Required:
-        if (isset($data[static::KEY_LOCALE]) && is_array($data[static::KEY_LOCALE])) {
-            $postConfiguration->setLocale(
-                $this->postConfigurationLocaleMapper->fromDataArray($data[static::KEY_LOCALE])
+        if (isset($data[static::KEY_LOCALE_LIST]) && is_array($data[static::KEY_LOCALE_LIST])) {
+            $postConfiguration->setLocaleList(
+                $this->postConfigurationLocaleMapper->fromDataArray($data[static::KEY_LOCALE_LIST])
             );
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_LOCALE);
+            throw new MapperException('Missing key: ' . static::KEY_LOCALE_LIST);
         }
 
         return $postConfiguration;
@@ -83,8 +83,8 @@ class PostConfigurationMapper
         $data = [];
 
         $data[static::KEY_ID] = $postConfiguration->getId();
-        $data[static::KEY_LOCALE] = $this->postConfigurationLocaleMapper->toDataArray(
-            $postConfiguration->getLocale()
+        $data[static::KEY_LOCALE_LIST] = $this->postConfigurationLocaleMapper->toDataArray(
+            $postConfiguration->getLocaleList()
         );
 
         return $data;

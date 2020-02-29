@@ -19,21 +19,20 @@
 
 namespace Made\Blog\Engine\Repository\Proxy;
 
-use Made\Blog\Engine\Model\Theme;
-use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
-use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
+use Made\Blog\Engine\Model\PostConfiguration;
+use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
- * Class CachingThemeRepository
+ * Class CacheProxyPostConfigurationRepository
  *
  * @package Made\Blog\Engine\Repository\Proxy
  */
-class CacheProxyThemeRepository implements ThemeRepositoryInterface
+class CacheProxyPostConfigurationRepository implements PostConfigurationRepositoryInterface
 {
-    const CACHE_KEY_ALL = 'theme-all';
-    const CACHE_KEY_ONE = 'theme-one-%1$s';
+    const CACHE_KEY_ALL = 'post-configuration-all';
+    const CACHE_KEY_ONE = 'post-configuration-one-%1$s';
 
     /**
      * @var CacheInterface
@@ -41,19 +40,19 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
     private $cache;
 
     /**
-     * @var ThemeRepositoryInterface
+     * @var PostConfigurationRepositoryInterface
      */
-    private $themeRepository;
+    private $postConfigurationRepository;
 
     /**
-     * CacheProxyThemeRepository constructor.
+     * CacheProxyPostConfigurationRepository constructor.
      * @param CacheInterface $cache
-     * @param ThemeRepositoryInterface $themeRepository
+     * @param PostConfigurationRepositoryInterface $postConfigurationRepository
      */
-    public function __construct(CacheInterface $cache, ThemeRepositoryInterface $themeRepository)
+    public function __construct(CacheInterface $cache, PostConfigurationRepositoryInterface $postConfigurationRepository)
     {
         $this->cache = $cache;
-        $this->themeRepository = $themeRepository;
+        $this->postConfigurationRepository = $postConfigurationRepository;
     }
 
     /**
@@ -66,14 +65,14 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
         $all = [];
 
         try {
-            /** @var array|Theme[] $all */
+            /** @var array|PostConfiguration[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($all)) {
-            $all = $this->themeRepository->getAll();
+            $all = $this->postConfigurationRepository->getAll();
 
             if (!empty($all)) {
                 try {
@@ -90,23 +89,23 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneByName(string $name): ?Theme
+    public function getOneById(string $id): ?PostConfiguration
     {
         $key = vsprintf(static::CACHE_KEY_ONE, [
-            $name,
+            $id,
         ]);
 
         $one = null;
 
         try {
-            /** @var null|Theme $one */
+            /** @var null|\Made\Blog\Engine\Model\PostConfiguration $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($one)) {
-            $one = $this->themeRepository->getOneByName($name);
+            $one = $this->postConfigurationRepository->getOneById($id);
 
             if (!empty($one)) {
                 try {

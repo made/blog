@@ -19,20 +19,12 @@
 
 namespace Made\Blog\Engine\Repository;
 
-use Made\Blog\Engine\Model\PostConfiguration;
-
-interface PostConfigurationRepositoryInterface
+/**
+ * Interface PostRepositoryInterface
+ *
+ * @package Made\Blog\Engine\Repository
+ */
+interface PostRepositoryInterface
 {
-    const TAG_POST_CONFIGURATION_REPOSITORY = 'repository.post_configuration';
-
-    /**
-     * @return array|PostConfiguration[]
-     */
-    public function getAll(): array;
-
-    /**
-     * @param string $id
-     * @return PostConfiguration|null
-     */
-    public function getOneById(string $id): ?PostConfiguration;
+    const TAG_POST_REPOSITORY = 'repository.post';
 }

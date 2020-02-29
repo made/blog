@@ -34,7 +34,7 @@ return [
 
     Configuration::class => [
         Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__),
-        Configuration::CONFIGURATION_NAME_THEME => 'theme-base',
+        Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE => 'en',
         // ToDo: add supported languages for blog posts
     ],
 

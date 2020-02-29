@@ -17,22 +17,39 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Repository;
+namespace Made\Blog\Engine\Exception;
 
-use Made\Blog\Engine\Model\PostConfiguration;
+use Exception;
+use Throwable;
 
-interface PostConfigurationRepositoryInterface
+class PostException extends Exception
 {
-    const TAG_POST_CONFIGURATION_REPOSITORY = 'repository.post_configuration';
+    /**
+     * @var array
+     */
+    private $context;
 
     /**
-     * @return array|PostConfiguration[]
+     * @return array
      */
-    public function getAll(): array;
+    public function getContext(): array
+    {
+        return $this->context;
+    }
+
+    public function __construct($message, array $context = [], $code = 0, Throwable $previous = null)
+    {
+        $this->context = $context;
+        parent::__construct($message, $code, $previous);
+    }
 
     /**
-     * @param string $id
-     * @return PostConfiguration|null
+     * @param array $context
+     * @return PostException
      */
-    public function getOneById(string $id): ?PostConfiguration;
+    public function setContext(array $context): PostException
+    {
+        $this->context = $context;
+        return $this;
+    }
 }

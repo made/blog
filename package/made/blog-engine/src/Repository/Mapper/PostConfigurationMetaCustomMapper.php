@@ -20,7 +20,7 @@
 namespace Made\Blog\Engine\Repository\Mapper;
 
 use Made\Blog\Engine\Exception\MapperException;
-use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationMetaCustom;
+use Made\Blog\Engine\Model\PostConfigurationMetaCustom;
 
 /**
  * Class PostConfigurationMetaCustomMapper
@@ -32,11 +32,11 @@ class PostConfigurationMetaCustomMapper
     use NormalizeValueArrayTrait;
 
     const KEY_ELEMENT = 'element';
-    const KEY_ATTRIBUTES = 'attributes';
+    const KEY_ATTRIBUTE_LIST = 'attribute';
 
     /**
      * @param array $data
-     * @return PostConfigurationMetaCustom
+     * @return \Made\Blog\Engine\Model\PostConfigurationMetaCustom
      * @throws MapperException
      */
     public function fromData(array $data): PostConfigurationMetaCustom
@@ -51,8 +51,8 @@ class PostConfigurationMetaCustomMapper
         }
 
         // Optional:
-        if (isset($data[static::KEY_ATTRIBUTES]) && is_array($data[static::KEY_ATTRIBUTES]) && !empty($attributes = $this->normalizeValueArray($data[static::KEY_ATTRIBUTES], false))) {
-            $postConfigurationMetaCustom->setAttributes($attributes);
+        if (isset($data[static::KEY_ATTRIBUTE_LIST]) && is_array($data[static::KEY_ATTRIBUTE_LIST]) && !empty($attributeList = $this->normalizeValueArray($data[static::KEY_ATTRIBUTE_LIST], false))) {
+            $postConfigurationMetaCustom->setAttributeList($attributeList);
         }
 
         return $postConfigurationMetaCustom;
@@ -60,7 +60,7 @@ class PostConfigurationMetaCustomMapper
 
     /**
      * @param array|array[] $dataArray
-     * @return array|PostConfigurationMetaCustom[]
+     * @return array|\Made\Blog\Engine\Model\PostConfigurationMetaCustom[]
      * @throws MapperException
      */
     public function fromDataArray(array $dataArray): array
@@ -75,7 +75,7 @@ class PostConfigurationMetaCustomMapper
     }
 
     /**
-     * @param PostConfigurationMetaCustom $postConfigurationMetaCustom
+     * @param \Made\Blog\Engine\Model\PostConfigurationMetaCustom $postConfigurationMetaCustom
      * @return array
      */
     public function toData(PostConfigurationMetaCustom $postConfigurationMetaCustom): array
@@ -83,13 +83,13 @@ class PostConfigurationMetaCustomMapper
         $data = [];
 
         $data[static::KEY_ELEMENT] = $postConfigurationMetaCustom->getElement();
-        $data[static::KEY_ATTRIBUTES] = $postConfigurationMetaCustom->getAttributes();
+        $data[static::KEY_ATTRIBUTE_LIST] = $postConfigurationMetaCustom->getAttributeList();
 
         return $data;
     }
 
     /**
-     * @param array|PostConfigurationMetaCustom[] $array
+     * @param array|\Made\Blog\Engine\Model\PostConfigurationMetaCustom[] $array
      * @return array|array[]
      */
     public function toDataArray(array $array): array

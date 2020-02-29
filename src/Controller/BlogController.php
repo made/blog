@@ -21,8 +21,7 @@ namespace App\Controller;
 
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
-use Made\Blog\Engine\Exception\PostConfigurationException;
-use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository;
+use Made\Blog\Engine\Exception\PostException;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -134,7 +133,7 @@ class BlogController implements ControllerInterface
             echo "<pre>";
             var_dump($res);
             echo "</pre>";
-        } catch (PostConfigurationException $exception) {
+        } catch (PostException $exception) {
             echo "<pre><h1>Important Context</h1>";
             var_dump($exception->getContext());
             echo "</pre>";

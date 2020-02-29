@@ -76,18 +76,6 @@ class ThemeService
     }
 
     /**
-     * @param string $path
-     * @return string
-     */
-    private function getViewPath(string $path): string
-    {
-        return Path::join(...[
-            $path,
-            static::PATH_VIEW,
-        ]);
-    }
-
-    /**
      * @return string
      */
     public function getPath(): string
@@ -117,16 +105,29 @@ class ThemeService
     {
         if (!($twigLoader instanceof FilesystemLoader)) {
             // TODO: Add proper exception message.
-            throw new ThemeException();
+            throw new ThemeException('Unsupported ' . LoaderInterface::class . ' implementation!');
         }
 
         /** @var FilesystemLoader $twigLoader */
 
         $themeList = $this->themeRepository->getAll();
+
         foreach ($themeList as $theme) {
             $path = $theme->getPath();
             // The name of the theme is used as the namespace.
             $twigLoader->addPath($this->getViewPath($path), $theme->getName());
         }
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    private function getViewPath(string $path): string
+    {
+        return Path::join(...[
+            $path,
+            static::PATH_VIEW,
+        ]);
     }
 }

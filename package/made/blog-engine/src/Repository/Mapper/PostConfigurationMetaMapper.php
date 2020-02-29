@@ -20,7 +20,7 @@
 namespace Made\Blog\Engine\Repository\Mapper;
 
 use Made\Blog\Engine\Exception\MapperException;
-use Made\Blog\Engine\Model\Configuration\Post\PostConfigurationMeta;
+use Made\Blog\Engine\Model\PostConfigurationMeta;
 
 /**
  * Class PostConfigurationMetaMapper
@@ -36,7 +36,7 @@ class PostConfigurationMetaMapper
     const KEY_DESCRIPTION = 'description';
     const KEY_KEYWORDS = 'keywords';
     const KEY_ROBOTS = 'robots';
-    const KEY_CUSTOM_META = 'custom_meta';
+    const KEY_CUSTOM_META_LIST = 'custom_meta';
 
     /**
      * @var PostConfigurationMetaCustomMapper
@@ -87,9 +87,9 @@ class PostConfigurationMetaMapper
         }
 
         // Optional:
-        if (isset($data[static::KEY_CUSTOM_META]) && is_array($data[static::KEY_CUSTOM_META])) {
-            $postConfigurationMeta->setCustomMeta(
-                $this->postConfigurationMetaCustomMapper->fromDataArray($data[static::KEY_CUSTOM_META])
+        if (isset($data[static::KEY_CUSTOM_META_LIST]) && is_array($data[static::KEY_CUSTOM_META_LIST])) {
+            $postConfigurationMeta->setCustomMetaList(
+                $this->postConfigurationMetaCustomMapper->fromDataArray($data[static::KEY_CUSTOM_META_LIST])
             );
         }
 
@@ -109,8 +109,8 @@ class PostConfigurationMetaMapper
         $data[static::KEY_DESCRIPTION] = $postConfigurationMeta->getDescription();
         $data[static::KEY_KEYWORDS] = $postConfigurationMeta->getKeywords();
         $data[static::KEY_ROBOTS] = $postConfigurationMeta->getRobots();
-        $data[static::KEY_CUSTOM_META] = $this->postConfigurationMetaCustomMapper->toDataArray(
-            $postConfigurationMeta->getCustomMeta()
+        $data[static::KEY_CUSTOM_META_LIST] = $this->postConfigurationMetaCustomMapper->toDataArray(
+            $postConfigurationMeta->getCustomMetaList()
         );
 
         return $data;
