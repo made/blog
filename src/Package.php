@@ -116,6 +116,7 @@ class Package extends PackageAbstract
         });
 
         // TODO: This pulls the twig class from the container which in turn tries to pull the theme service and so on.
+        //  See $this->registerController() for an idea on how to handle this kind of stuff.
 //        $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
 //        $this->app->add($twigMiddleware);
     }
@@ -194,6 +195,9 @@ class Package extends PackageAbstract
             return new BlogController($twig, $logger, $repository);
         });
 
+        // TODO: This should not be called in here, to prevent premature fetching of dependencies. This kind of stuff,
+        //  meaning also middleware and other related stuff, should be called only after all and every package is safely
+        //  registered to the container.
         BlogController::register($this->app);
     }
 }
