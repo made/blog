@@ -23,23 +23,15 @@ use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Model\PostContent;
 
 /**
- * Interface PostContentProviderInterface
+ * Class PostContentResolverInterface
  *
  * @package Made\Blog\Engine\Service
  */
-interface PostContentProviderInterface
+interface PostContentResolverInterface
 {
-    const TAG_POST_CONTENT_PROVIDER = 'provider.post_content';
-
-    /**
-     * @param string $origin
-     * @return bool
-     */
-    public function accept(string $origin): bool;
-
     /**
      * @param PostConfigurationLocale $postConfigurationLocale
-     * @return PostContent|null
+     * @return PostContent
      */
-    public function provide(PostConfigurationLocale $postConfigurationLocale): ?PostContent;
+    public function resolve(PostConfigurationLocale $postConfigurationLocale): ?PostContent;
 }

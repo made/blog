@@ -62,11 +62,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      * @param PostConfigurationMapper $postConfigurationMapper
      * @param LoggerInterface $logger
      */
-    public function __construct(
-        Configuration $configuration,
-        PostConfigurationMapper $postConfigurationMapper,
-        LoggerInterface $logger
-    )
+    public function __construct(Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, LoggerInterface $logger)
     {
         $this->configuration = $configuration;
         $this->postConfigurationMapper = $postConfigurationMapper;
@@ -102,6 +98,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 return null;
             }
 
+            // TODO: Only get segment denoting the post folder name.
             $data[PostConfigurationMapper::KEY_ID] = $this->getPostPath($entry);
             $data = $this->provisionIntersectingData($data);
 
@@ -123,7 +120,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      * A case insensitive search for a single post with an id. The first found post is returned.
      *
      * @param string $id
-     * @return \Made\Blog\Engine\Model\PostConfiguration|null
+     * @return PostConfiguration|null
      */
     public function getOneById(string $id): ?PostConfiguration
     {

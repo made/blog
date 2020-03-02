@@ -28,7 +28,7 @@ use Made\Blog\Engine\Model\PostContent;
  *
  * @package Made\Blog\Engine\Service
  */
-class PostContentResolver
+class PostContentResolver implements PostContentResolverInterface
 {
     /**
      * @var array|PostContentProviderInterface[]
@@ -49,7 +49,7 @@ class PostContentResolver
      * @return PostContent
      * @throws PostException
      */
-    public function resolve(PostConfigurationLocale $postConfigurationLocale): PostContent
+    public function resolve(PostConfigurationLocale $postConfigurationLocale): ?PostContent
     {
         $origin = $postConfigurationLocale->getOrigin();
 

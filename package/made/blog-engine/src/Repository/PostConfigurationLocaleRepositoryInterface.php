@@ -32,49 +32,49 @@ interface PostConfigurationLocaleRepositoryInterface
     const TAG_POST_CONFIGURATION_LOCALE_REPOSITORY = 'repository.post_configuration_locale';
 
     /**
-     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
+     * @return array|PostConfigurationLocale[]
      */
     public function getAll(): array;
 
     /**
      * @param DateTime $dateTime
-     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
+     * @return array|PostConfigurationLocale[]
      */
     public function getAllByPostDate(DateTime $dateTime): array;
 
     /**
      * @param string ...$statusList
-     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
+     * @return array|PostConfigurationLocale[]
      */
     public function getAllByStatus(string ...$statusList): array;
 
     /**
      * @param string ...$categoryList
-     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
+     * @return array|PostConfigurationLocale[]
      */
     public function getAllByCategory(string ...$categoryList): array;
 
     /**
      * @param string ...$tagList
-     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
+     * @return array|PostConfigurationLocale[]
      */
     public function getAllByTag(string ...$tagList): array;
 
     /**
      * @param string $id
-     * @return \Made\Blog\Engine\Model\PostConfigurationLocale|null
+     * @return PostConfigurationLocale|null
      */
     public function getOneById(string $id): ?PostConfigurationLocale;
 
     /**
      * @param string $slug
-     * @return \Made\Blog\Engine\Model\PostConfigurationLocale|null
+     * @return PostConfigurationLocale|null
      */
     public function getOneBySlug(string $slug): ?PostConfigurationLocale;
 
     /**
      * @param string $slugRedirect
-     * @return \Made\Blog\Engine\Model\PostConfigurationLocale|null
+     * @return PostConfigurationLocale|null
      */
     public function getOneBySlugRedirect(string $slugRedirect): ?PostConfigurationLocale;
 }

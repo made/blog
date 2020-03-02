@@ -20,14 +20,14 @@
 namespace Made\Blog\Engine\Repository\Proxy;
 
 use DateTime;
-use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
-use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
+use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
- * Class CacheProxyPostConfigurationLocaleRepository
+ * Class CacheProxyPostRepository
  *
  * TODO: Check if a single-key cache would be better. That would not use natsort() and implode() on the parameter, but
  *  pull each parameter entry from the cache and make the result unique by id. E.g.: Find "tag-1, tag-2" would not
@@ -35,16 +35,16 @@ use Psr\SimpleCache\InvalidArgumentException;
  *
  * @package Made\Blog\Engine\Repository\Proxy
  */
-class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLocaleRepositoryInterface
+class CacheProxyPostRepository implements PostRepositoryInterface
 {
-    const CACHE_KEY_ALL = 'post-configuration-locale-all';
-    const CACHE_KEY_ALL_BY_POST_DATE = 'post-configuration-locale-all-by-post-date-%1$s';
-    const CACHE_KEY_ALL_BY_STATUS = 'post-configuration-locale-all-by-status-%1$s';
-    const CACHE_KEY_ALL_BY_CATEGORY = 'post-configuration-locale-all-by-category-%1$s';
-    const CACHE_KEY_ALL_BY_TAG = 'post-configuration-locale-all-by-tag-%1$s';
-    const CACHE_KEY_ONE = 'post-configuration-locale-one-%1$s';
-    const CACHE_KEY_ONE_BY_SLUG = 'post-configuration-locale-one-by-slug-%1$s';
-    const CACHE_KEY_ONE_BY_SLUG_REDIRECT = 'post-configuration-locale-one-by-slug-redirect-%1$s';
+    const CACHE_KEY_ALL = 'post-all';
+    const CACHE_KEY_ALL_BY_POST_DATE = 'post-all-by-post-date-%1$s';
+    const CACHE_KEY_ALL_BY_STATUS = 'post-all-by-status-%1$s';
+    const CACHE_KEY_ALL_BY_CATEGORY = 'post-all-by-category-%1$s';
+    const CACHE_KEY_ALL_BY_TAG = 'post-all-by-tag-%1$s';
+    const CACHE_KEY_ONE = 'post-one-%1$s';
+    const CACHE_KEY_ONE_BY_SLUG = 'post-one-by-slug-%1$s';
+    const CACHE_KEY_ONE_BY_SLUG_REDIRECT = 'post-one-by-slug-redirect-%1$s';
 
     /**
      * @var CacheInterface
@@ -52,19 +52,19 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     private $cache;
 
     /**
-     * @var PostConfigurationLocaleRepositoryInterface
+     * @var PostRepositoryInterface
      */
-    private $postConfigurationLocaleRepository;
+    private $postRepository;
 
     /**
-     * CacheProxyPostConfigurationLocaleRepository constructor.
+     * CacheProxyPostRepository constructor.
      * @param CacheInterface $cache
-     * @param PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository
+     * @param PostRepositoryInterface $postRepository
      */
-    public function __construct(CacheInterface $cache, PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository)
+    public function __construct(CacheInterface $cache, PostRepositoryInterface $postRepository)
     {
         $this->cache = $cache;
-        $this->postConfigurationLocaleRepository = $postConfigurationLocaleRepository;
+        $this->postRepository = $postRepository;
     }
 
     /**
@@ -77,14 +77,14 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $all = [];
 
         try {
-            /** @var array|PostConfigurationLocale[] $all */
+            /** @var array|Post[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAll();
+            $all = $this->postRepository->getAll();
 
             if (!empty($all)) {
                 try {
@@ -110,14 +110,14 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $all = [];
 
         try {
-            /** @var array|PostConfigurationLocale[] $all */
+            /** @var array|Post[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAllByPostDate($dateTime);
+            $all = $this->postRepository->getAllByPostDate($dateTime);
 
             if (!empty($all)) {
                 try {
@@ -145,14 +145,14 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $all = [];
 
         try {
-            /** @var array|PostConfigurationLocale[] $all */
+            /** @var array|Post[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAllByStatus(...$statusList);
+            $all = $this->postRepository->getAllByStatus(...$statusList);
 
             if (!empty($all)) {
                 try {
@@ -180,14 +180,14 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $all = [];
 
         try {
-            /** @var array|PostConfigurationLocale[] $all */
+            /** @var array|Post[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAllByCategory(...$categoryList);
+            $all = $this->postRepository->getAllByCategory(...$categoryList);
 
             if (!empty($all)) {
                 try {
@@ -215,14 +215,14 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $all = [];
 
         try {
-            /** @var array|PostConfigurationLocale[] $all */
+            /** @var array|Post[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAllByTag(...$tagList);
+            $all = $this->postRepository->getAllByTag(...$tagList);
 
             if (!empty($all)) {
                 try {
@@ -239,7 +239,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getOneById(string $id): ?PostConfigurationLocale
+    public function getOneById(string $id): ?Post
     {
         $key = vsprintf(static::CACHE_KEY_ONE, [
             $id,
@@ -248,14 +248,14 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $one = null;
 
         try {
-            /** @var null|PostConfigurationLocale $one */
+            /** @var null|Post $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($one)) {
-            $one = $this->postConfigurationLocaleRepository->getOneById($id);
+            $one = $this->postRepository->getOneById($id);
 
             if (!empty($one)) {
                 try {
@@ -272,7 +272,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getOneBySlug(string $slug): ?PostConfigurationLocale
+    public function getOneBySlug(string $slug): ?Post
     {
         $key = vsprintf(static::CACHE_KEY_ONE_BY_SLUG, [
             $slug,
@@ -281,14 +281,14 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $one = null;
 
         try {
-            /** @var null|PostConfigurationLocale $one */
+            /** @var null|Post $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($one)) {
-            $one = $this->postConfigurationLocaleRepository->getOneBySlug($slug);
+            $one = $this->postRepository->getOneBySlug($slug);
 
             if (!empty($one)) {
                 try {
@@ -305,7 +305,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getOneBySlugRedirect(string $slugRedirect): ?PostConfigurationLocale
+    public function getOneBySlugRedirect(string $slugRedirect): ?Post
     {
         $key = vsprintf(static::CACHE_KEY_ONE_BY_SLUG_REDIRECT, [
             $slugRedirect,
@@ -314,14 +314,14 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $one = null;
 
         try {
-            /** @var null|PostConfigurationLocale $one */
+            /** @var null|Post $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($one)) {
-            $one = $this->postConfigurationLocaleRepository->getOneBySlugRedirect($slugRedirect);
+            $one = $this->postRepository->getOneBySlugRedirect($slugRedirect);
 
             if (!empty($one)) {
                 try {

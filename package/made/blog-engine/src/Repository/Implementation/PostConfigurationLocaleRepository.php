@@ -69,7 +69,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     {
         $all = $this->postConfigurationRepository->getAll();
 
-        return $this->convertToConfigurationLocale($all);
+        return $this->convertToPostConfigurationLocale($all);
     }
 
     /**
@@ -152,17 +152,11 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     {
         $one = $this->postConfigurationRepository->getOneById($id);
 
-        $allLocale = $this->convertToConfigurationLocale([
+        $allLocale = $this->convertToPostConfigurationLocale([
             $one,
         ]);
 
-        return array_reduce($allLocale, function (?PostConfigurationLocale $carry, PostConfigurationLocale $oneLocale) use ($id): ?PostConfigurationLocale {
-            if (null === $carry && strtolower($id) === strtolower($oneLocale->getId())) {
-                return $oneLocale;
-            }
-
-            return $carry;
-        }, null);
+        return reset($allLocale) ?: null;
     }
 
     /**
@@ -218,13 +212,13 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     }
 
     /**
-     * @param array|\Made\Blog\Engine\Model\PostConfiguration[] $all
-     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
+     * @param array|PostConfiguration[] $all
+     * @return array|PostConfigurationLocale[]
      */
-    private function convertToConfigurationLocale(array $all): array
+    private function convertToPostConfigurationLocale(array $all): array
     {
-        /** @var array|\Made\Blog\Engine\Model\PostConfigurationLocale[] $allLocale */
-        $allLocale = array_map(function (PostConfiguration $one): array {
+        /** @var array|PostConfigurationLocale[] $allLocale */
+        $allLocale = array_map(function (PostConfiguration $one): ?PostConfigurationLocale {
             $allLocale = $one->getLocaleList();
 
             foreach ($allLocale as $oneLocale) {

@@ -19,10 +19,12 @@
 
 namespace Made\Blog\Engine\Repository\Implementation;
 
+use DateTime;
+use Made\Blog\Engine\Model\Post;
+use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
-use Made\Blog\Engine\Service\PostContentProviderInterface;
-use Made\Blog\Engine\Service\PostContentResolver;
+use Made\Blog\Engine\Service\PostContentResolverInterface;
 
 /**
  * Class PostRepository
@@ -37,18 +39,134 @@ class PostRepository implements PostRepositoryInterface
     private $postConfigurationLocaleRepository;
 
     /**
-     * @var PostContentResolver
+     * @var PostContentResolverInterface
      */
     private $postContentResolver;
 
     /**
      * PostRepository constructor.
      * @param PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository
-     * @param PostContentResolver $postContentResolver
+     * @param PostContentResolverInterface $postContentResolver
      */
-    public function __construct(PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository, PostContentResolver $postContentResolver)
+    public function __construct(PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository, PostContentResolverInterface $postContentResolver)
     {
         $this->postConfigurationLocaleRepository = $postConfigurationLocaleRepository;
         $this->postContentResolver = $postContentResolver;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAll(): array
+    {
+        $all = $this->postConfigurationLocaleRepository->getAll();
+
+        return $this->convertToPost($all);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAllByPostDate(DateTime $dateTime): array
+    {
+        $all = $this->postConfigurationLocaleRepository->getAllByPostDate($dateTime);
+
+        return $this->convertToPost($all);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAllByStatus(string ...$statusList): array
+    {
+        $all = $this->postConfigurationLocaleRepository->getAllByStatus(...$statusList);
+
+        return $this->convertToPost($all);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAllByCategory(string ...$categoryList): array
+    {
+        $all = $this->postConfigurationLocaleRepository->getAllByCategory(...$categoryList);
+
+        return $this->convertToPost($all);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getAllByTag(string ...$tagList): array
+    {
+        $all = $this->postConfigurationLocaleRepository->getAllByTag(...$tagList);
+
+        return $this->convertToPost($all);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getOneById(string $id): ?Post
+    {
+        $one = $this->postConfigurationLocaleRepository->getOneById($id);
+
+        $allPost = $this->convertToPost([
+            $one,
+        ]);
+
+        return reset($allPost) ?: null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getOneBySlug(string $slug): ?Post
+    {
+        $one = $this->postConfigurationLocaleRepository->getOneBySlug($slug);
+
+        $allPost = $this->convertToPost([
+            $one,
+        ]);
+
+        return reset($allPost) ?: null;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getOneBySlugRedirect(string $slugRedirect): ?Post
+    {
+        $one = $this->postConfigurationLocaleRepository->getOneBySlugRedirect($slugRedirect);
+
+        $allPost = $this->convertToPost([
+            $one,
+        ]);
+
+        return reset($allPost) ?: null;
+    }
+
+    /**
+     * @param array|PostConfigurationLocale[] $all
+     * @return array|Post[]
+     */
+    private function convertToPost(array $all): array
+    {
+        $allPost = array_map(function (PostConfigurationLocale $postConfigurationLocale): ?Post {
+            $postContent = $this->postContentResolver->resolve($postConfigurationLocale);
+
+            // Make sure there are only posts with content.
+            if (null !== $postContent) {
+                return (new Post())
+                    ->setConfiguration($postConfigurationLocale)
+                    ->setContent($postContent);
+            }
+
+            return null;
+        }, $all);
+
+        return array_filter($allPost, function (?Post $post): bool {
+            return null !== $post;
+        });
     }
 }

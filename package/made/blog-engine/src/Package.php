@@ -19,8 +19,8 @@
 
 namespace Made\Blog\Engine;
 
+use http\Env;
 use Made\Blog\Engine\Model\Configuration;
-use Made\Blog\Engine\Package\TagResolverTrait;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationRepository as PostConfigurationRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository as ThemeRepositoryFile;
@@ -36,17 +36,21 @@ use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyPostConfigurationLocaleRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyPostConfigurationRepository;
+use Made\Blog\Engine\Repository\Proxy\CacheProxyPostRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\PostContentProvider as PostContentProviderFile;
 use Made\Blog\Engine\Service\PostContentProviderInterface;
 use Made\Blog\Engine\Service\PostContentResolver;
+use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
 use Made\Blog\Engine\Service\ThemeService;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
 use Pimple\Package\PackageAbstract;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 /**
  * Class Package
@@ -55,8 +59,6 @@ use Psr\SimpleCache\CacheInterface;
  */
 class Package extends PackageAbstract
 {
-    use TagResolverTrait;
-
     /**
      * Registers services on the given container.
      *
@@ -86,8 +88,12 @@ class Package extends PackageAbstract
 
         $this->registerConfigurationObject();
 
+        $this->registerTwig();
+        $this->registerParsedown();
+
         $this->registerDataLayerTheme();
         $this->registerDataLayerPostConfiguration();
+        $this->registerTask();
         $this->registerDataLayerPost();
 
         $this->registerThemeService();
@@ -130,6 +136,24 @@ class Package extends PackageAbstract
                 ->setRootDirectory($settings[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
                 ->setFallbackLocale($settings[Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE]);
         });
+    }
+
+    private function registerTwig(): void
+    {
+        // TODO: Add configuration.
+
+        $this->registerService(Environment::class, function (Container $container): Environment {
+            $loader = new FilesystemLoader();
+
+            // TODO: Complete loader initialization.
+
+            return new Environment($loader);
+        });
+    }
+
+    private function registerParsedown(): void
+    {
+        // TODO: Register parsedown and its configuration.
     }
 
     /**
@@ -241,8 +265,13 @@ class Package extends PackageAbstract
      */
     private function registerDataLayerPost(): void
     {
+        // TODO: Register each task service.
+
         $this->registerTagAndService(PostContentProviderInterface::TAG_POST_CONTENT_PROVIDER, PostContentProviderFile::class, function (Container $container): PostContentProviderInterface {
-            return new PostContentProviderFile();
+            /** @var array|\Made\Blog\Engine\Service\TaskChain\TaskAbstract[] $serviceList */
+            $serviceList = $this->resolveTag(PostContentProviderFile::TAG_POST_CONTENT_PROVIDER_TASK, TaskAbstract::class);
+
+            return new PostContentProviderFile($serviceList);
         });
 
         $this->registerService(PostContentResolver::class, function (Container $container): PostContentResolver {
@@ -263,9 +292,12 @@ class Package extends PackageAbstract
 
         $this->registerServiceLazy(PostRepositoryInterface::class, PostRepository::class);
 
-//        $this->container->extend(PostRepositoryInterface::class, function (PostRepositoryInterface $postRepository, Container $container): PostRepositoryInterface {
-//            return new CacheProxyPostRepository();
-//        });
+        $this->container->extend(PostRepositoryInterface::class, function (PostRepositoryInterface $postRepository, Container $container): PostRepositoryInterface {
+            /** @var CacheInterface $cache */
+            $cache = $container[CacheInterface::class];
+
+            return new CacheProxyPostRepository($cache, $postRepository);
+        });
     }
 
     private function registerThemeService(): void
@@ -277,29 +309,6 @@ class Package extends PackageAbstract
             $themeRepository = $container[ThemeRepositoryInterface::class];
 
             return new ThemeService($configuration, $themeRepository);
-        });
-    }
-
-    /**
-     * TODO: Use gameplayjdk/pimple-package-utility v1.1 when available.
-     *
-     * @param string $serviceName
-     * @param string $serviceNameLazy
-     * @throws PackageException
-     */
-    protected function registerServiceLazy(string $serviceName, string $serviceNameLazy): void
-    {
-        $this->registerConfiguration($serviceName, [
-            'implementation' => $serviceNameLazy,
-        ]);
-
-        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
-
-        $this->registerService($serviceName, function (Container $container) use ($configuration, $serviceName) {
-            /** @var array $settings */
-            $settings = $configuration[$serviceName];
-
-            return $container[$settings['implementation']];
         });
     }
 }

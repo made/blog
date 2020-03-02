@@ -19,6 +19,9 @@
 
 namespace Made\Blog\Engine\Repository;
 
+use DateTime;
+use Made\Blog\Engine\Model\Post;
+
 /**
  * Interface PostRepositoryInterface
  *
@@ -27,4 +30,51 @@ namespace Made\Blog\Engine\Repository;
 interface PostRepositoryInterface
 {
     const TAG_POST_REPOSITORY = 'repository.post';
+
+    /**
+     * @return array|Post[]
+     */
+    public function getAll(): array;
+
+    /**
+     * @param DateTime $dateTime
+     * @return array|Post[]
+     */
+    public function getAllByPostDate(DateTime $dateTime): array;
+
+    /**
+     * @param string ...$statusList
+     * @return array|Post[]
+     */
+    public function getAllByStatus(string ...$statusList): array;
+
+    /**
+     * @param string ...$categoryList
+     * @return array|Post[]
+     */
+    public function getAllByCategory(string ...$categoryList): array;
+
+    /**
+     * @param string ...$tagList
+     * @return array|Post[]
+     */
+    public function getAllByTag(string ...$tagList): array;
+
+    /**
+     * @param string $id
+     * @return Post|null
+     */
+    public function getOneById(string $id): ?Post;
+
+    /**
+     * @param string $slug
+     * @return Post|null
+     */
+    public function getOneBySlug(string $slug): ?Post;
+
+    /**
+     * @param string $slugRedirect
+     * @return Post|null
+     */
+    public function getOneBySlugRedirect(string $slugRedirect): ?Post;
 }

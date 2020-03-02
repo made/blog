@@ -98,7 +98,7 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
         $one = null;
 
         try {
-            /** @var null|\Made\Blog\Engine\Model\PostConfiguration $one */
+            /** @var null|PostConfiguration $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.

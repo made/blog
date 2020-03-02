@@ -23,32 +23,60 @@ use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Model\PostContent;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Made\Blog\Engine\Service\PostContentProviderInterface;
+use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
+use TaskChain\TaskChain;
+use TaskChain\TaskChainInterface;
 
 /**
  * Class PostContentProvider
- *
- * TODO: Use task chain here.
- *  - Read File
- *  - Process Twig
- *  - Process Parsedown
  *
  * @package Made\Blog\Engine\Service\PostContentProvider\Implementation\File
  */
 class PostContentProvider implements PostContentProviderInterface
 {
+    const TAG_POST_CONTENT_PROVIDER_TASK = 'provider.post_content.file.task';
+
     /**
-     * @inheritDoc
+     * @var TaskChainInterface
      */
-    public function accept(string $origin): bool
+    private $taskChain;
+
+    /**
+     * PostContentProvider constructor.
+     * @param array|TaskAbstract[] $taskList
+     */
+    public function __construct(array $taskList)
     {
-        return PostConfigurationRepositoryFile::class === $origin;
+        $this->taskChain = new TaskChain(false);
+
+        foreach ($taskList as $task) {
+            $this->taskChain->add($task, $task->getPriority());
+        }
     }
 
     /**
      * @inheritDoc
      */
-    public function provide(PostConfigurationLocale $postConfigurationLocale): PostContent
+    public function accept(string $origin): bool
     {
-        // TODO: Implement provide() method.
+        return PostConfigurationRepositoryFile::class === $origin
+            // This is possible, since the current implementation of a task chain does not care about the input, but
+            // instead only requires the contained task collection to be non-empty.
+            && $this->taskChain->accept(null);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function provide(PostConfigurationLocale $postConfigurationLocale): ?PostContent
+    {
+        $input = [
+            PostConfigurationLocale::class => $postConfigurationLocale,
+        ];
+
+        $output = $this->taskChain->run($input);
+
+        // Await a post content object as result.
+        return ($result = ($output[PostContent::class] ?? null)) instanceof PostContent ? $result : null;
     }
 }

@@ -4,8 +4,46 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "874f2b4a559e7483c13164a9f34b34f7",
+    "content-hash": "14441b2ba78d19134e18636c961f115e",
     "packages": [
+        {
+            "name": "brick/varexporter",
+            "version": "0.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/brick/varexporter.git",
+                "reference": "c84d5eab37eae481042ef0c3b4a78034a6220320"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/brick/varexporter/zipball/c84d5eab37eae481042ef0c3b4a78034a6220320",
+                "reference": "c84d5eab37eae481042ef0c3b4a78034a6220320",
+                "shasum": ""
+            },
+            "require": {
+                "nikic/php-parser": "^4.0",
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.0",
+                "phpunit/phpunit": "^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Brick\\VarExporter\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A powerful alternative to var_export(), which can export closures and objects without __set_state()",
+            "keywords": [
+                "var_export"
+            ],
+            "time": "2020-01-23T21:28:44+00:00"
+        },
         {
             "name": "erusev/parsedown",
             "version": "1.7.4",
@@ -106,19 +144,20 @@
         },
         {
             "name": "gameplayjdk/php-file-cache",
-            "version": "v1.1.0",
+            "version": "v1.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/GameplayJDK/php-file-cache.git",
-                "reference": "f80f1ad4353e06c67e79f39ba36701b0633bec82"
+                "reference": "9cf21e554cbf11c4de3edd9d8afb2239123247a9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GameplayJDK/php-file-cache/zipball/f80f1ad4353e06c67e79f39ba36701b0633bec82",
-                "reference": "f80f1ad4353e06c67e79f39ba36701b0633bec82",
+                "url": "https://api.github.com/repos/GameplayJDK/php-file-cache/zipball/9cf21e554cbf11c4de3edd9d8afb2239123247a9",
+                "reference": "9cf21e554cbf11c4de3edd9d8afb2239123247a9",
                 "shasum": ""
             },
             "require": {
+                "brick/varexporter": "^0.3.1",
                 "php": ">= 7.1",
                 "psr/simple-cache": "^1.0",
                 "symfony/filesystem": "^5.0"
@@ -143,20 +182,20 @@
                 }
             ],
             "description": "Low-level, file based cache using var_export() and some magic. Optionally PSR-16 compliant.",
-            "time": "2020-02-14T16:54:15+00:00"
+            "time": "2020-02-29T11:13:07+00:00"
         },
         {
             "name": "gameplayjdk/pimple-package-utility",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/GameplayJDK/pimple-package-utility.git",
-                "reference": "38ee72a924d73c554c7bb5e56f7370dfbebffa35"
+                "reference": "41707f5ddde2f77655c900298065e5650ec10cea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GameplayJDK/pimple-package-utility/zipball/38ee72a924d73c554c7bb5e56f7370dfbebffa35",
-                "reference": "38ee72a924d73c554c7bb5e56f7370dfbebffa35",
+                "url": "https://api.github.com/repos/GameplayJDK/pimple-package-utility/zipball/41707f5ddde2f77655c900298065e5650ec10cea",
+                "reference": "41707f5ddde2f77655c900298065e5650ec10cea",
                 "shasum": ""
             },
             "require": {
@@ -180,20 +219,58 @@
                 }
             ],
             "description": "Utility classes for pimple container based libraries and applications with configuration and tag support.",
-            "time": "2020-01-06T18:29:24+00:00"
+            "time": "2020-02-21T18:40:32+00:00"
+        },
+        {
+            "name": "gameplayjdk/task-chain",
+            "version": "v1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/GameplayJDK/task-chain.git",
+                "reference": "39765c08a983cb3fb6a5660996d965ca6b01c39d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/GameplayJDK/task-chain/zipball/39765c08a983cb3fb6a5660996d965ca6b01c39d",
+                "reference": "39765c08a983cb3fb6a5660996d965ca6b01c39d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">= 7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TaskChain\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "GameplayJDK",
+                    "email": "github@gameplayjdk.de"
+                }
+            ],
+            "description": "Small library for the task chain pattern.",
+            "time": "2020-03-02T18:58:26+00:00"
         },
         {
             "name": "made/blog-engine",
-            "version": "dev-master",
+            "version": "dev-content-repository",
             "dist": {
                 "type": "path",
                 "url": "package/made/blog-engine",
-                "reference": "22442768e31ec7ea2739d35a31a7052d5fd800c0"
+                "reference": "d9b6d82b10d78428c3a3903b9dfc24f681882e50",
+                "shasum": null
             },
             "require": {
                 "erusev/parsedown": "^1.7",
                 "ext-json": "*",
                 "gameplayjdk/pimple-package-utility": "^1.0",
+                "gameplayjdk/task-chain": "^1.0",
                 "php": ">=7.1 <7.4",
                 "pimple/pimple": "^3.2",
                 "psr/log": "^1.1",
@@ -207,7 +284,7 @@
                 }
             },
             "license": [
-                "MIT"
+                "GPL-3.0-or-later"
             ],
             "authors": [
                 {
@@ -347,6 +424,58 @@
                 "routing"
             ],
             "time": "2018-02-13T20:26:39+00:00"
+        },
+        {
+            "name": "nikic/php-parser",
+            "version": "v4.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nikic/PHP-Parser.git",
+                "reference": "9a9981c347c5c49d6dfe5cf826bb882b824080dc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/9a9981c347c5c49d6dfe5cf826bb882b824080dc",
+                "reference": "9a9981c347c5c49d6dfe5cf826bb882b824080dc",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "ircmaxell/php-yacc": "0.0.5",
+                "phpunit/phpunit": "^6.5 || ^7.0 || ^8.0"
+            },
+            "bin": [
+                "bin/php-parse"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpParser\\": "lib/PhpParser"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov"
+                }
+            ],
+            "description": "A PHP parser written in PHP",
+            "keywords": [
+                "parser",
+                "php"
+            ],
+            "time": "2019-11-08T13:50:10+00:00"
         },
         {
             "name": "pimple/pimple",
@@ -1016,7 +1145,7 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v5.0.4",
+            "version": "v5.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",

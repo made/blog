@@ -115,6 +115,7 @@ class Package extends PackageAbstract
             return $twig;
         });
 
+        // TODO: This pulls the twig class from the container which in turn tries to pull the theme service and so on.
 //        $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
 //        $this->app->add($twigMiddleware);
     }

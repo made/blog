@@ -51,6 +51,13 @@ class PostConfigurationLocaleMapper
         PostConfigurationLocale::STATUS_PUBLISHED,
     ];
 
+    /**
+     * The datetime string format.
+     *
+     * TODO: Move this to a dedicated formatter helper class.
+     *
+     * @var string
+     */
     const DTS_FORMAT = 'Y-m-d';
 
     /**
