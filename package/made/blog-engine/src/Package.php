@@ -19,7 +19,6 @@
 
 namespace Made\Blog\Engine;
 
-use http\Env;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationRepository as PostConfigurationRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
@@ -40,10 +39,15 @@ use Made\Blog\Engine\Repository\Proxy\CacheProxyPostRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\PostContentProvider as PostContentProviderFile;
+use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task\RenderParsedownTask;
+use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task\RenderTwigTask;
+use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task\WrapContextTask;
 use Made\Blog\Engine\Service\PostContentProviderInterface;
 use Made\Blog\Engine\Service\PostContentResolver;
+use Made\Blog\Engine\Service\PostService;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
 use Made\Blog\Engine\Service\ThemeService;
+use Parsedown;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
 use Pimple\Package\PackageAbstract;
@@ -51,6 +55,7 @@ use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use Twig\Loader\LoaderInterface;
 
 /**
  * Class Package
@@ -88,12 +93,13 @@ class Package extends PackageAbstract
 
         $this->registerConfigurationObject();
 
+        $this->registerPostService();
+
         $this->registerTwig();
         $this->registerParsedown();
 
         $this->registerDataLayerTheme();
         $this->registerDataLayerPostConfiguration();
-        $this->registerTask();
         $this->registerDataLayerPost();
 
         $this->registerThemeService();
@@ -138,22 +144,81 @@ class Package extends PackageAbstract
         });
     }
 
-    private function registerTwig(): void
+    private function registerPostService(): void
     {
-        // TODO: Add configuration.
+        $this->registerService(PostService::class, function (Container $container): PostService {
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
 
-        $this->registerService(Environment::class, function (Container $container): Environment {
-            $loader = new FilesystemLoader();
-
-            // TODO: Complete loader initialization.
-
-            return new Environment($loader);
+            return new PostService($configuration);
         });
     }
 
+    /**
+     * @throws PackageException
+     */
+    private function registerTwig(): void
+    {
+        $this->registerConfiguration(Environment::class, [
+            // TODO: Complete option list with defaults.
+            'cache' => false,
+        ]);
+
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
+
+        $this->registerService(FilesystemLoader::class, function (Container $container): LoaderInterface {
+            /** @var PostService $postService */
+            $postService = $container[PostService::class];
+
+            $loader = new FilesystemLoader();
+            $postService->updateLoader($loader);
+
+            return $loader;
+        });
+
+        $this->registerServiceAlias(LoaderInterface::class, FilesystemLoader::class);
+
+        $this->registerService(Environment::class, function (Container $container) use ($configuration): Environment {
+            /** @var array $settings */
+            $settings = $configuration[Environment::class];
+
+            /** @var LoaderInterface $loader */
+            $loader = $container[LoaderInterface::class];
+
+            return new Environment($loader, $settings);
+        });
+    }
+
+    /**
+     * @throws PackageException
+     */
     private function registerParsedown(): void
     {
-        // TODO: Register parsedown and its configuration.
+        $this->registerConfiguration(Parsedown::class, [
+            'breaks_enabled' => true,
+            'markup_escaped' => false,
+            'urls_linked' => true,
+            'safe_mode' => false,
+        ]);
+
+        /** @var array $configuration */
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
+
+        $this->registerService(Parsedown::class, function (Container $container) use ($configuration): Parsedown {
+            /** @var array $settings */
+            $settings = $configuration[Parsedown::class];
+
+            /** @var Parsedown $parsedown */
+            $parsedown = new Parsedown();
+            $parsedown->setBreaksEnabled($settings['breaks_enabled']);
+            $parsedown->setMarkupEscaped($settings['markup_escaped']);
+            $parsedown->setUrlsLinked($settings['urls_linked']);
+            $parsedown->setSafeMode($settings['safe_mode']);
+
+            return $parsedown;
+        });
+
+        // TODO: Extend with "parsedown-extra".
     }
 
     /**
@@ -246,6 +311,7 @@ class Package extends PackageAbstract
             /** @var PostConfigurationRepositoryInterface $postConfigurationRepository */
             $postConfigurationRepository = $container[PostConfigurationRepositoryInterface::class];
             /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
             return new PostConfigurationLocaleRepository($postConfigurationRepository, $logger);
         });
@@ -265,11 +331,48 @@ class Package extends PackageAbstract
      */
     private function registerDataLayerPost(): void
     {
-        // TODO: Register each task service.
+        $this->registerConfiguration(TaskAbstract::class, [
+            WrapContextTask::class => 10,
+            RenderTwigTask::class => 20,
+            RenderParsedownTask::class => 30,
+        ]);
+
+        /** @var array $configuration */
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
+
+        $this->registerTagAndService(PostContentProviderFile::TAG_POST_CONTENT_PROVIDER_TASK, WrapContextTask::class, function (Container $container) use ($configuration): TaskAbstract {
+            /** @var array $settings */
+            $settings = $configuration[TaskAbstract::class];
+
+            return new WrapContextTask($settings[WrapContextTask::class]);
+        });
+
+        $this->registerTagAndService(PostContentProviderFile::TAG_POST_CONTENT_PROVIDER_TASK, RenderTwigTask::class, function (Container $container) use ($configuration): TaskAbstract {
+            /** @var array $settings */
+            $settings = $configuration[TaskAbstract::class];
+
+            /** @var PostService $postService */
+            $postService = $container[PostService::class];
+            /** @var Environment $environment */
+            $environment = $container[Environment::class];
+
+            return new RenderTwigTask($settings[RenderTwigTask::class], $postService, $environment);
+        });
+
+        $this->registerTagAndService(PostContentProviderFile::TAG_POST_CONTENT_PROVIDER_TASK, RenderParsedownTask::class, function (Container $container) use ($configuration): TaskAbstract {
+            /** @var array $settings */
+            $settings = $configuration[TaskAbstract::class];
+
+            // TODO: Use "parsedown-extra" instead.
+            /** @var Parsedown $parsedown */
+            $parsedown = $container[Parsedown::class];
+
+            return new RenderParsedownTask($settings[RenderParsedownTask::class], $parsedown);
+        });
 
         $this->registerTagAndService(PostContentProviderInterface::TAG_POST_CONTENT_PROVIDER, PostContentProviderFile::class, function (Container $container): PostContentProviderInterface {
-            /** @var array|\Made\Blog\Engine\Service\TaskChain\TaskAbstract[] $serviceList */
-            $serviceList = $this->resolveTag(PostContentProviderFile::TAG_POST_CONTENT_PROVIDER_TASK, TaskAbstract::class);
+            /** @var array|TaskAbstract[] $serviceList */
+            $serviceList = $this->resolveTag(PostContentProviderFile::TAG_POST_CONTENT_PROVIDER_TASK, TaskAbstract::class, null);
 
             return new PostContentProviderFile($serviceList);
         });

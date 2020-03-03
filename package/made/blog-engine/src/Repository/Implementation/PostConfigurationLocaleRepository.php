@@ -94,9 +94,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     {
         $allLocale = $this->getAll();
 
-        $statusList = array_map(function (string $status): string {
-            return strtolower($status);
-        }, $statusList);
+        $statusList = array_change_key_case($statusList, CASE_LOWER);
 
         return array_filter($allLocale, function (PostConfigurationLocale $oneLocale) use ($statusList): bool {
             $oneLocaleStatus = strtolower($oneLocale->getStatus());
@@ -112,14 +110,10 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     {
         $allLocale = $this->getAll();
 
-        $categoryList = array_map(function (string $category): string {
-            return strtolower($category);
-        }, $categoryList);
+        $categoryList = array_change_key_case($categoryList, CASE_LOWER);
 
         return array_filter($allLocale, function (PostConfigurationLocale $oneLocale) use ($categoryList): bool {
-            $oneLocaleCategoryList = array_map(function (string $category): string {
-                return strtolower($category);
-            }, $oneLocale->getCategoryList());
+            $oneLocaleCategoryList = array_change_key_case($oneLocale->getCategoryList(), CASE_LOWER);
 
             return !empty(array_intersect($oneLocaleCategoryList, $categoryList));
         });
@@ -132,14 +126,10 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     {
         $allLocale = $this->getAll();
 
-        $tagList = array_map(function (string $tag): string {
-            return strtolower($tag);
-        }, $tagList);
+        $tagList = array_change_key_case($tagList, CASE_LOWER);
 
         return array_filter($allLocale, function (PostConfigurationLocale $oneLocale) use ($tagList): bool {
-            $oneLocaleTagList = array_map(function (string $category): string {
-                return strtolower($category);
-            }, $oneLocale->getTagList());
+            $oneLocaleTagList = array_change_key_case($oneLocale->getTagList(), CASE_LOWER);
 
             return !empty(array_intersect($oneLocaleTagList, $tagList));
         });
@@ -218,15 +208,17 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     private function convertToPostConfigurationLocale(array $all): array
     {
         /** @var array|PostConfigurationLocale[] $allLocale */
-        $allLocale = array_map(function (PostConfiguration $one): ?PostConfigurationLocale {
-            $allLocale = $one->getLocaleList();
+        $allLocale = array_map(function (?PostConfiguration $postConfiguration): ?PostConfigurationLocale {
+            if (null !== $postConfiguration) {
+                $allLocale = $postConfiguration->getLocaleList();
 
-            foreach ($allLocale as $oneLocale) {
-                if ($oneLocale->getLocale() !== $this->getCurrentLocale()) {
-                    continue;
+                foreach ($allLocale as $oneLocale) {
+                    if ($oneLocale->getLocale() !== $this->getCurrentLocale()) {
+                        continue;
+                    }
+
+                    return $oneLocale;
                 }
-
-                return $oneLocale;
             }
 
             return null;

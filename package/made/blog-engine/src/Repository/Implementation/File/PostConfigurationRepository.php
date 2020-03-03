@@ -30,6 +30,7 @@ use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
+use Made\Blog\Engine\Service\PostService;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -98,8 +99,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 return null;
             }
 
-            // TODO: Only get segment denoting the post folder name.
-            $data[PostConfigurationMapper::KEY_ID] = $this->getPostPath($entry);
+            $data[PostConfigurationMapper::KEY_ID] = $entry;
             $data = $this->provisionIntersectingData($data);
 
             try {
@@ -185,8 +185,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     {
         return Path::join(...[
             $this->configuration->getRootDirectory(),
-            // TODO: Do it like the theme service did.
-            static::POST_PATH,
+            PostService::PATH_POST,
         ]);
     }
 
@@ -216,7 +215,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
         return Path::join(...[
             $path,
-            PostConfigurationService::PATH_CONFIGURATION,
+            PostService::PATH_CONFIGURATION,
         ]);
     }
 

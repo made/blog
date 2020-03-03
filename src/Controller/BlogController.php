@@ -22,7 +22,7 @@ namespace App\Controller;
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
 use Made\Blog\Engine\Exception\PostException;
-use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository;
+use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -37,15 +37,17 @@ use Slim\Views\Twig;
 class BlogController implements ControllerInterface
 {
     const ROUTE_SLUG = 'blog.slug';
-    const ROUTE_POST_CONFIG_TEST = 'blog.post_config_test';
+    const ROUTE_TEST_SLUG = 'blog.test.slug';
 
     /**
      * @inheritDoc
      */
     public static function register(App $app): void
     {
-        $app->get('/post_config_test/{locale}', BlogController::class . ':postConfigurationTestAction')
-            ->setName(BlogController::ROUTE_POST_CONFIG_TEST);
+        $app->get('/test/{slug:.*}', BlogController::class . ':testSlugAction')
+            ->setName(BlogController::ROUTE_TEST_SLUG);
+
+        // This is the most generic pattern, thus its route has to be registered last.
         $app->get('/{slug:.*}', BlogController::class . ':slugAction')
             ->setName(BlogController::ROUTE_SLUG);
     }
@@ -61,21 +63,21 @@ class BlogController implements ControllerInterface
     private $logger;
 
     /**
-     * @var PostConfigurationRepository
+     * @var PostRepositoryInterface
      */
-    private $configurationRepository;
+    private $postRepository;
 
     /**
      * BlogController constructor.
      * @param Twig $twig
      * @param LoggerInterface $logger
-     * @param PostConfigurationRepository $configurationRepository
+     * @param PostRepositoryInterface $postRepository
      */
-    public function __construct(Twig $twig, LoggerInterface $logger, PostConfigurationRepository $configurationRepository)
+    public function __construct(Twig $twig, LoggerInterface $logger, PostRepositoryInterface $postRepository)
     {
         $this->twig = $twig;
         $this->logger = $logger;
-        $this->configurationRepository = $configurationRepository;
+        $this->postRepository = $postRepository;
     }
 
     /**
@@ -96,7 +98,8 @@ class BlogController implements ControllerInterface
         $response->getBody()
             ->write($line);
 
-        // This is a serious tripwire!
+        // This is a serious tripwire! It will not be important anymore, when an actual favicon.ico exists. But this is
+        // a browser flaw...
         if ('favicon.ico' === $slug) {
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
@@ -106,42 +109,33 @@ class BlogController implements ControllerInterface
         return $response;
     }
 
-
     /**
-     * /post_config_test/{locale}
+     * /test/{slug:.*}
      *
-     * ToDo: This test action should be deleted later!!!
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
+     * @param array $args
      * @return ResponseInterface
      */
-    public function postConfigurationTestAction(ServerRequestInterface $request, ResponseInterface $response, array $args)
+    public function testSlugAction(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
-        ini_set('xdebug.var_display_max_depth', '10');
-        ini_set('xdebug.var_display_max_children', '256');
-        ini_set('xdebug.var_display_max_data', '1024');
-        try {
+        /** @var string $slug */
+        $slug = $args['slug'];
 
-            // ToDo: This should automatically be set via slug (/en/*) or from the language fallback in the config
-//            $this->configurationRepository->setLocale($args['locale']);
+        $line = "The slug is: '$slug'.";
 
-//            $res = $this->configurationRepository->getAllByPostDate(new \DateTime());
-            $res = $this->configurationRepository->getAllByStatus('publish', 'draft');
-//            $res = $this->configurationRepository->getAllByStatus(...['publish', 'draft']);
-//            $res = $this->configurationRepository->getAllByStatus('DRAFT');
-//            $res = $this->configurationRepository->getAll();
-            echo "<pre>";
-            var_dump($res);
-            echo "</pre>";
-        } catch (PostException $exception) {
-            echo "<pre><h1>Important Context</h1>";
-            var_dump($exception->getContext());
-            echo "</pre>";
-            throw $exception;
-        }
+        // TODO: The slug needs to be normalized for comparison. Also the logic of getting the post should be moved to a
+        //  service. The slug needs to be parsed for the locale!
+        // TODO: To save the locale for the request, we need a place to save the current request data.
+        // TODO: Then the base-theme needs to be built, so the post can be displayed.
+
+        $post = $this->postRepository->getOneBySlug("/{$slug}");
+        var_dump($post);
 
         $response->getBody()
-            ->write('ok');
+            ->write($line);
+
+//        $this->logger->info($line);
 
         return $response;
     }

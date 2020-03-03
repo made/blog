@@ -20,20 +20,21 @@
 namespace Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task;
 
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Model\PostContent;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
 
 /**
- * Class WrapDataTask
+ * Class WrapContextTask
+ *
+ * This task is designed to wrap the twig context for the later task. To add additional data, just create a new task
+ * with a lower priority, which then can add or modify the context, as long as it is executed after this task and before
+ * the next one ({@see RenderTwigTask}).
  *
  * @package Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task
  */
-class WrapDataTask extends TaskAbstract
+class WrapContextTask extends TaskAbstract
 {
-    const ALIAS_CONFIGURATION = 'configuration';
-
-    // TODO: Add possibility to influence what things are provided as input/output. This task class is dedicated to
-    //  enrichment (and clean-up) of the input array, which will be given to twig as a rendering context later down the
-    //  chain.
+    const ALIAS_CONTEXT = RenderTwigTask::ALIAS_CONTEXT;
 
     /**
      * WrapDataTask constructor.
@@ -50,7 +51,8 @@ class WrapDataTask extends TaskAbstract
     public function accept($input): bool
     {
         return is_array($input)
-            && ($input[PostConfigurationLocale::class] ?? null) instanceof PostConfigurationLocale;
+            && ($input[PostConfigurationLocale::class] ?? null) instanceof PostConfigurationLocale
+            && ($input[PostContent::class] ?? null) instanceof PostContent;
     }
 
     /**
@@ -59,17 +61,21 @@ class WrapDataTask extends TaskAbstract
      */
     public function process($input, callable $nextCallback)
     {
-//        /** @var PostConfigurationLocale $postConfigurationLocale */
-//        $postConfigurationLocale = $input[PostConfigurationLocale::class];
+        /** @var PostConfigurationLocale $postConfigurationLocale */
+        $postConfigurationLocale = $input[PostConfigurationLocale::class];
 
-        // TODO: Add possibility to influence this data.
-        $input[static::ALIAS_CONFIGURATION] = $input[PostConfigurationLocale::class];
+        $context = [
+            'configuration' => $postConfigurationLocale,
+        ];
+
+        // Put the context into the further input.
+        $input[static::ALIAS_CONTEXT] = $context;
 
         /** @var array $output */
         $output = $nextCallback($input);
 
-        // Clean up after ourselves.
-        unset($output[static::ALIAS_CONFIGURATION]);
+        // Clean up after ourselves in the output.
+        unset($output[static::ALIAS_CONTEXT]);
 
         return $output;
     }

@@ -70,12 +70,22 @@ $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 $packageList = require dirname(__DIR__) . '/app/package.php';
 ksort($packageList);
 
+// Register every package from the list.
 foreach ($packageList as $package) {
     if (!$package instanceof PackageInterface) {
         continue;
     }
 
     $container->register($package);
+}
+
+// Initialize the client package.
+foreach ($packageList as $package) {
+    if (!$package instanceof Package) {
+        continue;
+    }
+
+    $package->initialize();
 }
 
 $app->run();

@@ -152,14 +152,16 @@ class PostRepository implements PostRepositoryInterface
      */
     private function convertToPost(array $all): array
     {
-        $allPost = array_map(function (PostConfigurationLocale $postConfigurationLocale): ?Post {
-            $postContent = $this->postContentResolver->resolve($postConfigurationLocale);
+        $allPost = array_map(function (?PostConfigurationLocale $postConfigurationLocale): ?Post {
+            if (null !== $postConfigurationLocale) {
+                $postContent = $this->postContentResolver->resolve($postConfigurationLocale);
 
-            // Make sure there are only posts with content.
-            if (null !== $postContent) {
-                return (new Post())
-                    ->setConfiguration($postConfigurationLocale)
-                    ->setContent($postContent);
+                // Make sure there are only posts with content.
+                if (null !== $postContent) {
+                    return (new Post())
+                        ->setConfiguration($postConfigurationLocale)
+                        ->setContent($postContent);
+                }
             }
 
             return null;

@@ -44,16 +44,6 @@ class Configuration
     private $fallbackLocale;
 
     /**
-     * @return bool
-     */
-    public function hasTheme(): bool
-    {
-        return !empty($this->theme);
-    }
-
-    /** generated methods */
-
-    /**
      * @return string
      */
     public function getRootDirectory(): string

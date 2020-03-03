@@ -292,7 +292,8 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
 
             if (!empty($one)) {
                 try {
-                    $this->cache->set($key, $one);
+                    if (!$this->cache->set($key, $one))
+                        throw new \RuntimeException('Unable to cache.');
                 } catch (InvalidArgumentException $exception) {
                     // TODO: Log.
                 }

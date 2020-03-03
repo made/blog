@@ -23,7 +23,7 @@ namespace App;
 use App\Controller\BlogController;
 use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
-use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
+use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Made\Blog\Engine\Service\ThemeService;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -84,6 +84,14 @@ class Package extends PackageAbstract
         $this->registerController();
     }
 
+    public function initialize(): void
+    {
+        $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
+        $this->app->add($twigMiddleware);
+
+        BlogController::register($this->app);
+    }
+
     /**
      * @throws PackageException
      */
@@ -114,11 +122,6 @@ class Package extends PackageAbstract
 
             return $twig;
         });
-
-        // TODO: This pulls the twig class from the container which in turn tries to pull the theme service and so on.
-        //  See $this->registerController() for an idea on how to handle this kind of stuff.
-//        $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
-//        $this->app->add($twigMiddleware);
     }
 
     /**
@@ -189,15 +192,10 @@ class Package extends PackageAbstract
             $twig = $container[Twig::class];
             /** @var Logger $logger */
             $logger = $container[Logger::class];
+            /** @var PostRepositoryInterface $postRepository */
+            $postRepository = $container[PostRepositoryInterface::class];
 
-            $repository = $container[PostConfigurationRepositoryInterface::class];
-
-            return new BlogController($twig, $logger, $repository);
+            return new BlogController($twig, $logger, $postRepository);
         });
-
-        // TODO: This should not be called in here, to prevent premature fetching of dependencies. This kind of stuff,
-        //  meaning also middleware and other related stuff, should be called only after all and every package is safely
-        //  registered to the container.
-        BlogController::register($this->app);
     }
 }

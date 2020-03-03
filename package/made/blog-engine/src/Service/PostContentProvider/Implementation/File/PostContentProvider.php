@@ -49,6 +49,7 @@ class PostContentProvider implements PostContentProviderInterface
     {
         $this->taskChain = new TaskChain(false);
 
+        // TODO: Find a good way to choose the implementation and suppress exception.
         foreach ($taskList as $task) {
             $this->taskChain->add($task, $task->getPriority());
         }
@@ -70,8 +71,12 @@ class PostContentProvider implements PostContentProviderInterface
      */
     public function provide(PostConfigurationLocale $postConfigurationLocale): ?PostContent
     {
+        $postContent = (new PostContent())
+            ->setContent('');
+
         $input = [
             PostConfigurationLocale::class => $postConfigurationLocale,
+            PostContent::class => $postContent,
         ];
 
         $output = $this->taskChain->run($input);

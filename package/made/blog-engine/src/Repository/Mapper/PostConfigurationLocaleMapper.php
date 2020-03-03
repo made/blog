@@ -19,9 +19,10 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
-use DateTime;
+use DateTime as DateTimeInternal;
 use Made\Blog\Engine\Exception\MapperException;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Workaround\DateTime;
 
 /**
  * Class PostConfigurationLocaleMapper

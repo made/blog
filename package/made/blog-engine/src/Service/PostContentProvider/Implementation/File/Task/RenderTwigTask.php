@@ -21,8 +21,10 @@ namespace Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task;
 
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Model\PostContent;
+use Made\Blog\Engine\Service\PostService;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
 use Twig\Environment;
+use Twig\Error\Error;
 
 /**
  * Class RenderTwigTask
@@ -31,6 +33,13 @@ use Twig\Environment;
  */
 class RenderTwigTask extends TaskAbstract
 {
+    const ALIAS_CONTEXT = 'context';
+
+    /**
+     * @var PostService
+     */
+    private $postService;
+
     /**
      * @var Environment
      */
@@ -39,12 +48,14 @@ class RenderTwigTask extends TaskAbstract
     /**
      * RenderTwigTask constructor.
      * @param int $priority
+     * @param PostService $postService
      * @param Environment $environment
      */
-    public function __construct(int $priority, Environment $environment)
+    public function __construct(int $priority, PostService $postService, Environment $environment)
     {
         parent::__construct($priority);
 
+        $this->postService = $postService;
         $this->environment = $environment;
     }
 
@@ -53,7 +64,10 @@ class RenderTwigTask extends TaskAbstract
      */
     public function accept($input): bool
     {
-        return is_array($input);
+        return is_array($input)
+            && ($input[PostConfigurationLocale::class] ?? null) instanceof PostConfigurationLocale
+            && ($input[PostContent::class] ?? null) instanceof PostContent
+            && is_array($input[static::ALIAS_CONTEXT] ?? null);
     }
 
     /**
@@ -63,20 +77,22 @@ class RenderTwigTask extends TaskAbstract
     {
         /** @var PostConfigurationLocale $postConfigurationLocale */
         $postConfigurationLocale = $input[PostConfigurationLocale::class];
+        /** @var PostContent $postContent */
+        $postContent = $input[PostContent::class];
+        /** @var array $context */
+        $context = $input[static::ALIAS_CONTEXT];
 
-        // TODO: Resolve path correctly. This should not be done exclusively in this task class, but inside a dedicated
-        //  service class. That would enable different types of format loading depending on which one is configured. As
-        //  of now this would not work as the id is set to the full path except of the last path segment denoting the
-        //  post folder name, which will be needed here, since "@Post" is the namespace of the "/posts" folder or
-        //  whatever path is configured for that.
-        //  See "/package/made/blog-engine/src/Repository/Implementation/File/PostConfigurationRepository.php".
-        $path = "@Post/{$postConfigurationLocale->getId()}/content.md.twig";
+        $path = $this->postService->getNamespacePath($postConfigurationLocale->getId());
+        $content = $postContent->getContent();
 
-        // TODO: Handle errors.
-        $content = $this->environment->render($path, $input);
+        try {
+            $content = $this->environment->render($path, $context);
+        } catch (Error $e) {
+            // TODO: Logging.
+        }
 
-        $input[PostContent::class] = (new PostContent())
-            ->setContent($content);
+        // As the content is an object it has the same instance in the further input and does not require to be updated there.
+        $postContent->setContent($content);
 
         return $nextCallback($input);
     }

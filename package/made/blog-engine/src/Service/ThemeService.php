@@ -50,7 +50,7 @@ class ThemeService
     const PATH_CONFIGURATION = '/theme.json';
 
     /**
-     * Namespace for Twig
+     * Namespace for Twig.
      */
     const NAMESPACE_VIEW = 'App';
 

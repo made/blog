@@ -19,23 +19,62 @@
 
 namespace Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task;
 
+use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Model\PostContent;
+use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
+use Parsedown;
+
 /**
  * Class RenderParsedownTask
  *
  * @package Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task
  */
-class RenderParsedownTask
+class RenderParsedownTask extends TaskAbstract
 {
-    // TODO: This task will need a "Parsedown" instance injected which does post-processing of the output of twig (which
-    //  should be markdown). The twig rendering step is on the one hand needed as a more pretty (and namespaced) way of
-    //  reading the post content files, but on the other hand it also enables pre-processing of the actual post text
-    //  based on any thinkable input parameter given through the context wrapping task at the beginning of the chain.
-    //  That task uses a premature callback call to be able to process the context before and after the rendering. More
-    //  information on that can be found in the comment inside that task class.
-    //  So, if someone decides to process the HTML output generated after this markdown parsing task for some reason,
-    //  he would simply add a new task at the end of the chain, which then can do further post-processing on the output,
-    //  while still maintaining the full context of the input data. An example would be running a jQuery DOM parser for
-    //  analysis of how many headlines there are or some other stuff, which could prove handy when rendering on the
-    //  frontend side using the embedded context (which is just and idea yet, but could save quite some extra processing).
-    //  I'm not sure if the content resolution (provider based) task pipeline is the right place for that kind of stuff.
+    /**
+     * @var Parsedown
+     */
+    private $parsedown;
+
+    /**
+     * RenderParsedownTask constructor.
+     * @param int $priority
+     * @param Parsedown $parsedown
+     */
+    public function __construct(int $priority, Parsedown $parsedown)
+    {
+        parent::__construct($priority);
+
+        $this->parsedown = $parsedown;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function accept($input): bool
+    {
+        return is_array($input)
+            && ($input[PostConfigurationLocale::class] ?? null) instanceof PostConfigurationLocale
+            && ($input[PostContent::class] ?? null) instanceof PostContent;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function process($input, callable $nextCallback)
+    {
+        /** @var PostContent $postContent */
+        $postContent = $input[PostContent::class];
+
+        $content = $postContent->getContent();
+
+        if (!empty($content)) {
+            // This will also work with parsedown-extra installed.
+            $content = $this->parsedown->text($content);
+        }
+
+        $postContent->setContent($content);
+
+        return $nextCallback($input);
+    }
 }
