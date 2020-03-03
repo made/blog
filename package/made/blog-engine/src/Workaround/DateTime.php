@@ -29,6 +29,7 @@ use DateTimeZone;
  * INFO: This is a workaround needed to achieve full caching ability with the current object graph, since the utilized
  *  library (brick/varexporter) of the cache implementation (gameplayjdk/php-file-cache) does not yet support "internal"
  *  classes such as DateTime. To counter that, I added this "replacement" class to mask the underlying "internal" class.
+ *  For more information on that matter, see https://github.com/brick/varexporter/issues/10.
  *
  * TODO: Find a better solution, maybe using the hotfix approach utilizing composer auto-loading to replace a class at
  *  loading time. Then the Brick\VarExporter\Internal\ObjectExporter\InternalClassExporter would have to be replaced.
