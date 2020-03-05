@@ -93,6 +93,13 @@ class PostConfigurationLocale
     private $template;
 
     /**
+     * TODO: Add getter/setter.
+     *
+     * @var PostConfiguration
+     */
+    private $postConfiguration;
+
+    /**
      * @return string
      */
     public function getId(): string

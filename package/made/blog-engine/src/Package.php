@@ -44,6 +44,7 @@ use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task\Render
 use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task\WrapContextTask;
 use Made\Blog\Engine\Service\PostContentProviderInterface;
 use Made\Blog\Engine\Service\PostContentResolver;
+use Made\Blog\Engine\Service\PostContentResolverInterface;
 use Made\Blog\Engine\Service\PostService;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
 use Made\Blog\Engine\Service\ThemeService;
@@ -384,11 +385,13 @@ class Package extends PackageAbstract
             return new PostContentResolver($serviceList);
         });
 
+        $this->registerServiceAlias(PostContentResolverInterface::class, PostContentResolver::class);
+
         $this->registerTagAndService(PostRepositoryInterface::TAG_POST_REPOSITORY, PostRepository::class, function (Container $container): PostRepositoryInterface {
             /** @var PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository */
             $postConfigurationLocaleRepository = $container[PostConfigurationLocaleRepositoryInterface::class];
-            /** @var PostContentResolver $postContentResolver */
-            $postContentResolver = $container[PostContentResolver::class];
+            /** @var PostContentResolverInterface $postContentResolver */
+            $postContentResolver = $container[PostContentResolverInterface::class];
 
             return new PostRepository($postConfigurationLocaleRepository, $postContentResolver);
         });

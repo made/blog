@@ -34,6 +34,7 @@ use Made\Blog\Engine\Service\PostContentResolverInterface;
 class PostRepository implements PostRepositoryInterface
 {
     /**
+     * // INFO: This will be aggregation.
      * @var PostConfigurationLocaleRepositoryInterface
      */
     private $postConfigurationLocaleRepository;
