@@ -21,6 +21,7 @@ namespace Made\Blog\Engine\Repository\Implementation\File;
 
 use Closure;
 use DateTime;
+use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
@@ -38,6 +39,8 @@ use ReflectionException;
  */
 class PostConfigurationLocaleRepository implements PostConfigurationLocaleRepositoryInterface
 {
+    use CriteriaHelperTrait;
+
     /**
      * @var PostConfigurationRepositoryInterface
      */
@@ -71,13 +74,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
 
         $allLocale = $this->convertToPostConfigurationLocale($locale, $all);
 
-        if (!empty($allLocale)) {
-            $allLocale = $this->filterBasedOnCriteria($criteria, $allLocale);
-            $allLocale = $this->sliceBasedOnCriteria($criteria, $allLocale);
-            $allLocale = $this->orderBasedOnCriteria($criteria, $allLocale);
-        }
-
-        return $allLocale;
+        return $this->applyCriteria($criteria, $allLocale, PostConfigurationLocale::class);
     }
 
     /**
@@ -158,7 +155,6 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     }
 
     /**
-     * @TODO Slug comparison should be improved.
      * @inheritDoc
      */
     public function getOneBySlug(string $locale, string $slug): ?PostConfigurationLocale
@@ -166,7 +162,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
         $allLocale = $this->getAll(new CriteriaLocale($locale));
 
         return array_reduce($allLocale, function (?PostConfigurationLocale $carry, PostConfigurationLocale $oneLocale) use ($slug): ?PostConfigurationLocale {
-            if (null === $carry && $slug === $oneLocale->getSlug()) {
+            if (null === $carry && $this->compareSlug($slug, $oneLocale->getSlug())) {
                 return $oneLocale;
             }
 
@@ -175,7 +171,6 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     }
 
     /**
-     * @TODO Slug comparison should be improved.
      * @inheritDoc
      */
     public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?PostConfigurationLocale
@@ -183,7 +178,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
         $allLocale = $this->getAll(new CriteriaLocale($locale));
 
         return array_reduce($allLocale, function (?PostConfigurationLocale $carry, PostConfigurationLocale $oneLocale) use ($slugRedirect): ?PostConfigurationLocale {
-            if (null === $carry && in_array($slugRedirect, $oneLocale->getSlugRedirectList(), true)) {
+            if (null === $carry && $this->compareSlug($slugRedirect, ...$oneLocale->getSlugRedirectList())) {
                 return $oneLocale;
             }
 
@@ -208,10 +203,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
                         continue;
                     }
 
-                    return $oneLocale
-                        // This step is important for later usage, a PostConfigurationLocale must hold a reference to
-                        // its PostConfiguration object.
-                        ->setPostConfiguration($postConfiguration);
+                    return $oneLocale;
                 }
             }
 
@@ -224,81 +216,28 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     }
 
     /**
-     * @param CriteriaLocale $criteria
-     * @param array|PostConfigurationLocale[] $allLocale
-     * @return array|PostConfigurationLocale[]
+     * @param string $slugSearch
+     * @param string ...$slugList
+     * @return string
      */
-    private function filterBasedOnCriteria(CriteriaLocale $criteria, array $allLocale): array
+    private function compareSlug(string $slugSearch, string ...$slugList): string
     {
-        if (null !== ($filter = $criteria->getFilter())) {
-            /** @var Closure $callback */
-            $callback = $filter->getCallback();
-            /** @var ClosureInspection|null $callbackInspection */
-            $callbackInspection = $this->createInspection($callback);
+        $slugSearch = $this->cleanSlug($slugSearch);
 
-            if (null !== $callbackInspection && $callbackInspection->isParameterTypeClass(0, PostConfigurationLocale::class)) {
-                $allLocale = array_filter($allLocale, $callback);
-            }
-        }
-
-        return $allLocale;
+        return array_reduce($slugList, function (bool $carry, string $slug) use ($slugSearch): bool {
+            return $carry || $this->cleanSlug($slug) === $slugSearch;
+        }, false);
     }
 
     /**
-     * @param CriteriaLocale $criteria
-     * @param array|PostConfigurationLocale[] $allLocale
-     * @return array|PostConfigurationLocale[]
+     * @param string $slugSearch
+     * @return string
      */
-    private function sliceBasedOnCriteria(CriteriaLocale $criteria, array $allLocale)
+    private function cleanSlug(string $slugSearch): string
     {
-        $offset = $criteria->getOffset();
-        if (-1 === $offset) {
-            $offset = null;
-        }
+        $slugSearch = preg_replace('/\/{2,}/', '/', $slugSearch);
+        $slugSearch = trim($slugSearch, '/');
 
-        $limit = $criteria->getLimit();
-        if (-1 === $limit) {
-            $limit = null;
-        }
-
-        return array_slice($allLocale, $offset, $limit);
-    }
-
-    /**
-     * @param CriteriaLocale $criteria
-     * @param array|PostConfigurationLocale[] $allLocale
-     * @return array|PostConfigurationLocale[]
-     */
-    private function orderBasedOnCriteria(CriteriaLocale $criteria, array $allLocale): array
-    {
-        if (null !== ($order = $criteria->getOrder())) {
-            /** @var Closure $comparator */
-            $comparator = $order->getComparator();
-            /** @var ClosureInspection|null $comparatorInspection */
-            $comparatorInspection = $this->createInspection($comparator);
-
-            if (null !== $comparatorInspection
-                && $comparatorInspection->isParameterTypeClass(0, PostConfigurationLocale::class)
-                && $comparatorInspection->isParameterTypeClass(1, PostConfigurationLocale::class)) {
-                usort($allLocale, $comparator);
-            }
-        }
-
-        return $allLocale;
-    }
-
-    /**
-     * @param Closure $callback
-     * @return ClosureInspection|null
-     */
-    private function createInspection(Closure $callback): ?ClosureInspection
-    {
-        try {
-            return ClosureInspection::on($callback);
-        } catch (ReflectionException $exception) {
-            // TODO: Logging.
-        }
-
-        return null;
+        return "/$slugSearch";
     }
 }

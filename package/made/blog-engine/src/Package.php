@@ -46,6 +46,8 @@ use Made\Blog\Engine\Service\PostContentProviderInterface;
 use Made\Blog\Engine\Service\PostContentResolver;
 use Made\Blog\Engine\Service\PostContentResolverInterface;
 use Made\Blog\Engine\Service\PostService;
+use Made\Blog\Engine\Service\SlugParser;
+use Made\Blog\Engine\Service\SlugParserInterface;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
 use Made\Blog\Engine\Service\ThemeService;
 use Parsedown;
@@ -104,6 +106,8 @@ class Package extends PackageAbstract
         $this->registerDataLayerPost();
 
         $this->registerThemeService();
+
+        $this->registerSlugParser();
     }
 
     /**
@@ -161,8 +165,13 @@ class Package extends PackageAbstract
     private function registerTwig(): void
     {
         $this->registerConfiguration(Environment::class, [
-            // TODO: Complete option list with defaults.
+            'debug' => false,
+            'charset' => 'UTF-8',
+            'strict_variables' => false,
+            'autoescape' => 'html',
             'cache' => false,
+            'auto_reload' => null,
+            'optimizations' => -1,
         ]);
 
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
@@ -416,5 +425,14 @@ class Package extends PackageAbstract
 
             return new ThemeService($configuration, $themeRepository);
         });
+    }
+
+    private function registerSlugParser(): void
+    {
+        $this->registerService(SlugParser::class, function (Container $container): SlugParserInterface {
+            return new SlugParser();
+        });
+
+        $this->registerServiceAlias(SlugParserInterface::class, SlugParser::class);
     }
 }

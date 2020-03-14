@@ -19,11 +19,9 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
+use DateTime;
 use Made\Blog\Engine\Exception\MapperException;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
-use Made\Blog\Engine\Workaround\DateTime;
-
-// TODO: Remove workaround for datetime!
 
 /**
  * Class PostConfigurationLocaleMapper
@@ -57,6 +55,7 @@ class PostConfigurationLocaleMapper
      * The datetime string format.
      *
      * TODO: Move this to a dedicated formatter helper class.
+     *  Allow H:i part optionally.
      *
      * @var string
      */

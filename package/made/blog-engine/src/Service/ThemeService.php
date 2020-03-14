@@ -96,8 +96,6 @@ class ThemeService
     }
 
     /**
-     * TODO: This needs to be tested after the theme repository is implemented.
-     *
      * @param LoaderInterface $twigLoader
      * @throws LoaderError
      * @throws ThemeException

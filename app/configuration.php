@@ -29,6 +29,7 @@ return [
     ],
 
     Twig::class => [
+        'debug' => true,
         'cache' => false,
     ],
 

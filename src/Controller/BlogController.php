@@ -21,13 +21,14 @@ namespace App\Controller;
 
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
-use Made\Blog\Engine\Exception\PostException;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
+use Made\Blog\Engine\Service\SlugParser;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Views\Twig;
+use Twig\Error\Error;
 
 /**
  * Class BlogController
@@ -44,9 +45,6 @@ class BlogController implements ControllerInterface
      */
     public static function register(App $app): void
     {
-        $app->get('/test/{slug:.*}', BlogController::class . ':testSlugAction')
-            ->setName(BlogController::ROUTE_TEST_SLUG);
-
         // This is the most generic pattern, thus its route has to be registered last.
         $app->get('/{slug:.*}', BlogController::class . ':slugAction')
             ->setName(BlogController::ROUTE_SLUG);
@@ -93,50 +91,27 @@ class BlogController implements ControllerInterface
         /** @var string $slug */
         $slug = $args['slug'];
 
-        $line = "The slug is: '$slug'.";
-
-        $response->getBody()
-            ->write($line);
-
         // This is a serious tripwire! It will not be important anymore, when an actual favicon.ico exists. But this is
         // a browser flaw...
         if ('favicon.ico' === $slug) {
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
-        $this->logger->info($line);
+        $sp = new SlugParser();
+        [
+            SlugParser::MATCH_LOCALE => $matchLocale,
+            SlugParser::MATCH_SLUG => $matchSlug,
+        ] = $sp->parse($slug);
 
-        return $response;
-    }
+        if (empty($matchLocale) || empty($matchSlug)) {
+            return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
+        }
 
-    /**
-     * /test/{slug:.*}
-     *
-     * @param ServerRequestInterface $request
-     * @param ResponseInterface $response
-     * @param array $args
-     * @return ResponseInterface
-     */
-    public function testSlugAction(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
-    {
-        /** @var string $slug */
-        $slug = $args['slug'];
+        $post = $this->postRepository->getOneBySlug($matchLocale, $matchSlug);
 
-        $line = "The slug is: '$slug'.";
-
-        // TODO: The slug needs to be normalized for comparison. Also the logic of getting the post should be moved to a
-        //  service. The slug needs to be parsed for the locale!
-        // TODO: To save the locale for the request, we need a place to save the current request data.
-        // TODO: Then the base-theme needs to be built, so the post can be displayed.
-
-        $post = $this->postRepository->getOneBySlug('en', "/{$slug}");
-        var_dump($post);
-
-        $response->getBody()
-            ->write($line);
-
-//        $this->logger->info($line);
-
-        return $response;
+        // TODO: Error handling.
+        return $this->twig->render($response, '@App/index.html.twig', [
+            'post' => $post,
+        ]);
     }
 }

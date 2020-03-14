@@ -38,6 +38,8 @@ use Made\Blog\Engine\Service\ThemeService;
  */
 class ThemeRepository implements ThemeRepositoryInterface
 {
+    use CriteriaHelperTrait;
+
     /**
      * @var Configuration
      */
@@ -111,9 +113,7 @@ class ThemeRepository implements ThemeRepositoryInterface
             return null !== $theme;
         });
 
-        // TODO: Use criteria!
-
-        return $all;
+        return $this->applyCriteria($criteria, $all, Theme::class);
     }
 
     /**

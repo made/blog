@@ -87,7 +87,6 @@ class PostService
 
     /**
      * @param LoaderInterface $twigLoader
-     * @throws LoaderError
      * @throws PostException
      */
     public function updateLoader(LoaderInterface $twigLoader): void

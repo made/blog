@@ -98,8 +98,13 @@ class Package extends PackageAbstract
     private function registerClientDependency(): void
     {
         $this->registerConfiguration(Twig::class, [
-            // TODO: Complete option list with defaults.
+            'debug' => false,
+            'charset' => 'UTF-8',
+            'strict_variables' => false,
+            'autoescape' => 'html',
             'cache' => false,
+            'auto_reload' => null,
+            'optimizations' => -1,
         ]);
 
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];

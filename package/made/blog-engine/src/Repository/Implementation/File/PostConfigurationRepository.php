@@ -19,6 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
+use Closure;
 use Made\Blog\Engine\Exception\MapperException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
@@ -32,7 +33,9 @@ use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Service\PostService;
+use Made\Blog\Engine\Utility\ClosureInspection\ClosureInspection;
 use Psr\Log\LoggerInterface;
+use ReflectionException;
 
 /**
  * Class PostConfigurationRepository
@@ -41,6 +44,8 @@ use Psr\Log\LoggerInterface;
  */
 class PostConfigurationRepository implements PostConfigurationRepositoryInterface
 {
+    use CriteriaHelperTrait;
+
     /**
      * @var Configuration
      */
@@ -114,9 +119,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             return null !== $postConfiguration;
         });
 
-        // TODO: Use criteria!
-
-        return $all;
+        return $this->applyCriteria($criteria, $all, PostConfiguration::class);
     }
 
     /**
