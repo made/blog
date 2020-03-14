@@ -22,6 +22,7 @@ namespace Made\Blog\Engine\Repository\Implementation;
 use DateTime;
 use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Made\Blog\Engine\Service\PostContentResolverInterface;
@@ -58,9 +59,10 @@ class PostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAll(): array
+    public function getAll(CriteriaLocale $criteria): array
     {
-        $all = $this->postConfigurationLocaleRepository->getAll();
+        $all = $this->postConfigurationLocaleRepository
+            ->getAll($criteria);
 
         return $this->convertToPost($all);
     }
@@ -68,9 +70,10 @@ class PostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAllByPostDate(DateTime $dateTime): array
+    public function getAllByPostDate(CriteriaLocale $criteria, DateTime $dateTime): array
     {
-        $all = $this->postConfigurationLocaleRepository->getAllByPostDate($dateTime);
+        $all = $this->postConfigurationLocaleRepository
+            ->getAllByPostDate($criteria, $dateTime);
 
         return $this->convertToPost($all);
     }
@@ -78,9 +81,10 @@ class PostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAllByStatus(string ...$statusList): array
+    public function getAllByStatus(CriteriaLocale $criteria, string ...$statusList): array
     {
-        $all = $this->postConfigurationLocaleRepository->getAllByStatus(...$statusList);
+        $all = $this->postConfigurationLocaleRepository
+            ->getAllByStatus($criteria, ...$statusList);
 
         return $this->convertToPost($all);
     }
@@ -88,9 +92,10 @@ class PostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAllByCategory(string ...$categoryList): array
+    public function getAllByCategory(CriteriaLocale $criteria, string ...$categoryList): array
     {
-        $all = $this->postConfigurationLocaleRepository->getAllByCategory(...$categoryList);
+        $all = $this->postConfigurationLocaleRepository
+            ->getAllByCategory($criteria, ...$categoryList);
 
         return $this->convertToPost($all);
     }
@@ -98,9 +103,10 @@ class PostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAllByTag(string ...$tagList): array
+    public function getAllByTag(CriteriaLocale $criteria, string ...$tagList): array
     {
-        $all = $this->postConfigurationLocaleRepository->getAllByTag(...$tagList);
+        $all = $this->postConfigurationLocaleRepository
+            ->getAllByTag($criteria, ...$tagList);
 
         return $this->convertToPost($all);
     }
@@ -108,9 +114,10 @@ class PostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneById(string $id): ?Post
+    public function getOneById(string $locale, string $id): ?Post
     {
-        $one = $this->postConfigurationLocaleRepository->getOneById($id);
+        $one = $this->postConfigurationLocaleRepository
+            ->getOneById($locale, $id);
 
         $allPost = $this->convertToPost([
             $one,
@@ -122,9 +129,10 @@ class PostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneBySlug(string $slug): ?Post
+    public function getOneBySlug(string $locale, string $slug): ?Post
     {
-        $one = $this->postConfigurationLocaleRepository->getOneBySlug($slug);
+        $one = $this->postConfigurationLocaleRepository
+            ->getOneBySlug($locale, $slug);
 
         $allPost = $this->convertToPost([
             $one,
@@ -136,9 +144,10 @@ class PostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneBySlugRedirect(string $slugRedirect): ?Post
+    public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?Post
     {
-        $one = $this->postConfigurationLocaleRepository->getOneBySlugRedirect($slugRedirect);
+        $one = $this->postConfigurationLocaleRepository
+            ->getOneBySlugRedirect($locale, $slugRedirect);
 
         $allPost = $this->convertToPost([
             $one,
@@ -155,7 +164,8 @@ class PostRepository implements PostRepositoryInterface
     {
         $allPost = array_map(function (?PostConfigurationLocale $postConfigurationLocale): ?Post {
             if (null !== $postConfigurationLocale) {
-                $postContent = $this->postContentResolver->resolve($postConfigurationLocale);
+                $postContent = $this->postContentResolver
+                    ->resolve($postConfigurationLocale);
 
                 // Make sure there are only posts with content.
                 if (null !== $postContent) {

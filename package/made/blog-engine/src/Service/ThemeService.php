@@ -22,6 +22,7 @@ namespace Made\Blog\Engine\Service;
 use Made\Blog\Engine\Exception\ThemeException;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Twig\Error\LoaderError;
 use Twig\Loader\FilesystemLoader;
@@ -110,7 +111,9 @@ class ThemeService
 
         /** @var FilesystemLoader $twigLoader */
 
-        $themeList = $this->themeRepository->getAll();
+        // TODO: Add order.
+        $themeListCriteria = new Criteria();
+        $themeList = $this->themeRepository->getAll($themeListCriteria);
 
         foreach ($themeList as $theme) {
             $path = $theme->getPath();

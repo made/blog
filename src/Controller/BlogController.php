@@ -129,7 +129,7 @@ class BlogController implements ControllerInterface
         // TODO: To save the locale for the request, we need a place to save the current request data.
         // TODO: Then the base-theme needs to be built, so the post can be displayed.
 
-        $post = $this->postRepository->getOneBySlug("/{$slug}");
+        $post = $this->postRepository->getOneBySlug('en', "/{$slug}");
         var_dump($post);
 
         $response->getBody()

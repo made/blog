@@ -21,6 +21,7 @@ namespace Made\Blog\Engine\Repository;
 
 use DateTime;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 
 /**
  * Interface PostConfigurationLocaleRepositoryInterface
@@ -32,49 +33,57 @@ interface PostConfigurationLocaleRepositoryInterface
     const TAG_POST_CONFIGURATION_LOCALE_REPOSITORY = 'repository.post_configuration_locale';
 
     /**
+     * @param CriteriaLocale $criteria
      * @return array|PostConfigurationLocale[]
      */
-    public function getAll(): array;
+    public function getAll(CriteriaLocale $criteria): array;
 
     /**
+     * @param CriteriaLocale $criteria
      * @param DateTime $dateTime
      * @return array|PostConfigurationLocale[]
      */
-    public function getAllByPostDate(DateTime $dateTime): array;
+    public function getAllByPostDate(CriteriaLocale $criteria, DateTime $dateTime): array;
 
     /**
+     * @param CriteriaLocale $criteria
      * @param string ...$statusList
      * @return array|PostConfigurationLocale[]
      */
-    public function getAllByStatus(string ...$statusList): array;
+    public function getAllByStatus(CriteriaLocale $criteria, string ...$statusList): array;
 
     /**
+     * @param CriteriaLocale $criteria
      * @param string ...$categoryList
      * @return array|PostConfigurationLocale[]
      */
-    public function getAllByCategory(string ...$categoryList): array;
+    public function getAllByCategory(CriteriaLocale $criteria, string ...$categoryList): array;
 
     /**
+     * @param CriteriaLocale $criteria
      * @param string ...$tagList
      * @return array|PostConfigurationLocale[]
      */
-    public function getAllByTag(string ...$tagList): array;
+    public function getAllByTag(CriteriaLocale $criteria, string ...$tagList): array;
 
     /**
+     * @param string $locale
      * @param string $id
      * @return PostConfigurationLocale|null
      */
-    public function getOneById(string $id): ?PostConfigurationLocale;
+    public function getOneById(string $locale, string $id): ?PostConfigurationLocale;
 
     /**
+     * @param string $locale
      * @param string $slug
      * @return PostConfigurationLocale|null
      */
-    public function getOneBySlug(string $slug): ?PostConfigurationLocale;
+    public function getOneBySlug(string $locale, string $slug): ?PostConfigurationLocale;
 
     /**
+     * @param string $locale
      * @param string $slugRedirect
      * @return PostConfigurationLocale|null
      */
-    public function getOneBySlugRedirect(string $slugRedirect): ?PostConfigurationLocale;
+    public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?PostConfigurationLocale;
 }

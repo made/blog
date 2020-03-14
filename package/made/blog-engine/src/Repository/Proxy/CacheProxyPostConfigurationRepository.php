@@ -20,6 +20,7 @@
 namespace Made\Blog\Engine\Repository\Proxy;
 
 use Made\Blog\Engine\Model\PostConfiguration;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -58,7 +59,7 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
     /**
      * @inheritDoc
      */
-    public function getAll(): array
+    public function getAll(Criteria $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
 
@@ -72,7 +73,8 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationRepository->getAll();
+            $all = $this->postConfigurationRepository
+                ->getAll($criteria);
 
             if (!empty($all)) {
                 try {

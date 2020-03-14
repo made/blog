@@ -27,6 +27,7 @@ use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
@@ -36,8 +37,6 @@ use Psr\Log\LoggerInterface;
 /**
  * Class PostConfigurationRepository
  *
- * @TODO Formatting is really messed up... please fix it.
- * @TODO Tidy up the docblocks, use more inheritdoc and put the docblocks into the interfaces, where they belong.
  * @package Made\Blog\Engine\Repository\Implementation\File
  */
 class PostConfigurationRepository implements PostConfigurationRepositoryInterface
@@ -73,7 +72,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     /**
      * @inheritDoc
      */
-    public function getAll(): array
+    public function getAll(Criteria $criteria): array
     {
         $path = $this->getPath();
 
@@ -111,9 +110,13 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             return null;
         }, $list);
 
-        return array_filter($all, function (?PostConfiguration $postConfiguration): bool {
+        $all = array_filter($all, function (?PostConfiguration $postConfiguration): bool {
             return null !== $postConfiguration;
         });
+
+        // TODO: Use criteria!
+
+        return $all;
     }
 
     /**
@@ -124,7 +127,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      */
     public function getOneById(string $id): ?PostConfiguration
     {
-        $all = $this->getAll();
+        $all = $this->getAll(new Criteria());
 
         return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $one) use ($id): ?PostConfiguration {
             if (null === $carry && strtolower($id) === strtolower($one->getId())) {

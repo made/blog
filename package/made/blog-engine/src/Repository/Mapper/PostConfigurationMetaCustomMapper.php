@@ -36,7 +36,7 @@ class PostConfigurationMetaCustomMapper
 
     /**
      * @param array $data
-     * @return \Made\Blog\Engine\Model\PostConfigurationMetaCustom
+     * @return PostConfigurationMetaCustom
      * @throws MapperException
      */
     public function fromData(array $data): PostConfigurationMetaCustom
@@ -60,7 +60,7 @@ class PostConfigurationMetaCustomMapper
 
     /**
      * @param array|array[] $dataArray
-     * @return array|\Made\Blog\Engine\Model\PostConfigurationMetaCustom[]
+     * @return array|PostConfigurationMetaCustom[]
      * @throws MapperException
      */
     public function fromDataArray(array $dataArray): array
@@ -75,7 +75,7 @@ class PostConfigurationMetaCustomMapper
     }
 
     /**
-     * @param \Made\Blog\Engine\Model\PostConfigurationMetaCustom $postConfigurationMetaCustom
+     * @param PostConfigurationMetaCustom $postConfigurationMetaCustom
      * @return array
      */
     public function toData(PostConfigurationMetaCustom $postConfigurationMetaCustom): array
@@ -89,7 +89,7 @@ class PostConfigurationMetaCustomMapper
     }
 
     /**
-     * @param array|\Made\Blog\Engine\Model\PostConfigurationMetaCustom[] $array
+     * @param array|PostConfigurationMetaCustom[] $array
      * @return array|array[]
      */
     public function toDataArray(array $array): array

@@ -21,6 +21,7 @@ namespace Made\Blog\Engine\Repository\Proxy;
 
 use DateTime;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -32,6 +33,8 @@ use Psr\SimpleCache\InvalidArgumentException;
  * TODO: Check if a single-key cache would be better. That would not use natsort() and implode() on the parameter, but
  *  pull each parameter entry from the cache and make the result unique by id. E.g.: Find "tag-1, tag-2" would not
  *  result in the cache key "tag-1-tag-2", but in "tag-1" and "tag-2" separately.
+ * TODO: Include criteria information in the cache key. This will result in more total cache entries, but will certainly
+ *  solve an issue with filter/order and offset/limit.
  *
  * @package Made\Blog\Engine\Repository\Proxy
  */
@@ -70,7 +73,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getAll(): array
+    public function getAll(CriteriaLocale $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
 
@@ -84,7 +87,8 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAll();
+            $all = $this->postConfigurationLocaleRepository
+                ->getAll($criteria);
 
             if (!empty($all)) {
                 try {
@@ -101,7 +105,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getAllByPostDate(DateTime $dateTime): array
+    public function getAllByPostDate(CriteriaLocale $criteria, DateTime $dateTime): array
     {
         $key = vsprintf(static::CACHE_KEY_ALL_BY_POST_DATE, [
             $dateTime->format(PostConfigurationLocaleMapper::DTS_FORMAT),
@@ -117,7 +121,8 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAllByPostDate($dateTime);
+            $all = $this->postConfigurationLocaleRepository
+                ->getAllByPostDate($criteria, $dateTime);
 
             if (!empty($all)) {
                 try {
@@ -134,7 +139,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getAllByStatus(string ...$statusList): array
+    public function getAllByStatus(CriteriaLocale $criteria, string ...$statusList): array
     {
         natsort($statusList);
 
@@ -152,7 +157,8 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAllByStatus(...$statusList);
+            $all = $this->postConfigurationLocaleRepository
+                ->getAllByStatus($criteria, ...$statusList);
 
             if (!empty($all)) {
                 try {
@@ -169,7 +175,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getAllByCategory(string ...$categoryList): array
+    public function getAllByCategory(CriteriaLocale $criteria, string ...$categoryList): array
     {
         natsort($categoryList);
 
@@ -187,7 +193,8 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAllByCategory(...$categoryList);
+            $all = $this->postConfigurationLocaleRepository
+                ->getAllByCategory($criteria, ...$categoryList);
 
             if (!empty($all)) {
                 try {
@@ -204,7 +211,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getAllByTag(string ...$tagList): array
+    public function getAllByTag(CriteriaLocale $criteria, string ...$tagList): array
     {
         natsort($tagList);
 
@@ -222,7 +229,8 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         }
 
         if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository->getAllByTag(...$tagList);
+            $all = $this->postConfigurationLocaleRepository
+                ->getAllByTag($criteria, ...$tagList);
 
             if (!empty($all)) {
                 try {
@@ -239,7 +247,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getOneById(string $id): ?PostConfigurationLocale
+    public function getOneById(string $locale, string $id): ?PostConfigurationLocale
     {
         $key = vsprintf(static::CACHE_KEY_ONE, [
             $id,
@@ -255,7 +263,8 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         }
 
         if (empty($one)) {
-            $one = $this->postConfigurationLocaleRepository->getOneById($id);
+            $one = $this->postConfigurationLocaleRepository
+                ->getOneById($locale, $id);
 
             if (!empty($one)) {
                 try {
@@ -272,7 +281,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getOneBySlug(string $slug): ?PostConfigurationLocale
+    public function getOneBySlug(string $locale, string $slug): ?PostConfigurationLocale
     {
         $key = vsprintf(static::CACHE_KEY_ONE_BY_SLUG, [
             $slug,
@@ -288,12 +297,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         }
 
         if (empty($one)) {
-            $one = $this->postConfigurationLocaleRepository->getOneBySlug($slug);
+            $one = $this->postConfigurationLocaleRepository
+                ->getOneBySlug($locale, $slug);
 
             if (!empty($one)) {
                 try {
-                    if (!$this->cache->set($key, $one))
-                        throw new \RuntimeException('Unable to cache.');
+                    $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
                     // TODO: Log.
                 }
@@ -306,7 +315,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
-    public function getOneBySlugRedirect(string $slugRedirect): ?PostConfigurationLocale
+    public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?PostConfigurationLocale
     {
         $key = vsprintf(static::CACHE_KEY_ONE_BY_SLUG_REDIRECT, [
             $slugRedirect,
@@ -322,7 +331,8 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         }
 
         if (empty($one)) {
-            $one = $this->postConfigurationLocaleRepository->getOneBySlugRedirect($slugRedirect);
+            $one = $this->postConfigurationLocaleRepository
+                ->getOneBySlugRedirect($locale, $slugRedirect);
 
             if (!empty($one)) {
                 try {

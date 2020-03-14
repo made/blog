@@ -19,10 +19,11 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
-use DateTime as DateTimeInternal;
 use Made\Blog\Engine\Exception\MapperException;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Workaround\DateTime;
+
+// TODO: Remove workaround for datetime!
 
 /**
  * Class PostConfigurationLocaleMapper
@@ -169,7 +170,7 @@ class PostConfigurationLocaleMapper
 
     /**
      * @param array|array[] $dataArray
-     * @return array|\Made\Blog\Engine\Model\PostConfigurationLocale[]
+     * @return array|PostConfigurationLocale[]
      * @throws MapperException
      */
     public function fromDataArray(array $dataArray): array

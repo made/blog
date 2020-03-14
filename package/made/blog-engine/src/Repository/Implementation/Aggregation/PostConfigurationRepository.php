@@ -20,10 +20,13 @@
 namespace Made\Blog\Engine\Repository\Implementation\Aggregation;
 
 use Made\Blog\Engine\Model\PostConfiguration;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 
 /**
  * Class PostConfigurationRepository
+ *
+ * TODO: Remove aggregation layer.
  *
  * @package Made\Blog\Engine\Repository\Implementation\Aggregation
  */
@@ -46,14 +49,15 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     /**
      * @inheritDoc
      */
-    public function getAll(): array
+    public function getAll(Criteria $criteria): array
     {
         $all = [];
 
         foreach ($this->postConfigurationRepositoryList as $postConfigurationRepository) {
-            array_push($all, ...$postConfigurationRepository->getAll());
+            array_push($all, ...$postConfigurationRepository->getAll($criteria));
         }
 
+        // Non-unique entries will result in one of them being ignored.
         return $all;
     }
 

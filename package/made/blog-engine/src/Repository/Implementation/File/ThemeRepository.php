@@ -26,6 +26,7 @@ use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Theme;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\ThemeService;
@@ -61,7 +62,7 @@ class ThemeRepository implements ThemeRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAll(): array
+    public function getAll(Criteria $criteria): array
     {
         $path = $this->getPath();
 
@@ -106,9 +107,13 @@ class ThemeRepository implements ThemeRepositoryInterface
             return null;
         }, $list);
 
-        return array_filter($all, function (?Theme $theme): bool {
+        $all = array_filter($all, function (?Theme $theme): bool {
             return null !== $theme;
         });
+
+        // TODO: Use criteria!
+
+        return $all;
     }
 
     /**
@@ -116,7 +121,7 @@ class ThemeRepository implements ThemeRepositoryInterface
      */
     public function getOneByName(string $name): ?Theme
     {
-        $all = $this->getAll();
+        $all = $this->getAll(new Criteria());
 
         return array_reduce($all, function (?Theme $carry, Theme $theme) use ($name): ?Theme {
             if (null === $carry && $theme->getName() === $name) {

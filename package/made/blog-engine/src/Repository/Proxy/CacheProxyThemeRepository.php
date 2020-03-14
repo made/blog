@@ -20,7 +20,7 @@
 namespace Made\Blog\Engine\Repository\Proxy;
 
 use Made\Blog\Engine\Model\Theme;
-use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -59,7 +59,7 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAll(): array
+    public function getAll(Criteria $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
 
@@ -73,7 +73,8 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
         }
 
         if (empty($all)) {
-            $all = $this->themeRepository->getAll();
+            $all = $this->themeRepository
+                ->getAll($criteria);
 
             if (!empty($all)) {
                 try {

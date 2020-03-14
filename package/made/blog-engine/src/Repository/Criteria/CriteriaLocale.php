@@ -17,24 +17,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Repository;
+namespace Made\Blog\Engine\Repository\Criteria;
 
-use Made\Blog\Engine\Model\PostConfiguration;
-use Made\Blog\Engine\Repository\Criteria\Criteria;
-
-interface PostConfigurationRepositoryInterface
+/**
+ * Class CriteriaLocale
+ *
+ * @package Made\Blog\Engine\Repository\Criteria
+ */
+class CriteriaLocale extends Criteria
 {
-    const TAG_POST_CONFIGURATION_REPOSITORY = 'repository.post_configuration';
+    /**
+     * @var string
+     */
+    private $locale;
 
     /**
-     * @param Criteria $criteria
-     * @return array|PostConfiguration[]
+     * CriteriaLocale constructor.
+     * @param string $locale
      */
-    public function getAll(Criteria $criteria): array;
+    public function __construct(string $locale)
+    {
+        $this->locale = $locale;
+    }
 
     /**
-     * @param string $id
-     * @return PostConfiguration|null
+     * @return string
      */
-    public function getOneById(string $id): ?PostConfiguration;
+    public function getLocale(): string
+    {
+        return $this->locale;
+    }
+
+    /**
+     * @param string $locale
+     * @return CriteriaLocale
+     */
+    public function setLocale(string $locale): CriteriaLocale
+    {
+        $this->locale = $locale;
+        return $this;
+    }
 }

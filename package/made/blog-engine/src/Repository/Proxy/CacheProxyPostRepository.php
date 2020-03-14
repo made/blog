@@ -21,6 +21,7 @@ namespace Made\Blog\Engine\Repository\Proxy;
 
 use DateTime;
 use Made\Blog\Engine\Model\Post;
+use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Psr\SimpleCache\CacheInterface;
@@ -70,7 +71,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAll(): array
+    public function getAll(CriteriaLocale $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
 
@@ -84,7 +85,8 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         }
 
         if (empty($all)) {
-            $all = $this->postRepository->getAll();
+            $all = $this->postRepository
+                ->getAll($criteria);
 
             if (!empty($all)) {
                 try {
@@ -101,7 +103,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAllByPostDate(DateTime $dateTime): array
+    public function getAllByPostDate(CriteriaLocale $criteria, DateTime $dateTime): array
     {
         $key = vsprintf(static::CACHE_KEY_ALL_BY_POST_DATE, [
             $dateTime->format(PostConfigurationLocaleMapper::DTS_FORMAT),
@@ -117,7 +119,8 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         }
 
         if (empty($all)) {
-            $all = $this->postRepository->getAllByPostDate($dateTime);
+            $all = $this->postRepository
+                ->getAllByPostDate($criteria, $dateTime);
 
             if (!empty($all)) {
                 try {
@@ -134,7 +137,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAllByStatus(string ...$statusList): array
+    public function getAllByStatus(CriteriaLocale $criteria, string ...$statusList): array
     {
         natsort($statusList);
 
@@ -152,7 +155,8 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         }
 
         if (empty($all)) {
-            $all = $this->postRepository->getAllByStatus(...$statusList);
+            $all = $this->postRepository
+                ->getAllByStatus($criteria, ...$statusList);
 
             if (!empty($all)) {
                 try {
@@ -169,7 +173,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAllByCategory(string ...$categoryList): array
+    public function getAllByCategory(CriteriaLocale $criteria, string ...$categoryList): array
     {
         natsort($categoryList);
 
@@ -187,7 +191,8 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         }
 
         if (empty($all)) {
-            $all = $this->postRepository->getAllByCategory(...$categoryList);
+            $all = $this->postRepository
+                ->getAllByCategory($criteria, ...$categoryList);
 
             if (!empty($all)) {
                 try {
@@ -204,7 +209,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAllByTag(string ...$tagList): array
+    public function getAllByTag(CriteriaLocale $criteria, string ...$tagList): array
     {
         natsort($tagList);
 
@@ -222,7 +227,8 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         }
 
         if (empty($all)) {
-            $all = $this->postRepository->getAllByTag(...$tagList);
+            $all = $this->postRepository
+                ->getAllByTag($criteria, ...$tagList);
 
             if (!empty($all)) {
                 try {
@@ -239,7 +245,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneById(string $id): ?Post
+    public function getOneById(string $locale, string $id): ?Post
     {
         $key = vsprintf(static::CACHE_KEY_ONE, [
             $id,
@@ -255,7 +261,8 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         }
 
         if (empty($one)) {
-            $one = $this->postRepository->getOneById($id);
+            $one = $this->postRepository
+                ->getOneById($locale, $id);
 
             if (!empty($one)) {
                 try {
@@ -272,7 +279,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneBySlug(string $slug): ?Post
+    public function getOneBySlug(string $locale, string $slug): ?Post
     {
         $key = vsprintf(static::CACHE_KEY_ONE_BY_SLUG, [
             $slug,
@@ -288,7 +295,8 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         }
 
         if (empty($one)) {
-            $one = $this->postRepository->getOneBySlug($slug);
+            $one = $this->postRepository
+                ->getOneBySlug($locale, $slug);
 
             if (!empty($one)) {
                 try {
@@ -305,7 +313,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneBySlugRedirect(string $slugRedirect): ?Post
+    public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?Post
     {
         $key = vsprintf(static::CACHE_KEY_ONE_BY_SLUG_REDIRECT, [
             $slugRedirect,
@@ -321,7 +329,8 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         }
 
         if (empty($one)) {
-            $one = $this->postRepository->getOneBySlugRedirect($slugRedirect);
+            $one = $this->postRepository
+                ->getOneBySlugRedirect($locale, $slugRedirect);
 
             if (!empty($one)) {
                 try {

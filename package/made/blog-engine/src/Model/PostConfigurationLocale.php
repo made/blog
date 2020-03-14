@@ -314,4 +314,22 @@ class PostConfigurationLocale
         $this->template = $template;
         return $this;
     }
+
+    /**
+     * @return PostConfiguration
+     */
+    public function getPostConfiguration(): PostConfiguration
+    {
+        return $this->postConfiguration;
+    }
+
+    /**
+     * @param PostConfiguration $postConfiguration
+     * @return PostConfigurationLocale
+     */
+    public function setPostConfiguration(PostConfiguration $postConfiguration): PostConfigurationLocale
+    {
+        $this->postConfiguration = $postConfiguration;
+        return $this;
+    }
 }

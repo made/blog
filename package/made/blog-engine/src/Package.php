@@ -21,9 +21,9 @@ namespace Made\Blog\Engine;
 
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationRepository as PostConfigurationRepositoryAggregation;
+use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository as ThemeRepositoryFile;
-use Made\Blog\Engine\Repository\Implementation\PostConfigurationLocaleRepository;
 use Made\Blog\Engine\Repository\Implementation\PostRepository;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;

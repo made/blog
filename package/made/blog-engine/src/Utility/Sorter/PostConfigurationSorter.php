@@ -25,7 +25,7 @@ use Made\Blog\Engine\Model\PostConfiguration;
 /**
  * Class PostConfigurationSorter
  *
- * @package Made\Blog\Engine\Util\Sorter
+ * @package Made\Blog\Engine\Utility\Sorter
  * @TODO Refactor to enable usage on PostConfigurationLocale object array.
  * @deprecated Unable to use with the new model.
  */

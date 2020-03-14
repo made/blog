@@ -20,6 +20,7 @@
 namespace Made\Blog\Engine\Repository;
 
 use Made\Blog\Engine\Model\Theme;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 
 /**
  * Interface ThemeRepositoryInterface
@@ -31,9 +32,10 @@ interface ThemeRepositoryInterface
     const TAG_THEME_REPOSITORY = 'repository.theme';
 
     /**
+     * @param Criteria $criteria
      * @return array|Theme[]
      */
-    public function getAll(): array;
+    public function getAll(Criteria $criteria): array;
 
     /**
      * @param string $name

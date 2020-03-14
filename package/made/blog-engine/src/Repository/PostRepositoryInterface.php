@@ -21,6 +21,7 @@ namespace Made\Blog\Engine\Repository;
 
 use DateTime;
 use Made\Blog\Engine\Model\Post;
+use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 
 /**
  * Interface PostRepositoryInterface
@@ -32,49 +33,57 @@ interface PostRepositoryInterface
     const TAG_POST_REPOSITORY = 'repository.post';
 
     /**
+     * @param CriteriaLocale $criteria
      * @return array|Post[]
      */
-    public function getAll(): array;
+    public function getAll(CriteriaLocale $criteria): array;
 
     /**
+     * @param CriteriaLocale $criteria
      * @param DateTime $dateTime
      * @return array|Post[]
      */
-    public function getAllByPostDate(DateTime $dateTime): array;
+    public function getAllByPostDate(CriteriaLocale $criteria, DateTime $dateTime): array;
 
     /**
+     * @param CriteriaLocale $criteria
      * @param string ...$statusList
      * @return array|Post[]
      */
-    public function getAllByStatus(string ...$statusList): array;
+    public function getAllByStatus(CriteriaLocale $criteria, string ...$statusList): array;
 
     /**
+     * @param CriteriaLocale $criteria
      * @param string ...$categoryList
      * @return array|Post[]
      */
-    public function getAllByCategory(string ...$categoryList): array;
+    public function getAllByCategory(CriteriaLocale $criteria, string ...$categoryList): array;
 
     /**
+     * @param CriteriaLocale $criteria
      * @param string ...$tagList
      * @return array|Post[]
      */
-    public function getAllByTag(string ...$tagList): array;
+    public function getAllByTag(CriteriaLocale $criteria, string ...$tagList): array;
 
     /**
+     * @param string $locale
      * @param string $id
      * @return Post|null
      */
-    public function getOneById(string $id): ?Post;
+    public function getOneById(string $locale, string $id): ?Post;
 
     /**
+     * @param string $locale
      * @param string $slug
      * @return Post|null
      */
-    public function getOneBySlug(string $slug): ?Post;
+    public function getOneBySlug(string $locale, string $slug): ?Post;
 
     /**
+     * @param string $locale
      * @param string $slugRedirect
      * @return Post|null
      */
-    public function getOneBySlugRedirect(string $slugRedirect): ?Post;
+    public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?Post;
 }
