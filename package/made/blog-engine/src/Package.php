@@ -20,8 +20,8 @@
 namespace Made\Blog\Engine;
 
 use Made\Blog\Engine\Model\Configuration;
-use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationRepository as PostConfigurationRepositoryAggregation;
-use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository;
+use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationLocaleRepository as PostConfigurationLocaleRepositoryAggregation;
+use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository as PostConfigurationLocaleRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository as ThemeRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\PostRepository;
@@ -46,11 +46,11 @@ use Made\Blog\Engine\Service\PostContentProviderInterface;
 use Made\Blog\Engine\Service\PostContentResolver;
 use Made\Blog\Engine\Service\PostContentResolverInterface;
 use Made\Blog\Engine\Service\PostService;
-use Made\Blog\Engine\Service\SlugParser;
+use Made\Blog\Engine\Service\SlugParser\Implementation\Basic\SlugParser;
 use Made\Blog\Engine\Service\SlugParserInterface;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
 use Made\Blog\Engine\Service\ThemeService;
-use Parsedown;
+use ParsedownExtra;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
 use Pimple\Package\PackageAbstract;
@@ -204,7 +204,7 @@ class Package extends PackageAbstract
      */
     private function registerParsedown(): void
     {
-        $this->registerConfiguration(Parsedown::class, [
+        $this->registerConfiguration(ParsedownExtra::class, [
             'breaks_enabled' => true,
             'markup_escaped' => false,
             'urls_linked' => true,
@@ -214,12 +214,12 @@ class Package extends PackageAbstract
         /** @var array $configuration */
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
-        $this->registerService(Parsedown::class, function (Container $container) use ($configuration): Parsedown {
+        $this->registerService(ParsedownExtra::class, function (Container $container) use ($configuration): ParsedownExtra {
             /** @var array $settings */
-            $settings = $configuration[Parsedown::class];
+            $settings = $configuration[ParsedownExtra::class];
 
-            /** @var Parsedown $parsedown */
-            $parsedown = new Parsedown();
+            /** @var ParsedownExtra $parsedown */
+            $parsedown = new ParsedownExtra();
             $parsedown->setBreaksEnabled($settings['breaks_enabled']);
             $parsedown->setMarkupEscaped($settings['markup_escaped']);
             $parsedown->setUrlsLinked($settings['urls_linked']);
@@ -227,8 +227,6 @@ class Package extends PackageAbstract
 
             return $parsedown;
         });
-
-        // TODO: Extend with "parsedown-extra".
     }
 
     /**
@@ -300,33 +298,32 @@ class Package extends PackageAbstract
             return new PostConfigurationRepositoryFile($configuration, $postConfigurationMapper, $logger);
         });
 
-        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryAggregation::class, function (Container $container): PostConfigurationRepositoryInterface {
-            $serviceList = $this->resolveTag(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryInterface::class, [
-                PostConfigurationRepositoryAggregation::class,
-            ]);
-
-            return new PostConfigurationRepositoryAggregation($serviceList);
-        });
-
-        $this->registerServiceLazy(PostConfigurationRepositoryInterface::class, PostConfigurationRepositoryAggregation::class);
-
-        $this->container->extend(PostConfigurationRepositoryInterface::class, function (PostConfigurationRepositoryInterface $postConfigurationRepository, Container $container): PostConfigurationRepositoryInterface {
+        $this->container->extend(PostConfigurationRepositoryFile::class, function (PostConfigurationRepositoryInterface $postConfigurationRepository, Container $container): PostConfigurationRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
 
             return new CacheProxyPostConfigurationRepository($cache, $postConfigurationRepository);
         });
 
-        $this->registerTagAndService(PostConfigurationLocaleRepositoryInterface::TAG_POST_CONFIGURATION_LOCALE_REPOSITORY, PostConfigurationLocaleRepository::class, function (Container $container): PostConfigurationLocaleRepositoryInterface {
-            /** @var PostConfigurationRepositoryInterface $postConfigurationRepository */
-            $postConfigurationRepository = $container[PostConfigurationRepositoryInterface::class];
+        $this->registerTagAndService(PostConfigurationLocaleRepositoryInterface::TAG_POST_CONFIGURATION_LOCALE_REPOSITORY, PostConfigurationLocaleRepositoryFile::class, function (Container $container): PostConfigurationLocaleRepositoryInterface {
+            /** @var PostConfigurationRepositoryFile $postConfigurationRepository */
+            $postConfigurationRepository = $container[PostConfigurationRepositoryFile::class];
             /** @var LoggerInterface $logger */
             $logger = $container[LoggerInterface::class];
 
-            return new PostConfigurationLocaleRepository($postConfigurationRepository, $logger);
+            return new PostConfigurationLocaleRepositoryFile($postConfigurationRepository, $logger);
         });
 
-        $this->registerServiceLazy(PostConfigurationLocaleRepositoryInterface::class, PostConfigurationLocaleRepository::class);
+        $this->registerTagAndService(PostConfigurationLocaleRepositoryInterface::TAG_POST_CONFIGURATION_LOCALE_REPOSITORY, PostConfigurationLocaleRepositoryAggregation::class, function (Container $container): PostConfigurationLocaleRepositoryInterface {
+            /** @var array|PostConfigurationLocaleRepositoryInterface[] $serviceList */
+            $serviceList = $this->resolveTag(PostConfigurationLocaleRepositoryInterface::TAG_POST_CONFIGURATION_LOCALE_REPOSITORY, PostConfigurationLocaleRepositoryInterface::class, [
+                PostConfigurationLocaleRepositoryAggregation::class,
+            ]);
+
+            return new PostConfigurationLocaleRepositoryAggregation($serviceList);
+        });
+
+        $this->registerServiceLazy(PostConfigurationLocaleRepositoryInterface::class, PostConfigurationLocaleRepositoryAggregation::class);
 
         $this->container->extend(PostConfigurationLocaleRepositoryInterface::class, function (PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository, Container $container): PostConfigurationLocaleRepositoryInterface {
             /** @var CacheInterface $cache */
@@ -373,9 +370,8 @@ class Package extends PackageAbstract
             /** @var array $settings */
             $settings = $configuration[TaskAbstract::class];
 
-            // TODO: Use "parsedown-extra" instead.
-            /** @var Parsedown $parsedown */
-            $parsedown = $container[Parsedown::class];
+            /** @var ParsedownExtra $parsedown */
+            $parsedown = $container[ParsedownExtra::class];
 
             return new RenderParsedownTask($settings[RenderParsedownTask::class], $parsedown);
         });

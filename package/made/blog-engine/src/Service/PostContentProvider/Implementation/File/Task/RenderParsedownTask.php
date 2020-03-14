@@ -22,7 +22,7 @@ namespace Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Model\PostContent;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
-use Parsedown;
+use ParsedownExtra;
 
 /**
  * Class RenderParsedownTask
@@ -32,16 +32,16 @@ use Parsedown;
 class RenderParsedownTask extends TaskAbstract
 {
     /**
-     * @var Parsedown
+     * @var ParsedownExtra
      */
     private $parsedown;
 
     /**
      * RenderParsedownTask constructor.
      * @param int $priority
-     * @param Parsedown $parsedown
+     * @param ParsedownExtra $parsedown
      */
-    public function __construct(int $priority, Parsedown $parsedown)
+    public function __construct(int $priority, ParsedownExtra $parsedown)
     {
         parent::__construct($priority);
 

@@ -21,14 +21,18 @@ namespace App\Controller;
 
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
+use Made\Blog\Engine\Help\Path;
+use Made\Blog\Engine\Help\Slug;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
-use Made\Blog\Engine\Service\SlugParser;
+use Made\Blog\Engine\Service\SlugParserInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Views\Twig;
-use Twig\Error\Error;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 /**
  * Class BlogController
@@ -38,7 +42,6 @@ use Twig\Error\Error;
 class BlogController implements ControllerInterface
 {
     const ROUTE_SLUG = 'blog.slug';
-    const ROUTE_TEST_SLUG = 'blog.test.slug';
 
     /**
      * @inheritDoc
@@ -66,15 +69,22 @@ class BlogController implements ControllerInterface
     private $postRepository;
 
     /**
+     * @var SlugParserInterface
+     */
+    private $slugParser;
+
+    /**
      * BlogController constructor.
      * @param Twig $twig
      * @param LoggerInterface $logger
+     * @param SlugParserInterface $slugParser
      * @param PostRepositoryInterface $postRepository
      */
-    public function __construct(Twig $twig, LoggerInterface $logger, PostRepositoryInterface $postRepository)
+    public function __construct(Twig $twig, LoggerInterface $logger, SlugParserInterface $slugParser, PostRepositoryInterface $postRepository)
     {
         $this->twig = $twig;
         $this->logger = $logger;
+        $this->slugParser = $slugParser;
         $this->postRepository = $postRepository;
     }
 
@@ -97,21 +107,52 @@ class BlogController implements ControllerInterface
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
-        $sp = new SlugParser();
         [
-            SlugParser::MATCH_LOCALE => $matchLocale,
-            SlugParser::MATCH_SLUG => $matchSlug,
-        ] = $sp->parse($slug);
+            SlugParserInterface::MATCH_LOCALE => $matchLocale,
+            SlugParserInterface::MATCH_SLUG => $matchSlug,
+        ] = $this->slugParser->parse($slug);
+
+        unset($slug);
 
         if (empty($matchLocale) || empty($matchSlug)) {
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
-        $post = $this->postRepository->getOneBySlug($matchLocale, $matchSlug);
+        // TODO: Add trailing slash middleware.
+        //  http://www.slimframework.com/docs/v4/cookbook/route-patterns.html
 
-        // TODO: Error handling.
-        return $this->twig->render($response, '@App/index.html.twig', [
-            'post' => $post,
-        ]);
+        $post = $this->postRepository->getOneBySlug($matchLocale, $matchSlug);
+        if (null === $post) {
+            $post = $this->postRepository->getOneBySlugRedirect($matchLocale, $matchSlug);
+
+            if (null !== $post) {
+                $locale = $post->getConfiguration()->getLocale();
+                $slug = $post->getConfiguration()->getSlug();
+
+                $slug = Path::join($locale, $slug);
+                $slug = Slug::sanitize($slug);
+
+                return $response
+                    ->withHeader('Location', $slug)
+                    ->withStatus(StatusCodeInterface::STATUS_MOVED_PERMANENTLY);
+            }
+        }
+
+        if (null == $post) {
+            return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
+        }
+
+        // TODO: Test ability to return a post as json.
+        //  http://www.slimframework.com/docs/v4/objects/response.html#returning-json
+
+        try {
+            return $this->twig->render($response, '@App/index.html.twig', [
+                'post' => $post,
+            ]);
+        } catch (LoaderError | RuntimeError | SyntaxError $error) {
+            // TODO: Logging.
+
+            return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
+        }
     }
 }

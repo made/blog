@@ -24,6 +24,7 @@ use App\Controller\BlogController;
 use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
+use Made\Blog\Engine\Service\SlugParserInterface;
 use Made\Blog\Engine\Service\ThemeService;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -197,10 +198,12 @@ class Package extends PackageAbstract
             $twig = $container[Twig::class];
             /** @var Logger $logger */
             $logger = $container[Logger::class];
+            /** @var SlugParserInterface $slugParser */
+            $slugParser = $container[SlugParserInterface::class];
             /** @var PostRepositoryInterface $postRepository */
             $postRepository = $container[PostRepositoryInterface::class];
 
-            return new BlogController($twig, $logger, $postRepository);
+            return new BlogController($twig, $logger, $slugParser, $postRepository);
         });
     }
 }

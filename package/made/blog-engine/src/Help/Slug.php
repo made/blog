@@ -17,35 +17,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Service;
+namespace Made\Blog\Engine\Help;
 
 /**
- * Class SlugParser
+ * Class Slug
  *
- * @package Made\Blog\Engine\Service
+ * @package Made\Blog\Engine\Help
  */
-class SlugParser implements SlugParserInterface
+class Slug
 {
-    const PATTERN = '/^\/?([a-z]{2})\/([\w\-]+)\/?$/';
-
     /**
-     * @inheritDoc
+     * @param string $slug
+     * @return string
      */
-    public function parse(string $slug): array
+    public static function sanitize(string $slug)
     {
-        $identifier = [
-            static::MATCH_FULL,
-            static::MATCH_LOCALE,
-            static::MATCH_SLUG,
-        ];
-        $match = [];
+        $slug = preg_replace('/\/{2,}/', '/', $slug);
+        $slug = trim($slug, '/');
 
-        $result = preg_match(static::PATTERN, $slug, $match);
-
-        if (0 === $result || false === $result) {
-            $match = array_fill(0, count($identifier), null);
-        }
-
-        return array_combine($identifier, $match) ?: [];
+        return "/$slug";
     }
 }

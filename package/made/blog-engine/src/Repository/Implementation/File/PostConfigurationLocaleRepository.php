@@ -19,18 +19,15 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Closure;
 use DateTime;
-use Made\Blog\Engine\Help\Path;
+use Made\Blog\Engine\Help\Slug;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
-use Made\Blog\Engine\Utility\ClosureInspection\ClosureInspection;
 use Psr\Log\LoggerInterface;
-use ReflectionException;
 
 /**
  * Class PostConfigurationLocaleRepository
@@ -162,7 +159,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
         $allLocale = $this->getAll(new CriteriaLocale($locale));
 
         return array_reduce($allLocale, function (?PostConfigurationLocale $carry, PostConfigurationLocale $oneLocale) use ($slug): ?PostConfigurationLocale {
-            if (null === $carry && $this->compareSlug($slug, $oneLocale->getSlug())) {
+            if (null === $carry && $this->matchSlug($slug, $oneLocale->getSlug())) {
                 return $oneLocale;
             }
 
@@ -178,7 +175,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
         $allLocale = $this->getAll(new CriteriaLocale($locale));
 
         return array_reduce($allLocale, function (?PostConfigurationLocale $carry, PostConfigurationLocale $oneLocale) use ($slugRedirect): ?PostConfigurationLocale {
-            if (null === $carry && $this->compareSlug($slugRedirect, ...$oneLocale->getSlugRedirectList())) {
+            if (null === $carry && $this->matchSlug($slugRedirect, ...$oneLocale->getSlugRedirectList())) {
                 return $oneLocale;
             }
 
@@ -216,28 +213,16 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     }
 
     /**
-     * @param string $slugSearch
+     * @param string $slugToMatch
      * @param string ...$slugList
      * @return string
      */
-    private function compareSlug(string $slugSearch, string ...$slugList): string
+    private function matchSlug(string $slugToMatch, string ...$slugList): string
     {
-        $slugSearch = $this->cleanSlug($slugSearch);
+        $slugToMatch = Slug::sanitize($slugToMatch);
 
-        return array_reduce($slugList, function (bool $carry, string $slug) use ($slugSearch): bool {
-            return $carry || $this->cleanSlug($slug) === $slugSearch;
+        return array_reduce($slugList, function (bool $carry, string $slug) use ($slugToMatch): bool {
+            return $carry || Slug::sanitize($slug) === $slugToMatch;
         }, false);
-    }
-
-    /**
-     * @param string $slugSearch
-     * @return string
-     */
-    private function cleanSlug(string $slugSearch): string
-    {
-        $slugSearch = preg_replace('/\/{2,}/', '/', $slugSearch);
-        $slugSearch = trim($slugSearch, '/');
-
-        return "/$slugSearch";
     }
 }

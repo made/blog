@@ -19,12 +19,12 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Closure;
 use Made\Blog\Engine\Exception\MapperException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
+use Made\Blog\Engine\Help\Slug;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
@@ -33,9 +33,7 @@ use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Service\PostService;
-use Made\Blog\Engine\Utility\ClosureInspection\ClosureInspection;
 use Psr\Log\LoggerInterface;
-use ReflectionException;
 
 /**
  * Class PostConfigurationRepository
@@ -169,11 +167,17 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 $localeData[PostConfigurationLocaleMapper::KEY_STATUS] = PostConfigurationLocale::STATUS_DRAFT;
             }
 
+            if (isset($localeData[PostConfigurationLocaleMapper::KEY_SLUG])) {
+                $localeData[PostConfigurationLocaleMapper::KEY_SLUG] =
+                    Slug::sanitize($localeData[PostConfigurationLocaleMapper::KEY_SLUG]);
+            }
+
             // INFO: Maybe some more? Lemme know.
 
             if (!isset($localeData[PostConfigurationLocaleMapper::KEY_TEMPLATE])
                 && isset($data[PostConfigurationLocaleMapper::KEY_TEMPLATE])) {
-                $localeData[PostConfigurationLocaleMapper::KEY_TEMPLATE] = $data[PostConfigurationLocaleMapper::KEY_TEMPLATE];
+                $localeData[PostConfigurationLocaleMapper::KEY_TEMPLATE] =
+                    $data[PostConfigurationLocaleMapper::KEY_TEMPLATE];
             }
 
             // Pull it back into the node.

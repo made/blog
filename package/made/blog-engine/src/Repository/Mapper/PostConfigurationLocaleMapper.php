@@ -45,6 +45,11 @@ class PostConfigurationLocaleMapper
     const KEY_SLUG_REDIRECT_LIST = 'slug_redirect';
     const KEY_TEMPLATE = 'template';
 
+    /**
+     * The list of valid status.
+     *
+     * @var array|string[]
+     */
     const STATUS_VALID = [
         PostConfigurationLocale::STATUS_DRAFT,
         PostConfigurationLocale::STATUS_REVIEW,
@@ -54,12 +59,16 @@ class PostConfigurationLocaleMapper
     /**
      * The datetime string format.
      *
-     * TODO: Move this to a dedicated formatter helper class.
-     *  Allow H:i part optionally.
-     *
      * @var string
      */
     const DTS_FORMAT = 'Y-m-d';
+
+    /**
+     * The datetime string format with time.
+     *
+     * @var string
+     */
+    const DTS_FORMAT_TIME = 'Y-m-d H:i';
 
     /**
      * @var PostConfigurationMetaMapper
@@ -246,6 +255,16 @@ class PostConfigurationLocaleMapper
      */
     private function createDateTime(string $string): ?DateTime
     {
-        return DateTime::createFromFormat(static::DTS_FORMAT, $string) ?: null;
+        /** @var DateTime|null $dateTime */
+        $dateTime = DateTime::createFromFormat(static::DTS_FORMAT, $string) ?: null;
+
+        // Try again with time.
+        if (null === $dateTime) {
+            $dateTime = DateTime::createFromFormat(static::DTS_FORMAT_TIME, $string) ?: null;
+        } else {
+            $dateTime->setTime(8, 0, 0, 420);
+        }
+
+        return $dateTime;
     }
 }
