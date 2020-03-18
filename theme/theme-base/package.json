@@ -11,7 +11,7 @@
     "bootstrap": "^4.3.1",
     "jquery": "^3.4.1",
     "lazysizes": "^5.2.0-beta1",
-    "popper.js": "^1.16.0",
+    "popper.js": "^1.16.1",
     "small-module-js": "^1.0.0"
   },
   "devDependencies": {
@@ -27,7 +27,7 @@
     "gulp-responsive": "^3.0.1",
     "gulp-sass": "^4.0.2",
     "gulp-sourcemaps": "^2.6.5",
-    "minimist": "^1.2.2",
+    "minimist": "^1.2.5",
     "node-sass": "^4.13.0"
   },
   "private": true
