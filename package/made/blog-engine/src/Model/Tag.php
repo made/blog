@@ -20,55 +20,55 @@
 namespace Made\Blog\Engine\Model;
 
 /**
- * Class PostConfigurationMetaCustom
+ * Class Tag
  *
  * @package Made\Blog\Engine\Model
  */
-class PostConfigurationMetaCustom
+class Tag
 {
     /**
      * @var string
      */
-    private $element;
+    private $id;
 
     /**
-     * @var array|string[]|null
+     * @var string
      */
-    private $attributeList;
+    private $name;
 
     /**
      * @return string
      */
-    public function getElement(): string
+    public function getId(): string
     {
-        return $this->element;
+        return $this->id;
     }
 
     /**
-     * @param string $element
-     * @return PostConfigurationMetaCustom
+     * @param string $id
+     * @return Tag
      */
-    public function setElement(string $element): PostConfigurationMetaCustom
+    public function setId(string $id): Tag
     {
-        $this->element = $element;
+        $this->id = $id;
         return $this;
     }
 
     /**
-     * @return array|string[]|null
+     * @return string
      */
-    public function getAttributeList(): ?array
+    public function getName(): string
     {
-        return $this->attributeList;
+        return $this->name;
     }
 
     /**
-     * @param array|string[]|null $attributeList
-     * @return PostConfigurationMetaCustom
+     * @param string $name
+     * @return Tag
      */
-    public function setAttributeList(?array $attributeList): PostConfigurationMetaCustom
+    public function setName(string $name): Tag
     {
-        $this->attributeList = $attributeList;
+        $this->name = $name;
         return $this;
     }
 }

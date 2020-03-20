@@ -20,23 +20,33 @@
 namespace Made\Blog\Engine;
 
 use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
+use Made\Blog\Engine\Repository\Implementation\Aggregation\CategoryRepository as CategoryRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationLocaleRepository as PostConfigurationLocaleRepositoryAggregation;
+use Made\Blog\Engine\Repository\Implementation\Aggregation\TagRepository as TagRepositoryAggregation;
+use Made\Blog\Engine\Repository\Implementation\File\CategoryRepository as CategoryRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository as PostConfigurationLocaleRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
+use Made\Blog\Engine\Repository\Implementation\File\TagRepository as TagRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository as ThemeRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\PostRepository;
+use Made\Blog\Engine\Repository\Mapper\CategoryMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMetaCustomMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMetaMapper;
+use Made\Blog\Engine\Repository\Mapper\TagMapper;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
+use Made\Blog\Engine\Repository\Proxy\CacheProxyCategoryRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyPostConfigurationLocaleRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyPostConfigurationRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyPostRepository;
+use Made\Blog\Engine\Repository\Proxy\CacheProxyTagRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
+use Made\Blog\Engine\Repository\TagRepositoryInterface;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\PostContentProvider as PostContentProviderFile;
 use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task\RenderParsedownTask;
@@ -262,6 +272,14 @@ class Package extends PackageAbstract
      */
     private function registerDataLayerPostConfiguration(): void
     {
+        $this->registerService(CategoryMapper::class, function (Container $container): CategoryMapper {
+            return new CategoryMapper();
+        });
+
+        $this->registerService(TagMapper::class, function (Container $container): TagMapper {
+            return new TagMapper();
+        });
+
         $this->registerService(PostConfigurationMetaCustomMapper::class, function (Container $container): PostConfigurationMetaCustomMapper {
             return new PostConfigurationMetaCustomMapper();
         });
@@ -276,8 +294,12 @@ class Package extends PackageAbstract
         $this->registerService(PostConfigurationLocaleMapper::class, function (Container $container): PostConfigurationLocaleMapper {
             /** @var PostConfigurationMetaMapper $postConfigurationMetaMapper */
             $postConfigurationMetaMapper = $container[PostConfigurationMetaMapper::class];
+            /** @var CategoryMapper $categoryMapper */
+            $categoryMapper = $container[CategoryMapper::class];
+            /** @var TagMapper $tagMapper */
+            $tagMapper = $container[TagMapper::class];
 
-            return new PostConfigurationLocaleMapper($postConfigurationMetaMapper);
+            return new PostConfigurationLocaleMapper($postConfigurationMetaMapper, $categoryMapper, $tagMapper);
         });
 
         $this->registerService(PostConfigurationMapper::class, function (Container $container): PostConfigurationMapper {
@@ -287,15 +309,81 @@ class Package extends PackageAbstract
             return new PostConfigurationMapper($postConfigurationLocaleMapper);
         });
 
+        $this->registerTagAndService(CategoryRepositoryInterface::TAG_CATEGORY_REPOSITORY, CategoryRepositoryFile::class, function (Container $container): CategoryRepositoryInterface {
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
+            /** @var CategoryMapper $categoryMapper */
+            $categoryMapper = $container[CategoryMapper::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
+
+            return new CategoryRepositoryFile($configuration, $categoryMapper, $logger);
+        });
+
+        $this->registerTagAndService(CategoryRepositoryInterface::TAG_CATEGORY_REPOSITORY, CategoryRepositoryAggregation::class, function (Container $container): CategoryRepositoryInterface {
+            /** @var array|CategoryRepositoryInterface[] $serviceList */
+            $serviceList = $this->resolveTag(CategoryRepositoryInterface::TAG_CATEGORY_REPOSITORY, CategoryRepositoryInterface::class, [
+                CategoryRepositoryAggregation::class,
+            ]);
+
+            return new CategoryRepositoryAggregation($serviceList);
+        });
+
+        $this->registerServiceLazy(CategoryRepositoryInterface::class, CategoryRepositoryAggregation::class);
+
+        $this->container->extend(CategoryRepositoryInterface::class, function (CategoryRepositoryInterface $categoryRepository, Container $container): CategoryRepositoryInterface {
+            /** @var CacheInterface $cache */
+            $cache = $container[CacheInterface::class];
+
+            return new CacheProxyCategoryRepository($cache, $categoryRepository);
+        });
+
+        $this->registerTagAndService(TagRepositoryInterface::TAG_TAG_REPOSITORY, TagRepositoryFile::class, function (Container $container): TagRepositoryInterface {
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
+            /** @var TagMapper $tagMapper */
+            $tagMapper = $container[TagMapper::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
+
+            return new TagRepositoryFile($configuration, $tagMapper, $logger);
+        });
+
+        $this->registerTagAndService(TagRepositoryInterface::TAG_TAG_REPOSITORY, TagRepositoryAggregation::class, function (Container $container): TagRepositoryInterface {
+            /** @var array|TagRepositoryInterface[] $serviceList */
+            $serviceList = $this->resolveTag(TagRepositoryInterface::TAG_TAG_REPOSITORY, TagRepositoryInterface::class, [
+                TagRepositoryAggregation::class,
+            ]);
+
+            return new TagRepositoryAggregation($serviceList);
+        });
+
+        $this->registerServiceLazy(TagRepositoryInterface::class, TagRepositoryAggregation::class);
+
+        $this->container->extend(TagRepositoryInterface::class, function (TagRepositoryInterface $tagRepository, Container $container): TagRepositoryInterface {
+            /** @var CacheInterface $cache */
+            $cache = $container[CacheInterface::class];
+
+            return new CacheProxyTagRepository($cache, $tagRepository);
+        });
+
         $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container): PostConfigurationRepositoryInterface {
             /** @var Configuration $configuration */
             $configuration = $container[Configuration::class];
             /** @var PostConfigurationMapper $postConfigurationMapper */
             $postConfigurationMapper = $container[PostConfigurationMapper::class];
+            /** @var CategoryRepositoryInterface $categoryRepository */
+            $categoryRepository = $container[CategoryRepositoryInterface::class];
+            /** @var CategoryMapper $categoryMapper */
+            $categoryMapper = $container[CategoryMapper::class];
+            /** @var TagRepositoryInterface $tagRepository */
+            $tagRepository = $container[TagRepositoryInterface::class];
+            /** @var TagMapper $tagMapper */
+            $tagMapper = $container[TagMapper::class];
             /** @var LoggerInterface $logger */
             $logger = $container[LoggerInterface::class];
 
-            return new PostConfigurationRepositoryFile($configuration, $postConfigurationMapper, $logger);
+            return new PostConfigurationRepositoryFile($configuration, $postConfigurationMapper, $categoryRepository, $categoryMapper, $tagRepository, $tagMapper, $logger);
         });
 
         $this->container->extend(PostConfigurationRepositoryFile::class, function (PostConfigurationRepositoryInterface $postConfigurationRepository, Container $container): PostConfigurationRepositoryInterface {

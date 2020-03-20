@@ -40,7 +40,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
      * PostConfigurationLocaleRepository constructor.
      * @param array|PostConfigurationLocaleRepository[] $postConfigurationLocaleRepositoryList
      */
-    public function __construct($postConfigurationLocaleRepositoryList)
+    public function __construct(array $postConfigurationLocaleRepositoryList)
     {
         $this->postConfigurationLocaleRepositoryList = $postConfigurationLocaleRepositoryList;
     }

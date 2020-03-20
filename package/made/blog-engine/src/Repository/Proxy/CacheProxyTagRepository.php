@@ -19,21 +19,22 @@
 
 namespace Made\Blog\Engine\Repository\Proxy;
 
-use Made\Blog\Engine\Model\Theme;
+use Made\Blog\Engine\Model\Tag;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
-use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
+use Made\Blog\Engine\Repository\TagRepositoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
- * Class CachingThemeRepository
+ * Class CacheProxyTagRepository
  *
  * @package Made\Blog\Engine\Repository\Proxy
  */
-class CacheProxyThemeRepository implements ThemeRepositoryInterface
+class CacheProxyTagRepository implements TagRepositoryInterface
 {
-    const CACHE_KEY_ALL = 'theme-all';
-    const CACHE_KEY_ONE_BY_NAME = 'theme-one-by-name-%1$s';
+    const CACHE_KEY_ALL = 'tag-all';
+    const CACHE_KEY_ONE = 'tag-one-%1$s';
+    const CACHE_KEY_ONE_BY_NAME = 'tag-one-by-name-%1$s';
 
     /**
      * @var CacheInterface
@@ -41,19 +42,19 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
     private $cache;
 
     /**
-     * @var ThemeRepositoryInterface
+     * @var TagRepositoryInterface
      */
-    private $themeRepository;
+    private $tagRepository;
 
     /**
-     * CacheProxyThemeRepository constructor.
+     * CacheProxyTagRepository constructor.
      * @param CacheInterface $cache
-     * @param ThemeRepositoryInterface $themeRepository
+     * @param TagRepositoryInterface $tagRepository
      */
-    public function __construct(CacheInterface $cache, ThemeRepositoryInterface $themeRepository)
+    public function __construct(CacheInterface $cache, TagRepositoryInterface $tagRepository)
     {
         $this->cache = $cache;
-        $this->themeRepository = $themeRepository;
+        $this->tagRepository = $tagRepository;
     }
 
     /**
@@ -66,14 +67,14 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
         $all = [];
 
         try {
-            /** @var array|Theme[] $all */
+            /** @var array|Tag[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($all)) {
-            $all = $this->themeRepository
+            $all = $this->tagRepository
                 ->getAll($criteria);
 
             if (!empty($all)) {
@@ -91,7 +92,41 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneByName(string $name): ?Theme
+    public function getOneById(string $id): ?Tag
+    {
+        $key = vsprintf(static::CACHE_KEY_ONE, [
+            $id,
+        ]);
+
+        $one = null;
+
+        try {
+            /** @var null|Tag $one */
+            $one = $this->cache->get($key, null);
+        } catch (InvalidArgumentException $exception) {
+            // TODO: Log.
+        }
+
+        if (empty($one)) {
+            $one = $this->tagRepository
+                ->getOneById($id);
+
+            if (!empty($one)) {
+                try {
+                    $this->cache->set($key, $one);
+                } catch (InvalidArgumentException $exception) {
+                    // TODO: Log.
+                }
+            }
+        }
+
+        return $one;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getOneByName(string $name): ?Tag
     {
         $key = vsprintf(static::CACHE_KEY_ONE_BY_NAME, [
             $name,
@@ -100,14 +135,14 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
         $one = null;
 
         try {
-            /** @var null|Theme $one */
+            /** @var null|Tag $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
             // TODO: Log.
         }
 
         if (empty($one)) {
-            $one = $this->themeRepository
+            $one = $this->tagRepository
                 ->getOneByName($name);
 
             if (!empty($one)) {

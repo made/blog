@@ -76,12 +76,26 @@ class PostConfigurationLocaleMapper
     private $postConfigurationMetaMapper;
 
     /**
+     * @var CategoryMapper
+     */
+    private $categoryMapper;
+
+    /**
+     * @var TagMapper
+     */
+    private $tagMapper;
+
+    /**
      * PostConfigurationLocaleMapper constructor.
      * @param PostConfigurationMetaMapper $postConfigurationMetaMapper
+     * @param CategoryMapper $categoryMapper
+     * @param TagMapper $tagMapper
      */
-    public function __construct(PostConfigurationMetaMapper $postConfigurationMetaMapper)
+    public function __construct(PostConfigurationMetaMapper $postConfigurationMetaMapper, CategoryMapper $categoryMapper, TagMapper $tagMapper)
     {
         $this->postConfigurationMetaMapper = $postConfigurationMetaMapper;
+        $this->categoryMapper = $categoryMapper;
+        $this->tagMapper = $tagMapper;
     }
 
     /**
@@ -152,13 +166,17 @@ class PostConfigurationLocaleMapper
         }
 
         // Optional:
-        if (isset($data[static::KEY_CATEGORY_LIST]) && is_array($data[static::KEY_CATEGORY_LIST]) && !empty($categoryList = $this->normalizeValueArray($data[static::KEY_CATEGORY_LIST], true))) {
-            $postConfigurationLocale->setCategoryList($categoryList);
+        if (isset($data[static::KEY_CATEGORY_LIST]) && is_array($data[static::KEY_CATEGORY_LIST])) {
+            $postConfigurationLocale->setCategoryList(
+                $this->categoryMapper->fromDataArray($data[static::KEY_CATEGORY_LIST])
+            );
         }
 
         // Optional:
-        if (isset($data[static::KEY_TAG_LIST]) && is_array($data[static::KEY_TAG_LIST]) && !empty($tagList = $this->normalizeValueArray($data[static::KEY_TAG_LIST], true))) {
-            $postConfigurationLocale->setTagList($tagList);
+        if (isset($data[static::KEY_TAG_LIST]) && is_array($data[static::KEY_TAG_LIST])) {
+            $postConfigurationLocale->setTagList(
+                $this->tagMapper->fromDataArray($data[static::KEY_TAG_LIST])
+            );
         }
 
         // Optional:
@@ -227,8 +245,8 @@ class PostConfigurationLocaleMapper
     {
         $dataArray = [];
 
-        foreach ($array as $postConfigurationMetaCustom) {
-            $dataArray[] = $this->toData($postConfigurationMetaCustom);
+        foreach ($array as $postConfigurationLocale) {
+            $dataArray[] = $this->toData($postConfigurationLocale);
         }
 
         return $dataArray;

@@ -68,17 +68,17 @@ class PostConfigurationLocale
     private $title;
 
     /**
-     * @var PostConfigurationMeta
+     * @var PostConfigurationMeta|null
      */
     private $meta;
 
     /**
-     * @var array|string[]|null
+     * @var array|Category[]|null
      */
     private $categoryList;
 
     /**
-     * @var array|string[]|null
+     * @var array|Tag[]|null
      */
     private $tagList;
 
@@ -219,25 +219,25 @@ class PostConfigurationLocale
     }
 
     /**
-     * @return PostConfigurationMeta
+     * @return PostConfigurationMeta|null
      */
-    public function getMeta(): PostConfigurationMeta
+    public function getMeta(): ?PostConfigurationMeta
     {
         return $this->meta;
     }
 
     /**
-     * @param PostConfigurationMeta $meta
+     * @param PostConfigurationMeta|null $meta
      * @return PostConfigurationLocale
      */
-    public function setMeta(PostConfigurationMeta $meta): PostConfigurationLocale
+    public function setMeta(?PostConfigurationMeta $meta): PostConfigurationLocale
     {
         $this->meta = $meta;
         return $this;
     }
 
     /**
-     * @return array|string[]|null
+     * @return array|Category[]|null
      */
     public function getCategoryList(): ?array
     {
@@ -245,17 +245,17 @@ class PostConfigurationLocale
     }
 
     /**
-     * @param array|string[]|null $categoryList
+     * @param array|Category[]|null $categoryList
      * @return PostConfigurationLocale
      */
-    public function setCategoryList(?array $categoryList): PostConfigurationLocale
+    public function setCategoryList($categoryList): PostConfigurationLocale
     {
         $this->categoryList = $categoryList;
         return $this;
     }
 
     /**
-     * @return array|string[]|null
+     * @return array|Tag[]|null
      */
     public function getTagList(): ?array
     {
@@ -263,7 +263,7 @@ class PostConfigurationLocale
     }
 
     /**
-     * @param array|string[]|null $tagList
+     * @param array|Tag[]|null $tagList
      * @return PostConfigurationLocale
      */
     public function setTagList(?array $tagList): PostConfigurationLocale

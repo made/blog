@@ -25,13 +25,19 @@ use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Help\Slug;
+use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Model\Tag;
+use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
+use Made\Blog\Engine\Repository\Mapper\CategoryMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
+use Made\Blog\Engine\Repository\Mapper\TagMapper;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
+use Made\Blog\Engine\Repository\TagRepositoryInterface;
 use Made\Blog\Engine\Service\PostService;
 use Psr\Log\LoggerInterface;
 
@@ -55,6 +61,26 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     private $postConfigurationMapper;
 
     /**
+     * @var CategoryRepositoryInterface
+     */
+    private $categoryRepository;
+
+    /**
+     * @var CategoryMapper
+     */
+    private $categoryMapper;
+
+    /**
+     * @var TagRepositoryInterface
+     */
+    private $tagRepository;
+
+    /**
+     * @var TagMapper
+     */
+    private $tagMapper;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -63,12 +89,20 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      * PostConfigurationRepository constructor.
      * @param Configuration $configuration
      * @param PostConfigurationMapper $postConfigurationMapper
+     * @param CategoryRepositoryInterface $categoryRepository
+     * @param CategoryMapper $categoryMapper
+     * @param TagRepositoryInterface $tagRepository
+     * @param TagMapper $tagMapper
      * @param LoggerInterface $logger
      */
-    public function __construct(Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, LoggerInterface $logger)
+    public function __construct(Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, CategoryRepositoryInterface $categoryRepository, CategoryMapper $categoryMapper, TagRepositoryInterface $tagRepository, TagMapper $tagMapper, LoggerInterface $logger)
     {
         $this->configuration = $configuration;
         $this->postConfigurationMapper = $postConfigurationMapper;
+        $this->categoryRepository = $categoryRepository;
+        $this->categoryMapper = $categoryMapper;
+        $this->tagRepository = $tagRepository;
+        $this->tagMapper = $tagMapper;
         $this->logger = $logger;
     }
 
@@ -167,6 +201,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 $localeData[PostConfigurationLocaleMapper::KEY_STATUS] = PostConfigurationLocale::STATUS_DRAFT;
             }
 
+            // Set the slug to a properly formed slug.
             if (isset($localeData[PostConfigurationLocaleMapper::KEY_SLUG])) {
                 $localeData[PostConfigurationLocaleMapper::KEY_SLUG] =
                     Slug::sanitize($localeData[PostConfigurationLocaleMapper::KEY_SLUG]);
@@ -174,13 +209,28 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
             // INFO: Maybe some more? Lemme know.
 
+            // Provision the category list from an array of string or array to an array of array when not empty.
+            if (isset($localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST])
+                && !empty($localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST])) {
+                $localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST] =
+                    $this->provisionCategoryData($localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST]);
+            }
+
+            // Provision the tag list from an array of string or array to an array of array when not empty.
+            if (isset($localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST])
+                && !empty($localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST])) {
+                $localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST] =
+                    $this->provisionTagData($localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST]);
+            }
+
+            // Set the template to the one set in the super page if defined there but not inside the locale data.
             if (!isset($localeData[PostConfigurationLocaleMapper::KEY_TEMPLATE])
                 && isset($data[PostConfigurationLocaleMapper::KEY_TEMPLATE])) {
                 $localeData[PostConfigurationLocaleMapper::KEY_TEMPLATE] =
                     $data[PostConfigurationLocaleMapper::KEY_TEMPLATE];
             }
 
-            // Pull it back into the node.
+            // Push it back into the node.
             $data[PostConfigurationMapper::KEY_LOCALE_LIST][$locale] = $localeData;
         }
 
@@ -188,7 +238,102 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     }
 
     /**
-     * Gets the Path for the folder containing all blog entries
+     * @param array|string[]|array[] $categoryList
+     * @return array
+     */
+    private function provisionCategoryData(array $categoryList): array
+    {
+        // Pull the category data from the list.
+        foreach ($categoryList as $index => $category) {
+            $categoryObject = null;
+
+            // Check if it is an array.
+            if (is_array($category)) {
+                try {
+                    // Assume the array contains category data.
+                    $categoryObject = $this->categoryMapper->fromData($category);
+                } catch (MapperException $exception) {
+                    // TODO: Logging.
+                }
+
+                // If it does not, the object stays with a null value.
+            }
+
+            // Check if it is a string.
+            if (is_string($category)) {
+                // Assume that string is the id of a category and get that category data from the repository.
+                $categoryObject = $this->categoryRepository
+                    ->getOneById($category);
+
+                // If there was no category found above, just create a new category with identical id and name.
+                if (null === $categoryObject) {
+                    $categoryObject = (new Category())
+                        ->setId($category)
+                        ->setName($category);
+                }
+            }
+
+            if (null === $categoryObject) {
+                // Unset the index if the category data could not be provisioned.
+                unset($categoryList[$index]);
+            } else {
+                // Push it back into the list.
+                $categoryList[$index] = $this->categoryMapper->toData($categoryObject);
+            }
+        }
+
+        return $categoryList;
+    }
+
+    /**
+     * @param array $tagList
+     * @return array
+     */
+    private function provisionTagData(array $tagList): array
+    {
+        // Pull the tag data from the list.
+        foreach ($tagList as $index => $tag) {
+            $tagObject = null;
+
+            // Check if it is an array.
+            if (is_array($tag)) {
+                try {
+                    // Assume the array contains tag data.
+                    $tagObject = $this->tagMapper->fromData($tag);
+                } catch (MapperException $exception) {
+                    // TODO: Logging.
+                }
+
+                // If it does not, the object stays with a null value.
+            }
+
+            // Check if it is a string.
+            if (is_string($tag)) {
+                // Assume that string is the id of a tag and get that tag data from the repository.
+                $tagObject = $this->tagRepository
+                    ->getOneById($tag);
+
+                // If there was no tag found above, just create a new tag with identical id and name.
+                if (null === $tagObject) {
+                    $tagObject = (new Tag())
+                        ->setId($tag)
+                        ->setName($tag);
+                }
+            }
+
+            if (null === $tagObject) {
+                // Unset the index if the tag data could not be provisioned.
+                unset($tagList[$index]);
+            } else {
+                // Push it back into the list.
+                $tagList[$index] = $this->tagMapper->toData($tagObject);
+            }
+        }
+
+        return $tagList;
+    }
+
+    /**
      * @return string
      */
     private function getPath(): string
@@ -199,9 +344,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
         ]);
     }
 
-
     /**
-     * Gets the Path for the given blog post
      * @param string $entry
      * @return string
      */

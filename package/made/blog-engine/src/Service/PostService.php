@@ -44,6 +44,16 @@ class PostService
     const PATH_CONFIGURATION = 'configuration.json';
 
     /**
+     * Path to the category configuration file (json).
+     */
+    const PATH_CONFIGURATION_CATEGORY = 'configuration_category.json';
+
+    /**
+     * Path to the tag configuration file (json).
+     */
+    const PATH_CONFIGURATION_TAG = 'configuration_tag.json';
+
+    /**
      * Namespace for twig.
      */
     const NAMESPACE_POST = 'Post';
