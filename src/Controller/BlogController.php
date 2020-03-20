@@ -138,15 +138,19 @@ class BlogController implements ControllerInterface
             }
         }
 
-        if (null == $post) {
+        if (null === $post) {
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
         // TODO: Test ability to return a post as json.
         //  http://www.slimframework.com/docs/v4/objects/response.html#returning-json
 
+        // TODO: Get the full PostConfiguration object.
+        $postConfiguration = null;
+
         try {
             return $this->twig->render($response, '@App/index.html.twig', [
+                'postConfiguration' => $postConfiguration,
                 'post' => $post,
             ]);
         } catch (LoaderError | RuntimeError | SyntaxError $error) {

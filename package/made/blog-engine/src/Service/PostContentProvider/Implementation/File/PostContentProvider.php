@@ -43,13 +43,13 @@ class PostContentProvider implements PostContentProviderInterface
 
     /**
      * PostContentProvider constructor.
+     * @param TaskChainInterface $taskChain
      * @param array|TaskAbstract[] $taskList
      */
-    public function __construct(array $taskList)
+    public function __construct(TaskChainInterface $taskChain, array $taskList)
     {
-        $this->taskChain = new TaskChain(false);
+        $this->taskChain = $taskChain;
 
-        // TODO: Find a good way to choose the implementation and suppress exception.
         foreach ($taskList as $task) {
             $this->taskChain->add($task, $task->getPriority());
         }

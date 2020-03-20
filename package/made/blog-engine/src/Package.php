@@ -66,6 +66,8 @@ use Pimple\Package\Exception\PackageException;
 use Pimple\Package\PackageAbstract;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use TaskChain\TaskChain;
+use TaskChain\TaskChainInterface;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Twig\Loader\LoaderInterface;
@@ -435,6 +437,14 @@ class Package extends PackageAbstract
         /** @var array $configuration */
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
+        $this->registerService(TaskChain::class, $this->container->factory(function (Container $container): TaskChain {
+            // TODO: Make configurable.
+            return new TaskChain(false);
+        }));
+
+        // This has to be a factory, since the returned value must not be cached in the container!
+        $this->registerService(TaskChainInterface::class, $this->container->factory($this->container->raw(TaskChain::class)));
+
         $this->registerTagAndService(PostContentProviderFile::TAG_POST_CONTENT_PROVIDER_TASK, WrapContextTask::class, function (Container $container) use ($configuration): TaskAbstract {
             /** @var array $settings */
             $settings = $configuration[TaskAbstract::class];
@@ -465,10 +475,12 @@ class Package extends PackageAbstract
         });
 
         $this->registerTagAndService(PostContentProviderInterface::TAG_POST_CONTENT_PROVIDER, PostContentProviderFile::class, function (Container $container): PostContentProviderInterface {
+            /** @var TaskChainInterface $taskChain */
+            $taskChain = $container[TaskChainInterface::class];
             /** @var array|TaskAbstract[] $serviceList */
             $serviceList = $this->resolveTag(PostContentProviderFile::TAG_POST_CONTENT_PROVIDER_TASK, TaskAbstract::class, null);
 
-            return new PostContentProviderFile($serviceList);
+            return new PostContentProviderFile($taskChain, $serviceList);
         });
 
         $this->registerService(PostContentResolver::class, function (Container $container): PostContentResolver {
