@@ -60,6 +60,15 @@ class CacheProxyTagRepository implements TagRepositoryInterface
     /**
      * @inheritDoc
      */
+    public function create(Tag $tag): bool
+    {
+        return $this->tagRepository
+            ->create($tag);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getAll(Criteria $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
@@ -155,5 +164,23 @@ class CacheProxyTagRepository implements TagRepositoryInterface
         }
 
         return $one;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function modify(Tag $tag): bool
+    {
+        return $this->tagRepository
+            ->modify($tag);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function destroy(Tag $tag): bool
+    {
+        return $this->tagRepository
+            ->destroy($tag);
     }
 }

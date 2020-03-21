@@ -19,12 +19,11 @@
 
 namespace Made\Blog\Engine\Service;
 
-use Made\Blog\Engine\Exception\ThemeException;
+use Made\Blog\Engine\Exception\InvalidArgumentException;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
-use Twig\Error\LoaderError;
 use Twig\Loader\FilesystemLoader;
 use Twig\Loader\LoaderInterface;
 
@@ -97,14 +96,13 @@ class ThemeService
 
     /**
      * @param LoaderInterface $twigLoader
-     * @throws LoaderError
-     * @throws ThemeException
+     * @throws InvalidArgumentException
      */
     public function updateLoader(LoaderInterface $twigLoader): void
     {
         if (!($twigLoader instanceof FilesystemLoader)) {
             // TODO: Add proper exception message.
-            throw new ThemeException('Unsupported ' . LoaderInterface::class . ' implementation!');
+            throw new InvalidArgumentException('Unsupported ' . LoaderInterface::class . ' implementation: ' . get_class($twigLoader));
         }
 
         /** @var FilesystemLoader $twigLoader */
@@ -116,7 +114,7 @@ class ThemeService
         foreach ($themeList as $theme) {
             $path = $theme->getPath();
             // The name of the theme is used as the namespace.
-            $twigLoader->addPath($this->getViewPath($path), $theme->getName());
+            $twigLoader->setPaths($this->getViewPath($path), $theme->getName());
         }
     }
 

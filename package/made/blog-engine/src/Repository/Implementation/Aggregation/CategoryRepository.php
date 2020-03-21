@@ -19,6 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\Aggregation;
 
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
@@ -42,6 +43,16 @@ class CategoryRepository implements CategoryRepositoryInterface
     public function __construct(array $categoryRepositoryList)
     {
         $this->categoryRepositoryList = $categoryRepositoryList;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function create(Category $category): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
     }
 
     /**
@@ -88,5 +99,25 @@ class CategoryRepository implements CategoryRepositoryInterface
         }
 
         return $one;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function modify(Category $category): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function destroy(Category $category): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
     }
 }

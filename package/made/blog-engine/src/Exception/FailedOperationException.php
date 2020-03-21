@@ -22,10 +22,10 @@ namespace Made\Blog\Engine\Exception;
 use Exception;
 
 /**
- * Class MapperException
+ * Class FailedOperationException
  *
  * @package Made\Blog\Engine\Exception
  */
-class MapperException extends Exception
+class FailedOperationException extends Exception implements FailedOperationExceptionInterface
 {
 }

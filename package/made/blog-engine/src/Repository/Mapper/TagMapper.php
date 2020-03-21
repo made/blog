@@ -19,7 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Model\Tag;
 
 /**
@@ -35,7 +35,7 @@ class TagMapper
     /**
      * @param array $data
      * @return Tag
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromData(array $data): Tag
     {
@@ -45,14 +45,14 @@ class TagMapper
         if (isset($data[static::KEY_ID]) && is_string($data[static::KEY_ID])) {
             $tag->setId($data[static::KEY_ID]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_ID);
+            throw new FailedOperationException('Missing key: ' . static::KEY_ID);
         }
 
         // Required:
         if (isset($data[static::KEY_NAME]) && is_string($data[static::KEY_NAME])) {
             $tag->setName($data[static::KEY_NAME]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_NAME);
+            throw new FailedOperationException('Missing key: ' . static::KEY_NAME);
         }
 
         return $tag;
@@ -61,7 +61,7 @@ class TagMapper
     /**
      * @param array|array[] $dataArray
      * @return array|Tag[]
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromDataArray(array $dataArray): array
     {

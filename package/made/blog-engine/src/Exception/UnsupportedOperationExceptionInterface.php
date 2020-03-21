@@ -19,13 +19,11 @@
 
 namespace Made\Blog\Engine\Exception;
 
-use Exception;
-
 /**
- * Class ThemeException
+ * Interface UnsupportedOperationExceptionInterface
  *
  * @package Made\Blog\Engine\Exception
  */
-class ThemeException extends Exception
+interface UnsupportedOperationExceptionInterface
 {
 }

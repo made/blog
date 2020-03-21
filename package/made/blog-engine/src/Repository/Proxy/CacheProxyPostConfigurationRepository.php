@@ -59,6 +59,15 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
     /**
      * @inheritDoc
      */
+    public function modify(PostConfiguration $postConfiguration): bool
+    {
+        return $this->postConfigurationRepository
+            ->modify($postConfiguration);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getAll(Criteria $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
@@ -119,5 +128,23 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
         }
 
         return $one;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function create(PostConfiguration $postConfiguration): bool
+    {
+        return $this->postConfigurationRepository
+            ->create($postConfiguration);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function destroy(PostConfiguration $postConfiguration): bool
+    {
+        return $this->postConfigurationRepository
+            ->destroy($postConfiguration);
     }
 }

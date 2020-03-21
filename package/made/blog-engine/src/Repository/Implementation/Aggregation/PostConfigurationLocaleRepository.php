@@ -20,6 +20,7 @@
 namespace Made\Blog\Engine\Repository\Implementation\Aggregation;
 
 use DateTime;
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
@@ -43,6 +44,16 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     public function __construct(array $postConfigurationLocaleRepositoryList)
     {
         $this->postConfigurationLocaleRepositoryList = $postConfigurationLocaleRepositoryList;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function create(PostConfigurationLocale $postConfigurationLocale): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
     }
 
     /**
@@ -161,5 +172,25 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
         }
 
         return $one;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function modify(PostConfigurationLocale $postConfigurationLocale): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function destroy(PostConfigurationLocale $postConfigurationLocale): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
     }
 }

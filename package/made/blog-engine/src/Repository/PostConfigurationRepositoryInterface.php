@@ -27,6 +27,12 @@ interface PostConfigurationRepositoryInterface
     const TAG_POST_CONFIGURATION_REPOSITORY = 'repository.post_configuration';
 
     /**
+     * @param PostConfiguration $postConfiguration
+     * @return bool
+     */
+    public function create(PostConfiguration $postConfiguration): bool;
+
+    /**
      * @param Criteria $criteria
      * @return array|PostConfiguration[]
      */
@@ -37,4 +43,16 @@ interface PostConfigurationRepositoryInterface
      * @return PostConfiguration|null
      */
     public function getOneById(string $id): ?PostConfiguration;
+
+    /**
+     * @param PostConfiguration $postConfiguration
+     * @return bool
+     */
+    public function modify(PostConfiguration $postConfiguration): bool;
+
+    /**
+     * @param PostConfiguration $postConfiguration
+     * @return bool
+     */
+    public function destroy(PostConfiguration $postConfiguration): bool;
 }

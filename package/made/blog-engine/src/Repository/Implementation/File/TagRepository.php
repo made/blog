@@ -19,7 +19,8 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
@@ -70,6 +71,16 @@ class TagRepository implements TagRepositoryInterface
 
     /**
      * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function create(Tag $tag): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
      */
     public function getAll(Criteria $criteria): array
     {
@@ -91,7 +102,7 @@ class TagRepository implements TagRepositoryInterface
 
             try {
                 return $this->tagMapper->fromData($data);
-            } catch (MapperException $exception) {
+            } catch (FailedOperationException $exception) {
                 // TODO: Logging.
             }
 
@@ -137,8 +148,29 @@ class TagRepository implements TagRepositoryInterface
         }, null);
     }
 
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function modify(Tag $tag): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
+    }
 
     /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function destroy(Tag $tag): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
+    }
+
+
+    /**
+     * TODO: Use PostService::getPath() instead.
      * @return string
      */
     private function getPath(): string

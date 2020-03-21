@@ -19,7 +19,7 @@
 
 namespace Made\Blog\Engine\Service;
 
-use Made\Blog\Engine\Exception\PostException;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Model\PostContent;
 
@@ -47,7 +47,7 @@ class PostContentResolver implements PostContentResolverInterface
     /**
      * @param PostConfigurationLocale $postConfigurationLocale
      * @return PostContent
-     * @throws PostException
+     * @throws FailedOperationException
      */
     public function resolve(PostConfigurationLocale $postConfigurationLocale): ?PostContent
     {
@@ -57,7 +57,7 @@ class PostContentResolver implements PostContentResolverInterface
             return $postContentProvider->provide($postConfigurationLocale);
         }
 
-        throw new PostException('Unable to resolve post content.');
+        throw new FailedOperationException('Unable to resolve post content from origin: ' . $origin);
     }
 
     /**

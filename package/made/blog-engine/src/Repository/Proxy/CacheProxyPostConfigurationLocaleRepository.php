@@ -73,6 +73,15 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     /**
      * @inheritDoc
      */
+    public function create(PostConfigurationLocale $postConfigurationLocale): bool
+    {
+        return $this->postConfigurationLocaleRepository
+            ->create($postConfigurationLocale);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getAll(CriteriaLocale $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
@@ -344,5 +353,23 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         }
 
         return $one;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function modify(PostConfigurationLocale $postConfigurationLocale): bool
+    {
+        return $this->postConfigurationLocaleRepository
+            ->modify($postConfigurationLocale);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function destroy(PostConfigurationLocale $postConfigurationLocale): bool
+    {
+        return $this->postConfigurationLocaleRepository
+            ->destroy($postConfigurationLocale);
     }
 }

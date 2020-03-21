@@ -19,7 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Model\PostConfigurationMeta;
 
 /**
@@ -55,7 +55,7 @@ class PostConfigurationMetaMapper
     /**
      * @param array $data
      * @return PostConfigurationMeta
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromData(array $data): PostConfigurationMeta
     {

@@ -32,6 +32,12 @@ interface TagRepositoryInterface
     const TAG_TAG_REPOSITORY = 'repository.tag';
 
     /**
+     * @param Tag $tag
+     * @return bool
+     */
+    public function create(Tag $tag): bool;
+
+    /**
      * @param Criteria $criteria
      * @return array|Tag[]
      */
@@ -48,4 +54,16 @@ interface TagRepositoryInterface
      * @return Tag|null
      */
     public function getOneByName(string $name): ?Tag;
+
+    /**
+     * @param Tag $tag
+     * @return bool
+     */
+    public function modify(Tag $tag): bool;
+
+    /**
+     * @param Tag $tag
+     * @return bool
+     */
+    public function destroy(Tag $tag): bool;
 }

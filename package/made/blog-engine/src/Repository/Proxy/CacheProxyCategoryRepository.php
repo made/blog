@@ -61,6 +61,15 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
     /**
      * @inheritDoc
      */
+    public function create(Category $category): bool
+    {
+        return $this->categoryRepository
+            ->create($category);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getAll(Criteria $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
@@ -156,5 +165,23 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
         }
 
         return $one;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function modify(Category $category): bool
+    {
+        return $this->categoryRepository
+            ->modify($category);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function destroy(Category $category): bool
+    {
+        return $this->categoryRepository
+            ->destroy($category);
     }
 }

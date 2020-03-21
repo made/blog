@@ -33,6 +33,12 @@ interface PostConfigurationLocaleRepositoryInterface
     const TAG_POST_CONFIGURATION_LOCALE_REPOSITORY = 'repository.post_configuration_locale';
 
     /**
+     * @param PostConfigurationLocale $postConfigurationLocale
+     * @return bool
+     */
+    public function create(PostConfigurationLocale $postConfigurationLocale): bool;
+
+    /**
      * @param CriteriaLocale $criteria
      * @return array|PostConfigurationLocale[]
      */
@@ -86,4 +92,16 @@ interface PostConfigurationLocaleRepositoryInterface
      * @return PostConfigurationLocale|null
      */
     public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?PostConfigurationLocale;
+
+    /**
+     * @param PostConfigurationLocale $postConfigurationLocale
+     * @return bool
+     */
+    public function modify(PostConfigurationLocale $postConfigurationLocale): bool;
+
+    /**
+     * @param PostConfigurationLocale $postConfigurationLocale
+     * @return bool
+     */
+    public function destroy(PostConfigurationLocale $postConfigurationLocale): bool;
 }

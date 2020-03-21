@@ -19,7 +19,8 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
@@ -108,6 +109,16 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
     /**
      * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function modify(PostConfiguration $postConfiguration): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
      */
     public function getAll(Criteria $criteria): array
     {
@@ -140,7 +151,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
             try {
                 return $this->postConfigurationMapper->fromData($data);
-            } catch (MapperException $exception) {
+            } catch (FailedOperationException $exception) {
                 // TODO: Logging.
             }
 
@@ -171,6 +182,26 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
             return $carry;
         }, null);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function create(PostConfiguration $postConfiguration): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function destroy(PostConfiguration $postConfiguration): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
     }
 
     /**
@@ -252,7 +283,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 try {
                     // Assume the array contains category data.
                     $categoryObject = $this->categoryMapper->fromData($category);
-                } catch (MapperException $exception) {
+                } catch (FailedOperationException $exception) {
                     // TODO: Logging.
                 }
 
@@ -300,7 +331,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 try {
                     // Assume the array contains tag data.
                     $tagObject = $this->tagMapper->fromData($tag);
-                } catch (MapperException $exception) {
+                } catch (FailedOperationException $exception) {
                     // TODO: Logging.
                 }
 
@@ -334,6 +365,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     }
 
     /**
+     * TODO: Use PostService::getPath() instead.
      * @return string
      */
     private function getPath(): string

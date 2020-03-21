@@ -33,6 +33,12 @@ interface PostRepositoryInterface
     const TAG_POST_REPOSITORY = 'repository.post';
 
     /**
+     * @param Post $post
+     * @return bool
+     */
+    public function create(Post $post): bool;
+
+    /**
      * @param CriteriaLocale $criteria
      * @return array|Post[]
      */
@@ -86,4 +92,16 @@ interface PostRepositoryInterface
      * @return Post|null
      */
     public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?Post;
+
+    /**
+     * @param Post $post
+     * @return bool
+     */
+    public function modify(Post $post): bool;
+
+    /**
+     * @param Post $post
+     * @return bool
+     */
+    public function destroy(Post $post): bool;
 }

@@ -19,8 +19,8 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\MapperException;
-use Made\Blog\Engine\Help\Directory;
+use Made\Blog\Engine\Exception\FailedOperationException;
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
@@ -71,6 +71,16 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     /**
      * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function create(Category $category): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
      */
     public function getAll(Criteria $criteria): array
     {
@@ -92,7 +102,7 @@ class CategoryRepository implements CategoryRepositoryInterface
 
             try {
                 return $this->categoryMapper->fromData($data);
-            } catch (MapperException $exception) {
+            } catch (FailedOperationException $exception) {
                 // TODO: Logging.
             }
 
@@ -139,6 +149,27 @@ class CategoryRepository implements CategoryRepositoryInterface
     }
 
     /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function modify(Category $category): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function destroy(Category $category): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
+    }
+
+    /**
+     * TODO: Use PostService::getPath() instead.
      * @return string
      */
     private function getPath(): string

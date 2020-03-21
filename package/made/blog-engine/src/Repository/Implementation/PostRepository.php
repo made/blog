@@ -20,6 +20,7 @@
 namespace Made\Blog\Engine\Repository\Implementation;
 
 use DateTime;
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
@@ -35,7 +36,6 @@ use Made\Blog\Engine\Service\PostContentResolverInterface;
 class PostRepository implements PostRepositoryInterface
 {
     /**
-     * // INFO: This will be aggregation.
      * @var PostConfigurationLocaleRepositoryInterface
      */
     private $postConfigurationLocaleRepository;
@@ -54,6 +54,16 @@ class PostRepository implements PostRepositoryInterface
     {
         $this->postConfigurationLocaleRepository = $postConfigurationLocaleRepository;
         $this->postContentResolver = $postContentResolver;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function create(Post $post): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The post repository can not be used for that type of action.');
     }
 
     /**
@@ -154,6 +164,26 @@ class PostRepository implements PostRepositoryInterface
         ]);
 
         return reset($allPost) ?: null;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function modify(Post $post): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The post repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function destroy(Post $post): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The post repository can not be used for that type of action.');
     }
 
     /**

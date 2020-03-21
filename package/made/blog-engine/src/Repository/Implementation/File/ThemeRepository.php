@@ -19,7 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
@@ -102,7 +102,7 @@ class ThemeRepository implements ThemeRepositoryInterface
 
             try {
                 return $this->themeMapper->fromData($data);
-            } catch (MapperException $exception) {
+            } catch (FailedOperationException $exception) {
                 // TODO: Logging.
             }
 
@@ -168,6 +168,7 @@ class ThemeRepository implements ThemeRepositoryInterface
     }
 
     /**
+     * TODO: Use ThemeService::getViewPath() instead.
      * @param string $entry
      * @return string
      */

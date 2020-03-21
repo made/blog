@@ -32,6 +32,12 @@ interface CategoryRepositoryInterface
     const TAG_CATEGORY_REPOSITORY = 'repository.category';
 
     /**
+     * @param Category $category
+     * @return bool
+     */
+    public function create(Category $category): bool;
+
+    /**
      * @param Criteria $criteria
      * @return array|Category[]
      */
@@ -48,4 +54,16 @@ interface CategoryRepositoryInterface
      * @return Category|null
      */
     public function getOneByName(string $name): ?Category;
+
+    /**
+     * @param Category $category
+     * @return bool
+     */
+    public function modify(Category $category): bool;
+
+    /**
+     * @param Category $category
+     * @return bool
+     */
+    public function destroy(Category $category): bool;
 }

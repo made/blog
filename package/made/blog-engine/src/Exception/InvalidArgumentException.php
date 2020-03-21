@@ -22,10 +22,10 @@ namespace Made\Blog\Engine\Exception;
 use Exception;
 
 /**
- * Class ConfigurationException
+ * Class InvalidArgumentException
  *
  * @package Made\Blog\Engine\Exception
  */
-class ConfigurationException extends Exception
+class InvalidArgumentException extends Exception implements InvalidArgumentExceptionInterface
 {
 }

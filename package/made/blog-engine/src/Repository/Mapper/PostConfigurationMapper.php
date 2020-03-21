@@ -19,7 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Model\PostConfiguration;
 
 /**
@@ -49,7 +49,7 @@ class PostConfigurationMapper
     /**
      * @param array $data
      * @return PostConfiguration
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromData(array $data): PostConfiguration
     {
@@ -59,7 +59,7 @@ class PostConfigurationMapper
         if (isset($data[static::KEY_ID]) && is_string($data[static::KEY_ID])) {
             $postConfiguration->setId($data[static::KEY_ID]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_ID);
+            throw new FailedOperationException('Missing key: ' . static::KEY_ID);
         }
 
         // Required:
@@ -68,7 +68,7 @@ class PostConfigurationMapper
                 $this->postConfigurationLocaleMapper->fromDataArray($data[static::KEY_LOCALE_LIST])
             );
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_LOCALE_LIST);
+            throw new FailedOperationException('Missing key: ' . static::KEY_LOCALE_LIST);
         }
 
         return $postConfiguration;

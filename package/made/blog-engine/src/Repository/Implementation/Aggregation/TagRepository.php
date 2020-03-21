@@ -19,6 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\Aggregation;
 
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\Tag;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
@@ -42,6 +43,16 @@ class TagRepository implements TagRepositoryInterface
     public function __construct(array $tagRepositoryList)
     {
         $this->tagRepositoryList = $tagRepositoryList;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function create(Tag $tag): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
     }
 
     /**
@@ -88,5 +99,25 @@ class TagRepository implements TagRepositoryInterface
         }
 
         return $one;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function modify(Tag $tag): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function destroy(Tag $tag): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
     }
 }

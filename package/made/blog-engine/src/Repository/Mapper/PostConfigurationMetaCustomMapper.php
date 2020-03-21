@@ -19,7 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Model\PostConfigurationMetaCustom;
 
 /**
@@ -37,7 +37,7 @@ class PostConfigurationMetaCustomMapper
     /**
      * @param array $data
      * @return PostConfigurationMetaCustom
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromData(array $data): PostConfigurationMetaCustom
     {
@@ -47,7 +47,7 @@ class PostConfigurationMetaCustomMapper
         if (isset($data[static::KEY_ELEMENT]) && is_string($data[static::KEY_ELEMENT])) {
             $postConfigurationMetaCustom->setElement($data[static::KEY_ELEMENT]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_ELEMENT);
+            throw new FailedOperationException('Missing key: ' . static::KEY_ELEMENT);
         }
 
         // Optional:
@@ -61,7 +61,7 @@ class PostConfigurationMetaCustomMapper
     /**
      * @param array|array[] $dataArray
      * @return array|PostConfigurationMetaCustom[]
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromDataArray(array $dataArray): array
     {

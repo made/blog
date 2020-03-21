@@ -20,36 +20,12 @@
 namespace Made\Blog\Engine\Exception;
 
 use Exception;
-use Throwable;
 
-class PostException extends Exception
+/**
+ * Class UnsupportedOperationException
+ *
+ * @package Made\Blog\Engine\Exception
+ */
+class UnsupportedOperationException extends Exception implements UnsupportedOperationExceptionInterface
 {
-    /**
-     * @var array
-     */
-    private $context;
-
-    /**
-     * @return array
-     */
-    public function getContext(): array
-    {
-        return $this->context;
-    }
-
-    public function __construct($message, array $context = [], $code = 0, Throwable $previous = null)
-    {
-        $this->context = $context;
-        parent::__construct($message, $code, $previous);
-    }
-
-    /**
-     * @param array $context
-     * @return PostException
-     */
-    public function setContext(array $context): PostException
-    {
-        $this->context = $context;
-        return $this;
-    }
 }

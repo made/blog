@@ -20,7 +20,7 @@
 namespace Made\Blog\Engine\Repository\Mapper;
 
 use DateTime;
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 
 /**
@@ -101,7 +101,7 @@ class PostConfigurationLocaleMapper
     /**
      * @param array $data
      * @return PostConfigurationLocale
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromData(array $data): PostConfigurationLocale
     {
@@ -111,21 +111,21 @@ class PostConfigurationLocaleMapper
         if (isset($data[static::KEY_ID]) && is_string($data[static::KEY_ID])) {
             $postConfigurationLocale->setId($data[static::KEY_ID]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_ID);
+            throw new FailedOperationException('Missing key: ' . static::KEY_ID);
         }
 
         // Required:
         if (isset($data[static::KEY_ORIGIN]) && is_string($data[static::KEY_ORIGIN])) {
             $postConfigurationLocale->setOrigin($data[static::KEY_ORIGIN]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_ORIGIN);
+            throw new FailedOperationException('Missing key: ' . static::KEY_ORIGIN);
         }
 
         // Required:
         if (isset($data[static::KEY_LOCALE]) && is_string($data[static::KEY_LOCALE])) {
             $postConfigurationLocale->setLocale($data[static::KEY_LOCALE]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_LOCALE);
+            throw new FailedOperationException('Missing key: ' . static::KEY_LOCALE);
         }
 
         // Required:
@@ -133,7 +133,7 @@ class PostConfigurationLocaleMapper
             && null !== ($status = $this->validateStatus($data[static::KEY_STATUS]))) {
             $postConfigurationLocale->setStatus($status);
         } else {
-            throw new MapperException('Missing or invalid key: ' . static::KEY_STATUS);
+            throw new FailedOperationException('Missing or invalid key: ' . static::KEY_STATUS);
         }
 
         if (isset($data[static::KEY_DATE]) && is_string($data[static::KEY_DATE])
@@ -141,21 +141,21 @@ class PostConfigurationLocaleMapper
 
             $postConfigurationLocale->setDate($dateTime);
         } else {
-            throw new MapperException('Missing or invalid key: ' . static::KEY_DATE);
+            throw new FailedOperationException('Missing or invalid key: ' . static::KEY_DATE);
         }
 
         // Required:
         if (isset($data[static::KEY_SLUG]) && is_string($data[static::KEY_SLUG])) {
             $postConfigurationLocale->setSlug($data[static::KEY_SLUG]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_SLUG);
+            throw new FailedOperationException('Missing key: ' . static::KEY_SLUG);
         }
 
         // Required:
         if (isset($data[static::KEY_TITLE]) && is_string($data[static::KEY_TITLE])) {
             $postConfigurationLocale->setTitle($data[static::KEY_TITLE]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_TITLE);
+            throw new FailedOperationException('Missing key: ' . static::KEY_TITLE);
         }
 
         // Optional:
@@ -188,7 +188,7 @@ class PostConfigurationLocaleMapper
         if (isset($data[static::KEY_TEMPLATE]) && is_string($data[static::KEY_TEMPLATE])) {
             $postConfigurationLocale->setTemplate($data[static::KEY_TEMPLATE]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_TEMPLATE);
+            throw new FailedOperationException('Missing key: ' . static::KEY_TEMPLATE);
         }
 
         return $postConfigurationLocale;
@@ -197,7 +197,7 @@ class PostConfigurationLocaleMapper
     /**
      * @param array|array[] $dataArray
      * @return array|PostConfigurationLocale[]
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromDataArray(array $dataArray): array
     {

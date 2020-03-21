@@ -19,7 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Mapper;
 
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Model\Category;
 
 /**
@@ -35,7 +35,7 @@ class CategoryMapper
     /**
      * @param array $data
      * @return Category
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromData(array $data): Category
     {
@@ -45,14 +45,14 @@ class CategoryMapper
         if (isset($data[static::KEY_ID]) && is_string($data[static::KEY_ID])) {
             $category->setId($data[static::KEY_ID]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_ID);
+            throw new FailedOperationException('Missing key: ' . static::KEY_ID);
         }
 
         // Required:
         if (isset($data[static::KEY_NAME]) && is_string($data[static::KEY_NAME])) {
             $category->setName($data[static::KEY_NAME]);
         } else {
-            throw new MapperException('Missing key: ' . static::KEY_NAME);
+            throw new FailedOperationException('Missing key: ' . static::KEY_NAME);
         }
 
         return $category;
@@ -61,7 +61,7 @@ class CategoryMapper
     /**
      * @param array|array[] $dataArray
      * @return array|Category[]
-     * @throws MapperException
+     * @throws FailedOperationException
      */
     public function fromDataArray(array $dataArray): array
     {

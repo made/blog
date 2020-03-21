@@ -20,6 +20,7 @@
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
 use DateTime;
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Help\Slug;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
@@ -57,6 +58,16 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
     {
         $this->postConfigurationRepository = $postConfigurationRepository;
         $this->logger = $logger;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function create(PostConfigurationLocale $postConfigurationLocale): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
     }
 
     /**
@@ -181,6 +192,26 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
 
             return $carry;
         }, null);
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function modify(PostConfigurationLocale $postConfigurationLocale): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function destroy(PostConfigurationLocale $postConfigurationLocale): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The file repository can not be used for that type of action.');
     }
 
     /**

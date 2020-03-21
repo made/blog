@@ -71,6 +71,15 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     /**
      * @inheritDoc
      */
+    public function create(Post $post): bool
+    {
+        return $this->postRepository
+            ->create($post);
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getAll(CriteriaLocale $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
@@ -342,5 +351,23 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         }
 
         return $one;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function modify(Post $post): bool
+    {
+        return $this->postRepository
+            ->modify($post);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function destroy(Post $post): bool
+    {
+        return $this->postRepository
+            ->destroy($post);
     }
 }
