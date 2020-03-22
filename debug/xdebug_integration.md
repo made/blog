@@ -21,17 +21,17 @@ The run configuration should be similar to the following:
 
 > Host: `made-blog.local` Port: `80`
 > \
-> Document root: `made-blog/public`
+> Document root: `/made-blog/public`
 > \
-> [x] Use router script: `made-blog/public/index.php`
+> [x] Use router script: `/made-blog/public/index.php`
 
 2.  `Run (Profiler)` (PHP Built-in Web Server):
 
 > Host: `made-blog.local` Port: `80`
 > \
-> Document root: `made-blog/public`
+> Document root: `/made-blog/public`
 > \
-> [x] Use router script: `made-blog/public/index.php`
+> [x] Use router script: `/made-blog/public/index.php`
 >
 > Interpreter options:
 > ```bash
@@ -40,7 +40,7 @@ The run configuration should be similar to the following:
 > --define
 > xdebug.profiler_enable_trigger=1
 > --define
-> xdebug.profiler_output_dir="F:\PhpstormProjects\made-blog\debug\snapshot"
+> xdebug.profiler_output_dir="/made-blog/debug/snapshot"
 > --define
 > xdebug.profiler_output_name="xdebug.out.%t"
 > ```
