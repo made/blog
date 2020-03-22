@@ -17,21 +17,24 @@ vendor/
 /var/*
 !/var/.gitignore
 
-!/var/log
 /var/log/*
 !/var/log/.gitignore
 
-!/var/cache
 /var/cache/*
 !/var/cache/.gitignore
 
-!/var/cache/twig
 /var/cache/twig/*
 !/var/cache/twig/.gitignore
 
+# Development
+
+/debug/snapshot/*
+!/debug/snapshot/.gitignore
+
 # Public
 
-/public/asset
+/public/asset/*
+!/public/asset/.gitignore
 
 # System
 .DS_Store

@@ -5,7 +5,7 @@
   "minimum-stability": "stable",
   "license": "GPL-3.0-or-later",
   "require": {
-    "php": ">=7.1 <7.4",
+    "php": ">=7.3 <7.4",
     "ext-json": "*",
     "slim/slim": "^4.0",
     "slim/psr7": "^0.6.0",

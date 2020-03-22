@@ -19,7 +19,6 @@
 
 namespace Made\Blog\Engine\Repository\Proxy;
 
-
 use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
@@ -33,9 +32,11 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class CacheProxyCategoryRepository implements CategoryRepositoryInterface
 {
-    const CACHE_KEY_ALL = 'category-all';
-    const CACHE_KEY_ONE = 'category-one-%1$s';
-    const CACHE_KEY_ONE_BY_NAME = 'category-one-by-name-%1$s';
+    use CacheProxyIdentityHelperTrait;
+
+    const CACHE_KEY_ALL /*-----------*/ = 'c-all';
+    const CACHE_KEY_ONE_BY_ID /*-----*/ = 'c-one-by-id';
+    const CACHE_KEY_ONE_BY_NAME /*---*/ = 'c-one-by-name';
 
     /**
      * @var CacheInterface
@@ -72,7 +73,7 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
      */
     public function getAll(Criteria $criteria): array
     {
-        $key = static::CACHE_KEY_ALL;
+        $key = $this->getCacheKeyForCriteria(static::CACHE_KEY_ALL, $criteria);
 
         $all = [];
 
@@ -104,9 +105,7 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
      */
     public function getOneById(string $id): ?Category
     {
-        $key = vsprintf(static::CACHE_KEY_ONE, [
-            $id,
-        ]);
+        $key = static::CACHE_KEY_ONE_BY_ID . '-' . $id;
 
         $one = null;
 
@@ -138,9 +137,7 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
      */
     public function getOneByName(string $name): ?Category
     {
-        $key = vsprintf(static::CACHE_KEY_ONE_BY_NAME, [
-            $name,
-        ]);
+        $key = static::CACHE_KEY_ONE_BY_NAME . '-' . $name;
 
         $one = null;
 
@@ -183,5 +180,42 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
     {
         return $this->categoryRepository
             ->destroy($category);
+    }
+
+    /**
+     * @param string $format
+     * @param Criteria $criteria
+     * @return string
+     */
+    private function getCacheKeyForCriteria(string $format, Criteria $criteria): string
+    {
+        $offset = $criteria->getOffset();
+        if (-1 === $offset) {
+            $offset = 'null';
+        }
+
+        $limit = $criteria->getLimit();
+        if (-1 === $limit) {
+            $limit = 'null';
+        }
+
+        $filterName = 'null';
+        if (null !== ($filter = $criteria->getFilter())) {
+            $filterName = $filter->getName();
+        }
+
+        $orderName = 'null';
+        if (null !== ($order = $criteria->getOrder())) {
+            $orderName = $order->getName();
+        }
+
+        $identity = $this->getIdentity([
+            'offset' /*--*/ => $offset,
+            'limit' /*---*/ => $limit,
+            'filter' /*--*/ => $filterName,
+            'order' /*---*/ => $orderName,
+        ], 'sha256');
+
+        return "{$format}_{$identity}";
     }
 }

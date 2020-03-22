@@ -32,8 +32,10 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class CacheProxyPostConfigurationRepository implements PostConfigurationRepositoryInterface
 {
-    const CACHE_KEY_ALL = 'post-configuration-all';
-    const CACHE_KEY_ONE = 'post-configuration-one-%1$s';
+    use CacheProxyIdentityHelperTrait;
+
+    const CACHE_KEY_ALL /*-----------*/ = 'pc-all';
+    const CACHE_KEY_ONE_BY_ID /*-----*/ = 'pc-one-by-id';
 
     /**
      * @var CacheInterface
@@ -71,6 +73,7 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
     public function getAll(Criteria $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
+        $key = $this->getCacheKeyForCriteria($key, $criteria);
 
         $all = [];
 
@@ -102,9 +105,7 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
      */
     public function getOneById(string $id): ?PostConfiguration
     {
-        $key = vsprintf(static::CACHE_KEY_ONE, [
-            $id,
-        ]);
+        $key = static::CACHE_KEY_ONE_BY_ID . '-' . $id;
 
         $one = null;
 
@@ -116,7 +117,8 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
         }
 
         if (empty($one)) {
-            $one = $this->postConfigurationRepository->getOneById($id);
+            $one = $this->postConfigurationRepository
+                ->getOneById($id);
 
             if (!empty($one)) {
                 try {
@@ -146,5 +148,42 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
     {
         return $this->postConfigurationRepository
             ->destroy($postConfiguration);
+    }
+
+    /**
+     * @param string $format
+     * @param Criteria $criteria
+     * @return string
+     */
+    private function getCacheKeyForCriteria(string $format, Criteria $criteria): string
+    {
+        $offset = $criteria->getOffset();
+        if (-1 === $offset) {
+            $offset = 'null';
+        }
+
+        $limit = $criteria->getLimit();
+        if (-1 === $limit) {
+            $limit = 'null';
+        }
+
+        $filterName = 'null';
+        if (null !== ($filter = $criteria->getFilter())) {
+            $filterName = $filter->getName();
+        }
+
+        $orderName = 'null';
+        if (null !== ($order = $criteria->getOrder())) {
+            $orderName = $order->getName();
+        }
+
+        $identity = $this->getIdentity([
+            'offset' /*--*/ => $offset,
+            'limit' /*---*/ => $limit,
+            'filter' /*--*/ => $filterName,
+            'order' /*---*/ => $orderName,
+        ], 'sha256');
+
+        return "{$format}_{$identity}";
     }
 }

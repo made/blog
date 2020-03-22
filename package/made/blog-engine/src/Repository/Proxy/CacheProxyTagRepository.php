@@ -32,9 +32,11 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class CacheProxyTagRepository implements TagRepositoryInterface
 {
-    const CACHE_KEY_ALL = 'tag-all';
-    const CACHE_KEY_ONE = 'tag-one-%1$s';
-    const CACHE_KEY_ONE_BY_NAME = 'tag-one-by-name-%1$s';
+    use CacheProxyIdentityHelperTrait;
+
+    const CACHE_KEY_ALL /*-----------*/ = 't-all';
+    const CACHE_KEY_ONE_BY_ID /*-----*/ = 't-one-by-id';
+    const CACHE_KEY_ONE_BY_NAME /*---*/ = 't-one-by-name';
 
     /**
      * @var CacheInterface
@@ -72,6 +74,7 @@ class CacheProxyTagRepository implements TagRepositoryInterface
     public function getAll(Criteria $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
+        $key = $this->getCacheKeyForCriteria($key, $criteria);
 
         $all = [];
 
@@ -103,9 +106,7 @@ class CacheProxyTagRepository implements TagRepositoryInterface
      */
     public function getOneById(string $id): ?Tag
     {
-        $key = vsprintf(static::CACHE_KEY_ONE, [
-            $id,
-        ]);
+        $key = static::CACHE_KEY_ONE_BY_ID . '-' . $id;
 
         $one = null;
 
@@ -137,9 +138,7 @@ class CacheProxyTagRepository implements TagRepositoryInterface
      */
     public function getOneByName(string $name): ?Tag
     {
-        $key = vsprintf(static::CACHE_KEY_ONE_BY_NAME, [
-            $name,
-        ]);
+        $key = static::CACHE_KEY_ONE_BY_NAME . '-' . $name;
 
         $one = null;
 
@@ -182,5 +181,42 @@ class CacheProxyTagRepository implements TagRepositoryInterface
     {
         return $this->tagRepository
             ->destroy($tag);
+    }
+
+    /**
+     * @param string $format
+     * @param Criteria $criteria
+     * @return string
+     */
+    private function getCacheKeyForCriteria(string $format, Criteria $criteria): string
+    {
+        $offset = $criteria->getOffset();
+        if (-1 === $offset) {
+            $offset = 'null';
+        }
+
+        $limit = $criteria->getLimit();
+        if (-1 === $limit) {
+            $limit = 'null';
+        }
+
+        $filterName = 'null';
+        if (null !== ($filter = $criteria->getFilter())) {
+            $filterName = $filter->getName();
+        }
+
+        $orderName = 'null';
+        if (null !== ($order = $criteria->getOrder())) {
+            $orderName = $order->getName();
+        }
+
+        $identity = $this->getIdentity([
+            'offset' /*--*/ => $offset,
+            'limit' /*---*/ => $limit,
+            'filter' /*--*/ => $filterName,
+            'order' /*---*/ => $orderName,
+        ], 'sha256');
+
+        return "{$format}_{$identity}";
     }
 }

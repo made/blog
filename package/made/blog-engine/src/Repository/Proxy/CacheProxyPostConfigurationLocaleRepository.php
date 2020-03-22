@@ -20,6 +20,7 @@
 namespace Made\Blog\Engine\Repository\Proxy;
 
 use DateTime;
+use Made\Blog\Engine\Help\Slug;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
@@ -30,24 +31,20 @@ use Psr\SimpleCache\InvalidArgumentException;
 /**
  * Class CacheProxyPostConfigurationLocaleRepository
  *
- * TODO: Check if a single-key cache would be better. That would not use natsort() and implode() on the parameter, but
- *  pull each parameter entry from the cache and make the result unique by id. E.g.: Find "tag-1, tag-2" would not
- *  result in the cache key "tag-1-tag-2", but in "tag-1" and "tag-2" separately.
- * TODO: Include criteria information in the cache key. This will result in more total cache entries, but will certainly
- *  solve an issue with filter/order and offset/limit.
- *
  * @package Made\Blog\Engine\Repository\Proxy
  */
 class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLocaleRepositoryInterface
 {
-    const CACHE_KEY_ALL = 'post-configuration-locale-all';
-    const CACHE_KEY_ALL_BY_POST_DATE = 'post-configuration-locale-all-by-post-date-%1$s';
-    const CACHE_KEY_ALL_BY_STATUS = 'post-configuration-locale-all-by-status-%1$s';
-    const CACHE_KEY_ALL_BY_CATEGORY = 'post-configuration-locale-all-by-category-%1$s';
-    const CACHE_KEY_ALL_BY_TAG = 'post-configuration-locale-all-by-tag-%1$s';
-    const CACHE_KEY_ONE = 'post-configuration-locale-one-%1$s';
-    const CACHE_KEY_ONE_BY_SLUG = 'post-configuration-locale-one-by-slug-%1$s';
-    const CACHE_KEY_ONE_BY_SLUG_REDIRECT = 'post-configuration-locale-one-by-slug-redirect-%1$s';
+    use CacheProxyIdentityHelperTrait;
+
+    const CACHE_KEY_ALL /*-------------------*/ = 'pcl-all';
+    const CACHE_KEY_ALL_BY_POST_DATE /*------*/ = 'pcl-all-by-post-date';
+    const CACHE_KEY_ALL_BY_STATUS /*---------*/ = 'pcl-all-by-status';
+    const CACHE_KEY_ALL_BY_CATEGORY /*-------*/ = 'pcl-all-by-category';
+    const CACHE_KEY_ALL_BY_TAG /*------------*/ = 'pcl-all-by-tag';
+    const CACHE_KEY_ONE_BY_ID /*-------------*/ = 'pcl-one-by-id';
+    const CACHE_KEY_ONE_BY_SLUG /*-----------*/ = 'pcl-one-by-slug';
+    const CACHE_KEY_ONE_BY_SLUG_REDIRECT /*--*/ = 'pcl-one-by-slug-redirect';
 
     /**
      * @var CacheInterface
@@ -85,6 +82,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     public function getAll(CriteriaLocale $criteria): array
     {
         $key = static::CACHE_KEY_ALL;
+        $key = $this->getCacheKeyForCriteria($key, $criteria);
 
         $all = [];
 
@@ -116,9 +114,9 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
      */
     public function getAllByPostDate(CriteriaLocale $criteria, DateTime $dateTime): array
     {
-        $key = vsprintf(static::CACHE_KEY_ALL_BY_POST_DATE, [
-            $dateTime->format(PostConfigurationLocaleMapper::DTS_FORMAT),
-        ]);
+        $key = static::CACHE_KEY_ALL_BY_POST_DATE . '-' . $dateTime
+                ->format(PostConfigurationLocaleMapper::DTS_FORMAT);
+        $key = $this->getCacheKeyForCriteria($key, $criteria);
 
         $all = [];
 
@@ -152,33 +150,47 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     {
         natsort($statusList);
 
-        $key = vsprintf(static::CACHE_KEY_ALL_BY_STATUS, [
-            implode('-', $statusList),
-        ]);
+        $key = static::CACHE_KEY_ALL_BY_STATUS . '-%1$s';
+        $key = $this->getCacheKeyForCriteria($key, $criteria);
+        $keyList = array_map(function (string $status) use ($key): string {
+            return vsprintf($key, [
+                $status,
+            ]);
+        }, $statusList);
+        unset($key);
 
-        $all = [];
+        /** @var array|PostConfigurationLocale[] $allList */
+        $allList = [];
 
-        try {
+        foreach ($statusList as $index => $status) {
+            $key = $keyList[$index];
+
             /** @var array|PostConfigurationLocale[] $all */
-            $all = $this->cache->get($key, []);
-        } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
-        }
+            $all = [];
 
-        if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository
-                ->getAllByStatus($criteria, ...$statusList);
+            try {
+                $all = $this->cache->get($key, []);
+            } catch (InvalidArgumentException $exception) {
+                // TODO: Log.
+            }
 
-            if (!empty($all)) {
-                try {
-                    $this->cache->set($key, $all);
-                } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+            if (empty($all)) {
+                $all = $this->postConfigurationLocaleRepository
+                    ->getAllByStatus($criteria, $status);
+
+                if (!empty($all)) {
+                    try {
+                        $this->cache->set($key, $all);
+                    } catch (InvalidArgumentException $exception) {
+                        // TODO: Log.
+                    }
                 }
             }
+
+            array_push($allList, ...$all);
         }
 
-        return $all;
+        return $allList;
     }
 
     /**
@@ -188,33 +200,47 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     {
         natsort($categoryList);
 
-        $key = vsprintf(static::CACHE_KEY_ALL_BY_CATEGORY, [
-            implode('-', $categoryList),
-        ]);
+        $key = static::CACHE_KEY_ALL_BY_CATEGORY . '-%1$s';
+        $key = $this->getCacheKeyForCriteria($key, $criteria);
+        $keyList = array_map(function (string $status) use ($key): string {
+            return vsprintf($key, [
+                $status,
+            ]);
+        }, $categoryList);
+        unset($key);
 
-        $all = [];
+        /** @var array|PostConfigurationLocale[] $allList */
+        $allList = [];
 
-        try {
+        foreach ($categoryList as $index => $category) {
+            $key = $keyList[$index];
+
             /** @var array|PostConfigurationLocale[] $all */
-            $all = $this->cache->get($key, []);
-        } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
-        }
+            $all = [];
 
-        if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository
-                ->getAllByCategory($criteria, ...$categoryList);
+            try {
+                $all = $this->cache->get($key, []);
+            } catch (InvalidArgumentException $exception) {
+                // TODO: Log.
+            }
 
-            if (!empty($all)) {
-                try {
-                    $this->cache->set($key, $all);
-                } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+            if (empty($all)) {
+                $all = $this->postConfigurationLocaleRepository
+                    ->getAllByCategory($criteria, $category);
+
+                if (!empty($all)) {
+                    try {
+                        $this->cache->set($key, $all);
+                    } catch (InvalidArgumentException $exception) {
+                        // TODO: Log.
+                    }
                 }
             }
+
+            array_push($allList, ...$all);
         }
 
-        return $all;
+        return $allList;
     }
 
     /**
@@ -224,33 +250,48 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     {
         natsort($tagList);
 
-        $key = vsprintf(static::CACHE_KEY_ALL_BY_TAG, [
-            implode('-', $tagList),
-        ]);
+        $key = static::CACHE_KEY_ALL_BY_TAG . '-%1$s';
+        $key = $this->getCacheKeyForCriteria($key, $criteria);
+        $keyList = array_map(function (string $status) use ($key): string {
+            return vsprintf($key, [
+                $status,
+            ]);
+        }, $tagList);
+        unset($key);
 
-        $all = [];
+        /** @var array|PostConfigurationLocale[] $allList */
+        $allList = [];
 
-        try {
+        foreach ($tagList as $index => $tag) {
+            $key = $keyList[$index];
+
             /** @var array|PostConfigurationLocale[] $all */
-            $all = $this->cache->get($key, []);
-        } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
-        }
+            $all = [];
 
-        if (empty($all)) {
-            $all = $this->postConfigurationLocaleRepository
-                ->getAllByTag($criteria, ...$tagList);
+            try {
+                /** @var array|PostConfigurationLocale[] $all */
+                $all = $this->cache->get($key, []);
+            } catch (InvalidArgumentException $exception) {
+                // TODO: Log.
+            }
 
-            if (!empty($all)) {
-                try {
-                    $this->cache->set($key, $all);
-                } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+            if (empty($all)) {
+                $all = $this->postConfigurationLocaleRepository
+                    ->getAllByTag($criteria, $tag);
+
+                if (!empty($all)) {
+                    try {
+                        $this->cache->set($key, $all);
+                    } catch (InvalidArgumentException $exception) {
+                        // TODO: Log.
+                    }
                 }
             }
+
+            array_push($allList, ...$all);
         }
 
-        return $all;
+        return $allList;
     }
 
     /**
@@ -258,9 +299,8 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
      */
     public function getOneById(string $locale, string $id): ?PostConfigurationLocale
     {
-        $key = vsprintf(static::CACHE_KEY_ONE, [
-            $id,
-        ]);
+        $key = static::CACHE_KEY_ONE_BY_ID . '-' . $id;
+        $key = $this->getCacheKeyForLocale($key, $locale);
 
         $one = null;
 
@@ -292,9 +332,10 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
      */
     public function getOneBySlug(string $locale, string $slug): ?PostConfigurationLocale
     {
-        $key = vsprintf(static::CACHE_KEY_ONE_BY_SLUG, [
-            $slug,
-        ]);
+        $slug = Slug::sanitize($slug);
+
+        $key = static::CACHE_KEY_ONE_BY_SLUG . '-' . $slug;
+        $key = $this->getCacheKeyForLocale($key, $locale);
 
         $one = null;
 
@@ -326,9 +367,10 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
      */
     public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?PostConfigurationLocale
     {
-        $key = vsprintf(static::CACHE_KEY_ONE_BY_SLUG_REDIRECT, [
-            $slugRedirect,
-        ]);
+        $slugRedirect = Slug::sanitize($slugRedirect);
+
+        $key = static::CACHE_KEY_ONE_BY_SLUG_REDIRECT . '-' . $slugRedirect;
+        $key = $this->getCacheKeyForLocale($key, $locale);
 
         $one = null;
 
@@ -371,5 +413,59 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     {
         return $this->postConfigurationLocaleRepository
             ->destroy($postConfigurationLocale);
+    }
+
+    /**
+     * @param string $format
+     * @param CriteriaLocale $criteria
+     * @return string
+     */
+    private function getCacheKeyForCriteria(string $format, CriteriaLocale $criteria): string
+    {
+        $offset = $criteria->getOffset();
+        if (-1 === $offset) {
+            $offset = 'null';
+        }
+
+        $limit = $criteria->getLimit();
+        if (-1 === $limit) {
+            $limit = 'null';
+        }
+
+        $filterName = 'null';
+        if (null !== ($filter = $criteria->getFilter())) {
+            $filterName = $filter->getName();
+        }
+
+        $orderName = 'null';
+        if (null !== ($order = $criteria->getOrder())) {
+            $orderName = $order->getName();
+        }
+
+        $locale = $criteria->getLocale();
+
+        $identity = $this->getIdentity([
+            'offset' /*--*/ => $offset,
+            'limit' /*---*/ => $limit,
+            'filter' /*--*/ => $filterName,
+            'order' /*---*/ => $orderName,
+            'locale' /*--*/ => $locale,
+        ], 'sha256');
+
+        return "{$format}_{$identity}";
+    }
+
+    /**
+     * @param string $format
+     * @param string $locale
+     * @return string
+     */
+    private function getCacheKeyForLocale(string $format, string $locale): string
+    {
+        $identity = $this->getIdentity([
+            'locale' /*--*/ => $locale,
+        ], 'sha256');
+
+        return "{$format}_{$identity}";
     }
 }
