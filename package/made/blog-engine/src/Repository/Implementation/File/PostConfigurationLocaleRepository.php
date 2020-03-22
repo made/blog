@@ -22,8 +22,10 @@ namespace Made\Blog\Engine\Repository\Implementation\File;
 use DateTime;
 use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Help\Slug;
+use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Model\Tag;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
@@ -126,7 +128,10 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
         $categoryList = array_change_key_case($categoryList, CASE_LOWER);
 
         return array_filter($allLocale, function (PostConfigurationLocale $oneLocale) use ($categoryList): bool {
-            $oneLocaleCategoryList = array_change_key_case($oneLocale->getCategoryList(), CASE_LOWER);
+            $oneLocaleCategoryList = array_map(function (Category $category): string {
+                return $category->getId();
+            }, $oneLocale->getCategoryList());
+            $oneLocaleCategoryList = array_change_key_case($oneLocaleCategoryList, CASE_LOWER);
 
             return !empty(array_intersect($oneLocaleCategoryList, $categoryList));
         });
@@ -142,7 +147,10 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
         $tagList = array_change_key_case($tagList, CASE_LOWER);
 
         return array_filter($allLocale, function (PostConfigurationLocale $oneLocale) use ($tagList): bool {
-            $oneLocaleTagList = array_change_key_case($oneLocale->getTagList(), CASE_LOWER);
+            $oneLocaleTagList = array_map(function (Tag $tag): string {
+                return $tag->getId();
+            }, $oneLocale->getTagList());
+            $oneLocaleTagList = array_change_key_case($oneLocaleTagList, CASE_LOWER);
 
             return !empty(array_intersect($oneLocaleTagList, $tagList));
         });
