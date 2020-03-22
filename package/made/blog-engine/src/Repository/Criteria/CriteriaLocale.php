@@ -23,6 +23,11 @@ namespace Made\Blog\Engine\Repository\Criteria;
  * Class CriteriaLocale
  *
  * @package Made\Blog\Engine\Repository\Criteria
+ *
+ * @method CriteriaLocale setOffset(int $offset)
+ * @method CriteriaLocale setLimit(int $limit)
+ * @method CriteriaLocale setOrder(?Order $order)
+ * @method CriteriaLocale setFilter(?Filter $filter)
  */
 class CriteriaLocale extends Criteria
 {
