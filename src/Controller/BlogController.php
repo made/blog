@@ -118,9 +118,6 @@ class BlogController implements ControllerInterface
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
-        // TODO: Add trailing slash middleware.
-        //  http://www.slimframework.com/docs/v4/cookbook/route-patterns.html
-
         $post = $this->postRepository->getOneBySlug($matchLocale, $matchSlug);
         if (null === $post) {
             $post = $this->postRepository->getOneBySlugRedirect($matchLocale, $matchSlug);

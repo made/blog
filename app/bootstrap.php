@@ -70,6 +70,8 @@ $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 $packageList = require dirname(__DIR__) . '/app/package.php';
 ksort($packageList);
 
+$packageToInitialize = null;
+
 // Register every package from the list.
 foreach ($packageList as $package) {
     if (!$package instanceof PackageInterface) {
@@ -77,15 +79,16 @@ foreach ($packageList as $package) {
     }
 
     $container->register($package);
+
+    // Find the package to initialize. This is our application package in any case.
+    if (null === $packageToInitialize && $package instanceof Package) {
+        $packageToInitialize = $package;
+    }
 }
 
-// Initialize the client package.
-foreach ($packageList as $package) {
-    if (!$package instanceof Package) {
-        continue;
-    }
-
-    $package->initialize();
+// Only initialize when the package to initialize has been found.
+if (null !== $packageToInitialize) {
+    $packageToInitialize->initialize();
 }
 
 $app->run();

@@ -21,6 +21,7 @@
 namespace App;
 
 use App\Controller\BlogController;
+use App\Middleware\TrailingSlashMiddleware;
 use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
@@ -89,6 +90,9 @@ class Package extends PackageAbstract
     {
         $twigMiddleware = TwigMiddleware::createFromContainer($this->app, Twig::class);
         $this->app->add($twigMiddleware);
+
+        $trailingSlashMiddleware = new TrailingSlashMiddleware();
+        $this->app->add($trailingSlashMiddleware);
 
         BlogController::register($this->app);
     }
