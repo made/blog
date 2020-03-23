@@ -17,39 +17,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// ToDo: implement the correct information here - for now this is just a draft
-//  The actual custom things here are not post specific, they are site specific...
+// Definition of global defaults for Post. Note that actually using these defaults depends on the post driver and
+// therefor should be defined for each one separately. That way the defaults and the way they are defined can differ
+// between different drivers.
 return [
-    'default' => [
-        'locale' => [
-            'en' => [
+    'locale' => [
+        'en' => [
+            'meta' => [
                 'author' => 'John Doe',
-                'meta' => [
-                    'custom' => [
-                        'google-site-verification' => 'kladsjlkdasjlkdaskl',
-                        'yandex' => 'kladsjlkdasjlkdaskl',
-                        'bing' => 'kladsjlkdasjlkdaskl',
-                    ],
+                'custom' => [
+                    'google-site-verification' => 'kladsjlkdasjlkdaskl',
+                    'yandex' => 'kladsjlkdasjlkdaskl',
+                    'bing' => 'kladsjlkdasjlkdaskl',
                 ],
             ],
-            'de' => [
-                'author' => 'John Doe',
-                'meta' => [
-                    'custom' => [
-                        'google-site-verification' => 'kladsjlkdasjlkdaskl',
-                        'yandex' => 'kladsjlkdasjlkdaskl',
-                        'bing' => 'kladsjlkdasjlkdaskl',
-                    ],
-                ],
-            ],
-            'pl' => [
-                'author' => 'John Doe',
-                'meta' => [
-                    'custom' => [
-                        'google-site-verification' => 'kladsjlkdasjlkdaskl',
-                        'yandex' => 'kladsjlkdasjlkdaskl',
-                        'bing' => 'kladsjlkdasjlkdaskl',
-                    ],
+        ],
+        'de' => [
+            'meta' => [
+                'author' => 'Max Mustermann',
+                'custom' => [
+                    'google-site-verification' => 'kladsjlkdasjlkdaskl',
+                    'yandex' => 'kladsjlkdasjlkdaskl',
+                    'bing' => 'kladsjlkdasjlkdaskl',
                 ],
             ],
         ],

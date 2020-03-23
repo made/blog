@@ -274,6 +274,12 @@ class Package extends PackageAbstract
      */
     private function registerDataLayerPostConfiguration(): void
     {
+        $this->registerConfiguration(PostConfigurationRepositoryFile::class, [
+            'default' => [],
+        ]);
+
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
+
         $this->registerService(CategoryMapper::class, function (Container $container): CategoryMapper {
             return new CategoryMapper();
         });
@@ -369,7 +375,12 @@ class Package extends PackageAbstract
             return new CacheProxyTagRepository($cache, $tagRepository);
         });
 
-        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container): PostConfigurationRepositoryInterface {
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container) use ($configuration): PostConfigurationRepositoryInterface {
+            /** @var array $settings */
+            $settings = $configuration[PostConfigurationRepositoryFile::class];
+
+            unset($configuration);
+
             /** @var Configuration $configuration */
             $configuration = $container[Configuration::class];
             /** @var PostConfigurationMapper $postConfigurationMapper */
@@ -385,7 +396,7 @@ class Package extends PackageAbstract
             /** @var LoggerInterface $logger */
             $logger = $container[LoggerInterface::class];
 
-            return new PostConfigurationRepositoryFile($configuration, $postConfigurationMapper, $categoryRepository, $categoryMapper, $tagRepository, $tagMapper, $logger);
+            return new PostConfigurationRepositoryFile($settings['default'], $configuration, $postConfigurationMapper, $categoryRepository, $categoryMapper, $tagRepository, $tagMapper, $logger);
         });
 
         $this->container->extend(PostConfigurationRepositoryFile::class, function (PostConfigurationRepositoryInterface $postConfigurationRepository, Container $container): PostConfigurationRepositoryInterface {

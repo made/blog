@@ -52,6 +52,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     use CriteriaHelperTrait;
 
     /**
+     * @var array
+     */
+    private $defaultData;
+
+    /**
      * @var Configuration
      */
     private $configuration;
@@ -88,6 +93,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
     /**
      * PostConfigurationRepository constructor.
+     * @param array $defaultData
      * @param Configuration $configuration
      * @param PostConfigurationMapper $postConfigurationMapper
      * @param CategoryRepositoryInterface $categoryRepository
@@ -96,8 +102,9 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      * @param TagMapper $tagMapper
      * @param LoggerInterface $logger
      */
-    public function __construct(Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, CategoryRepositoryInterface $categoryRepository, CategoryMapper $categoryMapper, TagRepositoryInterface $tagRepository, TagMapper $tagMapper, LoggerInterface $logger)
+    public function __construct(array $defaultData, Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, CategoryRepositoryInterface $categoryRepository, CategoryMapper $categoryMapper, TagRepositoryInterface $tagRepository, TagMapper $tagMapper, LoggerInterface $logger)
     {
+        $this->defaultData = $defaultData;
         $this->configuration = $configuration;
         $this->postConfigurationMapper = $postConfigurationMapper;
         $this->categoryRepository = $categoryRepository;
@@ -207,6 +214,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     /**
      * Provision some data to save typing it into the file by hand. Just for those of us, who are lazy, you know.
      *
+     * TODO: By now this logic gotten far to extensive to keep it in here for long. We should put this in some extra service.
+     *
      * @param array $data
      * @return array
      */
@@ -214,6 +223,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     {
         // Pull the locale data from the node.
         foreach ($data[PostConfigurationMapper::KEY_LOCALE_LIST] as $locale => $localeData) {
+            $localeData = $this->provisionDefaultData($locale, $localeData);
+
             // Always set the id of the super page.
             $localeData[PostConfigurationLocaleMapper::KEY_ID] = $data[PostConfigurationMapper::KEY_ID];
             // Always set the origin to this repository for later content resolution.
@@ -237,8 +248,6 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 $localeData[PostConfigurationLocaleMapper::KEY_SLUG] =
                     Slug::sanitize($localeData[PostConfigurationLocaleMapper::KEY_SLUG]);
             }
-
-            // INFO: Maybe some more? Lemme know.
 
             // Provision the category list from an array of string or array to an array of array when not empty.
             if (isset($localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST])
@@ -266,6 +275,20 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
         }
 
         return $data;
+    }
+
+    /**
+     * @param string $locale
+     * @param array $localeData
+     * @return array
+     */
+    private function provisionDefaultData(string $locale, array $localeData): array
+    {
+        if (null !== ($defaultData = $this->defaultData['locale'][$locale] ?? null)) {
+            $localeData = array_replace_recursive($defaultData, $localeData);
+        }
+
+        return $localeData;
     }
 
     /**

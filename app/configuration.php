@@ -19,6 +19,7 @@
 
 use Cache\Cache;
 use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Monolog\Logger;
 use Slim\Views\Twig;
 
@@ -38,11 +39,12 @@ return [
         Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE => 'en',
     ],
 
-    // ToDo: Use a class later here.
-    'posts' => require dirname(__DIR__) . '/app/configuration.post.php',
-
     Cache::class => [
         'path' => dirname(__DIR__) . '/var/cache',
         'time' => strtotime('-24 Hour'),
+    ],
+
+    PostConfigurationRepositoryFile::class => [
+        'default' => require dirname(__DIR__) . '/app/configuration.post.php',
     ],
 ];
