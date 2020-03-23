@@ -210,6 +210,7 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
         }
 
         $identity = $this->getIdentity([
+            'class' => get_class(),
             'offset' /*--*/ => $offset,
             'limit' /*---*/ => $limit,
             'filter' /*--*/ => $filterName,

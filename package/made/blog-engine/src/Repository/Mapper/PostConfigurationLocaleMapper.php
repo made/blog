@@ -218,6 +218,14 @@ class PostConfigurationLocaleMapper
     {
         $data = [];
 
+        if (!$postConfigurationLocale->hasCategoryList()){
+            $postConfigurationLocale->setCategoryList([]);
+        }
+
+        if (!$postConfigurationLocale->hasTagList()){
+            $postConfigurationLocale->setTagList([]);
+        }
+
         $data[static::KEY_ID] = $postConfigurationLocale->getId();
         $data[static::KEY_ORIGIN] = $postConfigurationLocale->getOrigin();
         $data[static::KEY_LOCALE] = $postConfigurationLocale->getLocale();
@@ -229,8 +237,12 @@ class PostConfigurationLocaleMapper
         $data[static::KEY_META] = $this->postConfigurationMetaMapper->toData(
             $postConfigurationLocale->getMeta()
         );
-        $data[static::KEY_CATEGORY_LIST] = $postConfigurationLocale->getCategoryList();
-        $data[static::KEY_TAG_LIST] = $postConfigurationLocale->getTagList();
+        $data[static::KEY_CATEGORY_LIST] = $this->categoryMapper->toDataArray(
+            $postConfigurationLocale->getCategoryList()
+        );
+        $data[static::KEY_TAG_LIST] = $this->tagMapper->toDataArray(
+            $postConfigurationLocale->getTagList()
+        );
         $data[static::KEY_SLUG_REDIRECT_LIST] = $postConfigurationLocale->getSlugRedirectList();
         $data[static::KEY_TEMPLATE] = $postConfigurationLocale->getTemplate();
 

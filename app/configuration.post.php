@@ -25,10 +25,15 @@ return [
         'en' => [
             'meta' => [
                 'author' => 'John Doe',
-                'custom' => [
-                    'google-site-verification' => 'kladsjlkdasjlkdaskl',
-                    'yandex' => 'kladsjlkdasjlkdaskl',
-                    'bing' => 'kladsjlkdasjlkdaskl',
+                'custom_meta' => [
+                    [
+                        'element' => 'meta',
+                        'attribute' => [
+                            'name' => 'google-site-verification',
+                            'content' => 'your verification string',
+                        ],
+                    ],
+                    //'bing' => '...',
                 ],
             ],
         ],
@@ -36,9 +41,14 @@ return [
             'meta' => [
                 'author' => 'Max Mustermann',
                 'custom' => [
-                    'google-site-verification' => 'kladsjlkdasjlkdaskl',
-                    'yandex' => 'kladsjlkdasjlkdaskl',
-                    'bing' => 'kladsjlkdasjlkdaskl',
+                    [
+                        'element' => 'meta',
+                        'attribute' => [
+                            'name' => 'google-site-verification',
+                            'content' => 'your verification string',
+                        ],
+                    ],
+                    //'bing' => '...',
                 ],
             ],
         ],

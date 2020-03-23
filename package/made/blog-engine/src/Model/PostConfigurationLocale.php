@@ -255,6 +255,14 @@ class PostConfigurationLocale
     }
 
     /**
+     * @return bool
+     */
+    public function hasCategoryList(): bool
+    {
+        return !empty($this->categoryList);
+    }
+
+    /**
      * @return array|Tag[]|null
      */
     public function getTagList(): ?array
@@ -270,6 +278,14 @@ class PostConfigurationLocale
     {
         $this->tagList = $tagList;
         return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasTagList(): bool
+    {
+        return !empty($this->tagList);
     }
 
     /**

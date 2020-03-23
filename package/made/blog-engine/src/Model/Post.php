@@ -27,7 +27,7 @@ namespace Made\Blog\Engine\Model;
 class Post
 {
     /**
-     * @var PostConfigurationLocale
+     * @var PostConfiguration
      */
     private $configuration;
 
@@ -37,18 +37,18 @@ class Post
     private $content;
 
     /**
-     * @return PostConfigurationLocale
+     * @return PostConfiguration
      */
-    public function getConfiguration(): PostConfigurationLocale
+    public function getConfiguration(): PostConfiguration
     {
         return $this->configuration;
     }
 
     /**
-     * @param PostConfigurationLocale $configuration
+     * @param PostConfiguration $configuration
      * @return Post
      */
-    public function setConfiguration(PostConfigurationLocale $configuration): Post
+    public function setConfiguration(PostConfiguration $configuration): Post
     {
         $this->configuration = $configuration;
         return $this;

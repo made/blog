@@ -451,6 +451,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
         $locale = $criteria->getLocale();
 
         $identity = $this->getIdentity([
+            'class' => get_class(),
             'offset' /*--*/ => $offset,
             'limit' /*---*/ => $limit,
             'filter' /*--*/ => $filterName,
@@ -469,6 +470,7 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     private function getCacheKeyForLocale(string $format, string $locale): string
     {
         $identity = $this->getIdentity([
+            'class' => get_class(),
             'locale' /*--*/ => $locale,
         ], 'sha256');
 

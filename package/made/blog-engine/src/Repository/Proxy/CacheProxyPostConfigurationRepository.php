@@ -178,6 +178,7 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
         }
 
         $identity = $this->getIdentity([
+            'class' => get_class(),
             'offset' /*--*/ => $offset,
             'limit' /*---*/ => $limit,
             'filter' /*--*/ => $filterName,

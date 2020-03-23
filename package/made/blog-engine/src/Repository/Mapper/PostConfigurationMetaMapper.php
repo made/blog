@@ -104,6 +104,10 @@ class PostConfigurationMetaMapper
     {
         $data = [];
 
+        if (!$postConfigurationMeta->hasCustomMetaList()) {
+            $postConfigurationMeta->setCustomMetaList([]);
+        }
+
         $data[static::KEY_AUTHOR] = $postConfigurationMeta->getAuthor();
         $data[static::KEY_PUBLISHER] = $postConfigurationMeta->getPublisher();
         $data[static::KEY_DESCRIPTION] = $postConfigurationMeta->getDescription();

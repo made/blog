@@ -163,4 +163,12 @@ class PostConfigurationMeta
         $this->customMetaList = $customMetaList;
         return $this;
     }
+
+    /**
+     * @return bool
+     */
+    public function hasCustomMetaList(): bool
+    {
+        return !empty($this->customMetaList);
+    }
 }

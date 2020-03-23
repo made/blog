@@ -26,6 +26,8 @@ namespace Made\Blog\Engine\Model;
  */
 class PostConfiguration
 {
+    const LOCALE_KEY_CURRENT = 'current';
+
     /**
      * @var string
      */
@@ -73,12 +75,39 @@ class PostConfiguration
     }
 
     /**
+     * Set a locale. When a locale key is given, it is used. Bz default the locale list key is the locale string. If the
+     * locale string already exists as locale key, the locale key `"current"` ({@link LOCALE_KEY_CURRENT}) is used.
+     *
      * @param PostConfigurationLocale $locale
+     * @param string|null $localeKey
      * @return PostConfiguration
      */
-    public function addLocale(PostConfigurationLocale $locale): PostConfiguration
+    public function setLocale(PostConfigurationLocale $locale, ?string $localeKey = null): PostConfiguration
     {
-        $this->localeList[$locale->getLocale()] = $locale;
+        if (null === $localeKey) {
+            $localeKey = $locale->getLocale();
+
+            if (isset($this->localeList[$localeKey])) {
+                $localeKey = static::LOCALE_KEY_CURRENT;
+            }
+        }
+
+        $this->localeList[$localeKey] = $locale;
         return $this;
+    }
+
+    /**
+     * Get a locale. If no locale key is provided, the locale key `"current"` ({@link LOCALE_KEY_CURRENT}) is used.
+     *
+     * @param string|null $localeKey
+     * @return PostConfigurationLocale|null
+     */
+    public function getLocale(?string $localeKey = null): ?PostConfigurationLocale
+    {
+        if (null === $localeKey) {
+            $localeKey = static::LOCALE_KEY_CURRENT;
+        }
+
+        return $this->localeList[$localeKey] ?? null;
     }
 }

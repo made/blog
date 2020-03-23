@@ -14,7 +14,8 @@
     "monolog/monolog": "^2.0",
     "gameplayjdk/php-file-cache": "^1.2.1",
     "gameplayjdk/pimple-package-utility": "^1.1",
-    "made/blog-engine": "dev-content-repository"
+    "made/blog-engine": "dev-content-repository",
+    "willdurand/negotiation": "^2.3"
   },
   "authors": [
     {

@@ -211,6 +211,7 @@ class CacheProxyTagRepository implements TagRepositoryInterface
         }
 
         $identity = $this->getIdentity([
+            'class' => get_class(),
             'offset' /*--*/ => $offset,
             'limit' /*---*/ => $limit,
             'filter' /*--*/ => $filterName,

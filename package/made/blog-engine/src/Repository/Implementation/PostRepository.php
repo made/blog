@@ -22,9 +22,11 @@ namespace Made\Blog\Engine\Repository\Implementation;
 use DateTime;
 use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\Post;
+use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
+use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Made\Blog\Engine\Service\PostContentResolverInterface;
 
@@ -35,6 +37,11 @@ use Made\Blog\Engine\Service\PostContentResolverInterface;
  */
 class PostRepository implements PostRepositoryInterface
 {
+    /**
+     * @var PostConfigurationRepositoryInterface
+     */
+    private $postConfigurationRepository;
+
     /**
      * @var PostConfigurationLocaleRepositoryInterface
      */
@@ -47,11 +54,13 @@ class PostRepository implements PostRepositoryInterface
 
     /**
      * PostRepository constructor.
+     * @param PostConfigurationRepositoryInterface $postConfigurationRepository
      * @param PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository
      * @param PostContentResolverInterface $postContentResolver
      */
-    public function __construct(PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository, PostContentResolverInterface $postContentResolver)
+    public function __construct(PostConfigurationRepositoryInterface $postConfigurationRepository, PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository, PostContentResolverInterface $postContentResolver)
     {
+        $this->postConfigurationRepository = $postConfigurationRepository;
         $this->postConfigurationLocaleRepository = $postConfigurationLocaleRepository;
         $this->postContentResolver = $postContentResolver;
     }
@@ -194,13 +203,16 @@ class PostRepository implements PostRepositoryInterface
     {
         $allPost = array_map(function (?PostConfigurationLocale $postConfigurationLocale): ?Post {
             if (null !== $postConfigurationLocale) {
+                $postConfiguration = $this->postConfigurationRepository
+                    ->getOneById($postConfigurationLocale->getId());
+                $postConfiguration->setLocale($postConfigurationLocale, PostConfiguration::LOCALE_KEY_CURRENT);
                 $postContent = $this->postContentResolver
                     ->resolve($postConfigurationLocale);
 
                 // Make sure there are only posts with content.
                 if (null !== $postContent) {
                     return (new Post())
-                        ->setConfiguration($postConfigurationLocale)
+                        ->setConfiguration($postConfiguration)
                         ->setContent($postContent);
                 }
             }

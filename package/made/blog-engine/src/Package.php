@@ -35,6 +35,8 @@ use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMetaCustomMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMetaMapper;
+use Made\Blog\Engine\Repository\Mapper\PostContentMapper;
+use Made\Blog\Engine\Repository\Mapper\PostMapper;
 use Made\Blog\Engine\Repository\Mapper\TagMapper;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
@@ -317,6 +319,19 @@ class Package extends PackageAbstract
             return new PostConfigurationMapper($postConfigurationLocaleMapper);
         });
 
+        $this->registerService(PostContentMapper::class, function (Container $container): PostContentMapper {
+            return new PostContentMapper();
+        });
+
+        $this->registerService(PostMapper::class, function (Container $container): PostMapper {
+            /** @var PostConfigurationMapper $postConfigurationMapper */
+            $postConfigurationMapper = $container[PostConfigurationMapper::class];
+            /** @var PostContentMapper $postContentMapper */
+            $postContentMapper = $container[PostContentMapper::class];
+
+            return new PostMapper($postConfigurationMapper, $postContentMapper);
+        });
+
         $this->registerTagAndService(CategoryRepositoryInterface::TAG_CATEGORY_REPOSITORY, CategoryRepositoryFile::class, function (Container $container): CategoryRepositoryInterface {
             /** @var Configuration $configuration */
             $configuration = $container[Configuration::class];
@@ -399,7 +414,9 @@ class Package extends PackageAbstract
             return new PostConfigurationRepositoryFile($settings['default'], $configuration, $postConfigurationMapper, $categoryRepository, $categoryMapper, $tagRepository, $tagMapper, $logger);
         });
 
-        $this->container->extend(PostConfigurationRepositoryFile::class, function (PostConfigurationRepositoryInterface $postConfigurationRepository, Container $container): PostConfigurationRepositoryInterface {
+        $this->registerServiceLazy(PostConfigurationRepositoryInterface::class, PostConfigurationRepositoryFile::class);
+
+        $this->container->extend(PostConfigurationRepositoryInterface::class, function (PostConfigurationRepositoryInterface $postConfigurationRepository, Container $container): PostConfigurationRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
 
@@ -504,12 +521,14 @@ class Package extends PackageAbstract
         $this->registerServiceAlias(PostContentResolverInterface::class, PostContentResolver::class);
 
         $this->registerTagAndService(PostRepositoryInterface::TAG_POST_REPOSITORY, PostRepository::class, function (Container $container): PostRepositoryInterface {
+            /** @var PostConfigurationRepositoryInterface $postConfigurationRepository */
+            $postConfigurationRepository = $container[PostConfigurationRepositoryInterface::class];
             /** @var PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository */
             $postConfigurationLocaleRepository = $container[PostConfigurationLocaleRepositoryInterface::class];
             /** @var PostContentResolverInterface $postContentResolver */
             $postContentResolver = $container[PostContentResolverInterface::class];
 
-            return new PostRepository($postConfigurationLocaleRepository, $postContentResolver);
+            return new PostRepository($postConfigurationRepository, $postConfigurationLocaleRepository, $postContentResolver);
         });
 
         $this->registerServiceLazy(PostRepositoryInterface::class, PostRepository::class);

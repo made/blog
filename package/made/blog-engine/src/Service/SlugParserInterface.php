@@ -31,6 +31,8 @@ interface SlugParserInterface
     const MATCH_SLUG = 'slug';
 
     /**
+     * Parse the given slug to a tuple of information about the slug.
+     *
      * @param string $slug
      * @return array
      */
