@@ -206,6 +206,7 @@ class PostRepository implements PostRepositoryInterface
                 $postConfiguration = $this->postConfigurationRepository
                     ->getOneById($postConfigurationLocale->getId());
                 $postConfiguration->setLocale($postConfigurationLocale, PostConfiguration::LOCALE_KEY_CURRENT);
+
                 $postContent = $this->postContentResolver
                     ->resolve($postConfigurationLocale);
 

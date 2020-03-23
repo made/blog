@@ -19,6 +19,7 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\Aggregation;
 
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
@@ -44,6 +45,16 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     public function __construct(array $postConfigurationRepositoryList)
     {
         $this->postConfigurationRepositoryList = $postConfigurationRepositoryList;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function create(PostConfiguration $postConfiguration): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
     }
 
     /**
@@ -75,5 +86,25 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
         }
 
         return $one;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function modify(PostConfiguration $postConfiguration): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
+    }
+
+    /**
+     * @inheritDoc
+     * @throws UnsupportedOperationException
+     */
+    public function destroy(PostConfiguration $postConfiguration): bool
+    {
+        throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
+            . 'The aggregation repository can not be used for that type of action.');
     }
 }

@@ -23,6 +23,7 @@ use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\CategoryRepository as CategoryRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationLocaleRepository as PostConfigurationLocaleRepositoryAggregation;
+use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationRepository as PostConfigurationRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\TagRepository as TagRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\File\CategoryRepository as CategoryRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository as PostConfigurationLocaleRepositoryFile;
@@ -414,7 +415,16 @@ class Package extends PackageAbstract
             return new PostConfigurationRepositoryFile($settings['default'], $configuration, $postConfigurationMapper, $categoryRepository, $categoryMapper, $tagRepository, $tagMapper, $logger);
         });
 
-        $this->registerServiceLazy(PostConfigurationRepositoryInterface::class, PostConfigurationRepositoryFile::class);
+        $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryAggregation::class, function (Container $container): PostConfigurationRepositoryInterface {
+            /** @var array|PostConfigurationRepositoryInterface[] $serviceList */
+            $serviceList = $this->resolveTag(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryInterface::class, [
+                PostConfigurationRepositoryAggregation::class,
+            ]);
+
+            return new PostConfigurationRepositoryAggregation($serviceList);
+        });
+
+        $this->registerServiceLazy(PostConfigurationRepositoryInterface::class, PostConfigurationRepositoryAggregation::class);
 
         $this->container->extend(PostConfigurationRepositoryInterface::class, function (PostConfigurationRepositoryInterface $postConfigurationRepository, Container $container): PostConfigurationRepositoryInterface {
             /** @var CacheInterface $cache */
@@ -424,6 +434,7 @@ class Package extends PackageAbstract
         });
 
         $this->registerTagAndService(PostConfigurationLocaleRepositoryInterface::TAG_POST_CONFIGURATION_LOCALE_REPOSITORY, PostConfigurationLocaleRepositoryFile::class, function (Container $container): PostConfigurationLocaleRepositoryInterface {
+            // The file implementation only needs the file implementation!
             /** @var PostConfigurationRepositoryFile $postConfigurationRepository */
             $postConfigurationRepository = $container[PostConfigurationRepositoryFile::class];
             /** @var LoggerInterface $logger */
