@@ -24,7 +24,7 @@ namespace Made\Blog\Engine\Help;
  *
  * @package Made\Blog\Engine\Help
  */
-class Slug
+final class Slug
 {
     /**
      * @param string $slug
