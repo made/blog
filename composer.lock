@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "69fb613683c27301ccd76725264571cd",
+    "content-hash": "ec892c9c15ef5b43625deb32e0742eac",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -191,20 +191,20 @@
         },
         {
             "name": "gameplayjdk/php-file-cache",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/GameplayJDK/php-file-cache.git",
-                "reference": "9cf21e554cbf11c4de3edd9d8afb2239123247a9"
+                "reference": "7e1c1426b63ee0659afebfd688673c9255b8f0dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GameplayJDK/php-file-cache/zipball/9cf21e554cbf11c4de3edd9d8afb2239123247a9",
-                "reference": "9cf21e554cbf11c4de3edd9d8afb2239123247a9",
+                "url": "https://api.github.com/repos/GameplayJDK/php-file-cache/zipball/7e1c1426b63ee0659afebfd688673c9255b8f0dc",
+                "reference": "7e1c1426b63ee0659afebfd688673c9255b8f0dc",
                 "shasum": ""
             },
             "require": {
-                "brick/varexporter": "^0.3.1",
+                "brick/varexporter": "^0.3.2",
                 "php": ">= 7.1",
                 "psr/simple-cache": "^1.0",
                 "symfony/filesystem": "^5.0"
@@ -229,7 +229,7 @@
                 }
             ],
             "description": "Low-level, file based cache using var_export() and some magic. Optionally PSR-16 compliant.",
-            "time": "2020-02-29T11:13:07+00:00"
+            "time": "2020-03-23T13:40:01+00:00"
         },
         {
             "name": "gameplayjdk/pimple-package-utility",
@@ -310,13 +310,12 @@
             "dist": {
                 "type": "path",
                 "url": "package/made/blog-engine",
-                "reference": "1f94f48d08a64d44a691e77b2e4e4fcefe703b23",
-                "shasum": null
+                "reference": "1f7052172a7b1a2e5475ad4ebf0ebcf888494feb"
             },
             "require": {
                 "erusev/parsedown-extra": "^0.8.1",
                 "ext-json": "*",
-                "gameplayjdk/pimple-package-utility": "^1.0",
+                "gameplayjdk/pimple-package-utility": "^1.1",
                 "gameplayjdk/task-chain": "^1.0",
                 "php": ">=7.3 <7.4",
                 "pimple/pimple": "^3.2",
