@@ -19,34 +19,42 @@ The run configuration should be similar to the following:
 
 1.  `Run` (PHP Built-in Web Server):
 
-> Host: `made-blog.local` Port: `80`
-> \
-> Document root: `/made-blog/public`
-> \
-> [x] Use router script: `/made-blog/public/index.php`
+    > Host: `made-blog.local` Port: `80`
+    > \
+    > Document root: `/made-blog/public`
+    > \
+    > [x] Use router script: `/made-blog/public/index.php`
 
-2.  `Run (Profiler)` (PHP Built-in Web Server):
+2.  `Run (Measure Time)` (PHP Built-in Web Server):
 
-> Host: `made-blog.local` Port: `80`
-> \
-> Document root: `/made-blog/public`
-> \
-> [x] Use router script: `/made-blog/public/index.php`
->
-> Interpreter options:
-> ```bash
-> --define
-> xdebug.profiler_enable=0
-> --define
-> xdebug.profiler_enable_trigger=1
-> --define
-> xdebug.profiler_output_dir="/made-blog/debug/snapshot"
-> --define
-> xdebug.profiler_output_name="xdebug.out.%t"
-> ```
+    > Host: `made-blog.local` Port: `80`
+    > \
+    > Document root: `/made-blog/public`
+    > \
+    > [x] Use router script: `/made-blog/public/index_time_measure.php`
+
+3.  `Run (Profiler)` (PHP Built-in Web Server):
+
+    > Host: `made-blog.local` Port: `80`
+    > \
+    > Document root: `/made-blog/public`
+    > \
+    > [x] Use router script: `/made-blog/public/index.php`
+    >
+    > Interpreter options:
+    > ```bash
+    > --define
+    > xdebug.profiler_enable=0
+    > --define
+    > xdebug.profiler_enable_trigger=1
+    > --define
+    > xdebug.profiler_output_dir="/made-blog/debug/snapshot"
+    > --define
+    > xdebug.profiler_output_name="xdebug.out.%t"
+    > ```
 
 3. `Debug` (PHP Remote Debug):
 
-> Server: `made-blog.local` (xdebug)
-> \
-> IDE key(session id): `PHPSTORM`
+    > Server: `made-blog.local` (xdebug)
+    > \
+    > IDE key(session id): `PHPSTORM`
