@@ -22,16 +22,13 @@ namespace App;
 
 use App\Controller\BlogController;
 use App\Middleware\TrailingSlashMiddleware;
-use App\Service\SlugHandler;
 use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
-use Made\Blog\Engine\Repository\Mapper\PostMapper;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Made\Blog\Engine\Service\SlugParserInterface;
 use Made\Blog\Engine\Service\ThemeService;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
-use Negotiation\Negotiator;
 use Pimple\Container;
 use Pimple\Package\Exception\PackageException;
 use Pimple\Package\PackageAbstract;
@@ -85,8 +82,6 @@ class Package extends PackageAbstract
 
         $this->registerClientDependency();
         $this->registerPackageDependency();
-
-        $this->registerSlugHandler();
 
         $this->registerController();
     }
@@ -200,37 +195,19 @@ class Package extends PackageAbstract
         $this->registerServiceAlias(CacheInterface::class, Psr16Cache::class);
     }
 
-    private function registerSlugHandler(): void
+    private function registerController(): void
     {
-        $this->registerService(Negotiator::class, function (Container $container): Negotiator {
-            return new Negotiator();
-        });
-
-        $this->registerService(SlugHandler::class, function (Container $container): SlugHandler {
+        $this->registerService(BlogController::class, function (Container $container): BlogController {
             /** @var Twig $twig */
             $twig = $container[Twig::class];
             /** @var Logger $logger */
             $logger = $container[Logger::class];
             /** @var PostRepositoryInterface $postRepository */
             $postRepository = $container[PostRepositoryInterface::class];
-            /** @var PostMapper $postMapper */
-            $postMapper = $container[PostMapper::class];
             /** @var SlugParserInterface $slugParser */
             $slugParser = $container[SlugParserInterface::class];
-            /** @var Negotiator $negotiator */
-            $negotiator = $container[Negotiator::class];
 
-            return new SlugHandler($twig, $logger, $postRepository, $postMapper, $slugParser, $negotiator);
-        });
-    }
-
-    private function registerController(): void
-    {
-        $this->registerService(BlogController::class, function (Container $container): BlogController {
-            /** @var SlugHandler $slugHandler */
-            $slugHandler = $container[SlugHandler::class];
-
-            return new BlogController($slugHandler);
+            return new BlogController($twig, $logger, $postRepository, $slugParser);
         });
     }
 }

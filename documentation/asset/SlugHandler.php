@@ -41,6 +41,17 @@ use Twig\Error\SyntaxError;
 /**
  * Class SlugHandler
  *
+ * Dependency:
+ * - "willdurand/negotiation": "^2.3"
+ *
+ * There are several things still wrong about this class.
+ *
+ * 1. The api should ideally not be available at the same path as the web content. This has several reasons. First of
+ * all, the api content should not accidentally be index by search engines. Another reason is, that the api should not
+ * be based on changing routes, which possibly could be serving redirects.
+ * 2. The whole logic is stuck in the {@link handle()} method.
+ *
+ * @deprecated Controller should be used instead! This class will be moved to the documentation later on.
  * @package App\Service
  */
 class SlugHandler
@@ -181,7 +192,9 @@ class SlugHandler
                 'post' => $post,
             ]);
         } catch (LoaderError | RuntimeError | SyntaxError $error) {
-            // TODO: Logging.
+            $this->logger->error('Error on twig render: ' . $error->getRawMessage(), [
+                'error', $error,
+            ]);
 
             // In case of an error, go all in.
             return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
@@ -224,4 +237,29 @@ class SlugHandler
 
         return $mediaType;
     }
+
+    // In the package class:
+//    private function registerSlugHandler(): void
+//    {
+//        $this->registerService(Negotiator::class, function (Container $container): Negotiator {
+//            return new Negotiator();
+//        });
+//
+//        $this->registerService(SlugHandler::class, function (Container $container): SlugHandler {
+//            /** @var Twig $twig */
+//            $twig = $container[Twig::class];
+//            /** @var Logger $logger */
+//            $logger = $container[Logger::class];
+//            /** @var PostRepositoryInterface $postRepository */
+//            $postRepository = $container[PostRepositoryInterface::class];
+//            /** @var PostMapper $postMapper */
+//            $postMapper = $container[PostMapper::class];
+//            /** @var SlugParserInterface $slugParser */
+//            $slugParser = $container[SlugParserInterface::class];
+//            /** @var Negotiator $negotiator */
+//            $negotiator = $container[Negotiator::class];
+//
+//            return new SlugHandler($twig, $logger, $postRepository, $postMapper, $slugParser, $negotiator);
+//        });
+//    }
 }
