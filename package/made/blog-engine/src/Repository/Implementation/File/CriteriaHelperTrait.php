@@ -26,7 +26,9 @@ use Made\Blog\Engine\Utility\ClosureInspection\ClosureInspection;
 use ReflectionException;
 
 /**
- * Class CriteriaHelperTrait
+ * Trait CriteriaHelperTrait
+ *
+ * TODO: Make this a service.
  *
  * @package Made\Blog\Engine\Repository\Implementation\File
  */
@@ -59,12 +61,15 @@ trait CriteriaHelperTrait
     {
         if (null !== ($filter = $criteria->getFilter())) {
             /** @var Closure $callback */
-            $callback = $filter->getCallback();
-            /** @var ClosureInspection|null $callbackInspection */
-            $callbackInspection = $this->createInspection($callback);
+            $callback = $filter->getCallback($className);
 
-            if (null !== $callbackInspection && $callbackInspection->isParameterTypeClass(0, $className)) {
-                $all = array_filter($all, $callback);
+            if (null !== $callback) {
+                /** @var ClosureInspection|null $callbackInspection */
+                $callbackInspection = $this->createInspection($callback);
+
+                if (null !== $callbackInspection && $callbackInspection->isParameterTypeClass(0, $className)) {
+                    $all = array_filter($all, $callback);
+                }
             }
         }
 
@@ -72,6 +77,8 @@ trait CriteriaHelperTrait
     }
 
     /**
+     * TODO: Further testing is needed.
+     *
      * @param Criteria $criteria
      * @param array $all
      * @return array

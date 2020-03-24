@@ -139,7 +139,7 @@ class BlogController implements ControllerInterface
             }
 
             // Otherwise create the slug.
-            $slug = $this->createSlugFromPost($post);
+            $slug = $this->getPostSlug($post);
 
             // And redirect there permanently.
             return $response
@@ -148,9 +148,11 @@ class BlogController implements ControllerInterface
         }
 
         // Else, just render the page as usual.
+        $template = $this->getPostTemplate($post);
+
         try {
             // Use the twig-view helper for that.
-            return $this->twig->render($response, '@App/index.html.twig', [
+            return $this->twig->render($response, $template, [
                 'locale' => $matchLocale,
                 'post' => $post,
             ]);
@@ -168,7 +170,7 @@ class BlogController implements ControllerInterface
      * @param Post $post
      * @return string
      */
-    private function createSlugFromPost(Post $post): string
+    private function getPostSlug(Post $post): string
     {
         $configuration = $post->getConfiguration()
             ->getLocale(PostConfiguration::LOCALE_KEY_CURRENT);
@@ -180,5 +182,17 @@ class BlogController implements ControllerInterface
         $slug = Slug::sanitize($slug);
 
         return $slug;
+    }
+
+    /**
+     * @param Post $post
+     * @return string
+     */
+    private function getPostTemplate(Post $post): string
+    {
+        $configuration = $post->getConfiguration()
+            ->getLocale(PostConfiguration::LOCALE_KEY_CURRENT);
+
+        return $configuration->getTemplate();
     }
 }

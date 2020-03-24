@@ -39,6 +39,17 @@ class Order
     private $comparator;
 
     /**
+     * Order constructor.
+     * @param string $name
+     * @param Closure $comparator
+     */
+    public function __construct(string $name, Closure $comparator)
+    {
+        $this->name = $name;
+        $this->comparator = $comparator;
+    }
+
+    /**
      * @return string
      */
     public function getName(): string

@@ -435,6 +435,9 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $filterName = 'null';
         if (null !== ($filter = $criteria->getFilter())) {
             $filterName = $filter->getName();
+
+            $callbackMap =$filter->getCallbackMap();
+            $filterName = $filterName . '_' . implode('_', array_keys($callbackMap));
         }
 
         $orderName = 'null';
@@ -450,21 +453,6 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             'limit' /*---*/ => $limit,
             'filter' /*--*/ => $filterName,
             'order' /*---*/ => $orderName,
-            'locale' /*--*/ => $locale,
-        ], 'sha256');
-
-        return "{$format}_{$identity}";
-    }
-
-    /**
-     * @param string $format
-     * @param string $locale
-     * @return string
-     */
-    private function getCacheKeyForLocale(string $format, string $locale): string
-    {
-        $identity = $this->getIdentity([
-            'class' => get_class(),
             'locale' /*--*/ => $locale,
         ], 'sha256');
 

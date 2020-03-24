@@ -34,19 +34,19 @@ class Filter
     private $name;
 
     /**
-     * @var Closure
+     * @var array|Closure[]
      */
-    private $callback;
+    private $callbackMap;
 
     /**
      * Filter constructor.
      * @param string $name
-     * @param Closure $callback
+     * @param array|Closure[] $callbackMap
      */
-    public function __construct(string $name, Closure $callback)
+    public function __construct(string $name, array $callbackMap)
     {
         $this->name = $name;
-        $this->callback = $callback;
+        $this->callbackMap = $callbackMap;
     }
 
     /**
@@ -68,20 +68,40 @@ class Filter
     }
 
     /**
-     * @return Closure
+     * @return array|Closure[]
      */
-    public function getCallback(): Closure
+    public function getCallbackMap(): array
     {
-        return $this->callback;
+        return $this->callbackMap;
     }
 
     /**
+     * @param array|Closure[] $callbackMap
+     * @return Filter
+     */
+    public function setCallbackMap(array $callbackMap)
+    {
+        $this->callbackMap = $callbackMap;
+        return $this;
+    }
+
+    /**
+     * @param string $key
+     * @return Closure
+     */
+    public function getCallback(string $key): ?Closure
+    {
+        return $this->callbackMap[$key] ?? null;
+    }
+
+    /**
+     * @param string $key
      * @param Closure $callback
      * @return Filter
      */
-    public function setCallback(Closure $callback): Filter
+    public function setCallback(string $key, Closure $callback): Filter
     {
-        $this->callback = $callback;
+        $this->callbackMap[$key] = $callback;
         return $this;
     }
 }
