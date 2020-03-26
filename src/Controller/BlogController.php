@@ -1,32 +1,40 @@
 <?php
 /**
- * The MIT License (MIT)
- * Copyright (c) 2020 Made
+ * Made Blog
+ * Copyright (c) 2019-2020 Made
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * This program  is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace App\Controller;
 
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
+use Made\Blog\Engine\Help\Path;
+use Made\Blog\Engine\Help\Slug;
+use Made\Blog\Engine\Model\Post;
+use Made\Blog\Engine\Model\PostConfiguration;
+use Made\Blog\Engine\Repository\PostRepositoryInterface;
+use Made\Blog\Engine\Service\SlugParserInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Views\Twig;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 /**
  * Class BlogController
@@ -42,6 +50,7 @@ class BlogController implements ControllerInterface
      */
     public static function register(App $app): void
     {
+        // This is the most generic pattern, thus its route has to be registered last.
         $app->get('/{slug:.*}', BlogController::class . ':slugAction')
             ->setName(BlogController::ROUTE_SLUG);
     }
@@ -57,16 +66,33 @@ class BlogController implements ControllerInterface
     private $logger;
 
     /**
+     * @var PostRepositoryInterface
+     */
+    private $postRepository;
+
+    /**
+     * @var SlugParserInterface
+     */
+    private $slugParser;
+
+    /**
      * BlogController constructor.
      * @param Twig $twig
+     * @param LoggerInterface $logger
+     * @param PostRepositoryInterface $postRepository
+     * @param SlugParserInterface $slugParser
      */
-    public function __construct(Twig $twig, LoggerInterface $logger)
+    public function __construct(Twig $twig, LoggerInterface $logger, PostRepositoryInterface $postRepository, SlugParserInterface $slugParser)
     {
         $this->twig = $twig;
         $this->logger = $logger;
+        $this->postRepository = $postRepository;
+        $this->slugParser = $slugParser;
     }
 
     /**
+     * /{slug:.*}
+     *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @param array $args
@@ -77,18 +103,96 @@ class BlogController implements ControllerInterface
         /** @var string $slug */
         $slug = $args['slug'];
 
-        $line = "The slug is: '$slug'.";
-
-        $response->getBody()
-            ->write($line);
-
-        // This is a serious tripwire!
+        // This is a serious tripwire! It will not be important anymore, when an actual favicon.ico exists. But this is
+        // a browser flaw...
         if ('favicon.ico' === $slug) {
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
-        $this->logger->info($line);
+        // Extract all needed information from the slug.
+        [
+            SlugParserInterface::MATCH_LOCALE => $matchLocale,
+            SlugParserInterface::MATCH_SLUG => $matchSlug,
+        ] = $this->slugParser
+            ->parse($slug);
 
-        return $response;
+        // And then forget about it.
+        unset($slug);
+
+        // If information is missing, stop right there.
+        if (empty($matchLocale) || empty($matchSlug)) {
+            return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
+        }
+
+        // Try to find the post.
+        $post = $this->postRepository
+            ->getOneBySlug($matchLocale, $matchSlug);
+
+        // If it is not found, try to find it by slug-redirect.
+        if (null === $post) {
+            $post = $this->postRepository
+                ->getOneBySlugRedirect($matchLocale, $matchSlug);
+
+            // And if it has not been found by now, give up.
+            if (null === $post) {
+                return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
+            }
+
+            // Otherwise create the slug.
+            $slug = $this->getPostSlug($post);
+
+            // And redirect there permanently.
+            return $response
+                ->withHeader('Location', $slug)
+                ->withStatus(StatusCodeInterface::STATUS_MOVED_PERMANENTLY);
+        }
+
+        // Else, just render the page as usual.
+        $template = $this->getPostTemplate($post);
+
+        try {
+            // Use the twig-view helper for that.
+            return $this->twig->render($response, $template, [
+                'locale' => $matchLocale,
+                'post' => $post,
+            ]);
+        } catch (LoaderError | RuntimeError | SyntaxError $error) {
+            $this->logger->error('Error on twig render: ' . $error->getRawMessage(), [
+                'error', $error,
+            ]);
+
+            // In case of an error, go all in.
+            return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * @param Post $post
+     * @return string
+     */
+    private function getPostSlug(Post $post): string
+    {
+        $configuration = $post->getConfiguration()
+            ->getLocale(PostConfiguration::LOCALE_KEY_CURRENT);
+
+        $locale = $configuration->getLocale();
+        $slug = $configuration->getSlug();
+
+        $slug = Path::join($locale, $slug);
+        $slug = Slug::sanitize($slug);
+
+        return $slug;
+    }
+
+    /**
+     * @param Post $post
+     * @return string
+     */
+    private function getPostTemplate(Post $post): string
+    {
+        $configuration = $post->getConfiguration()
+            ->getLocale(PostConfiguration::LOCALE_KEY_CURRENT);
+
+        return $configuration->getTemplate();
     }
 }

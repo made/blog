@@ -1,18 +1,19 @@
 {
   "name": "made/blog-engine",
-  "description": "Blog engine library for made/blog.",
+  "description": "The Made Blog Engine library.",
   "type": "library",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "minimum-stability": "stable",
   "require": {
-    "php": ">=7.1 <7.4",
+    "php": ">=7.3 <7.4",
     "ext-json": "*",
     "pimple/pimple": "^3.2",
     "psr/log": "^1.1",
     "psr/simple-cache": "^1.0",
     "twig/twig": "^3.0",
-    "erusev/parsedown": "^1.7",
-    "gameplayjdk/pimple-package-utility": "^1.0"
+    "erusev/parsedown-extra": "^0.8.1",
+    "gameplayjdk/pimple-package-utility": "^1.1",
+    "gameplayjdk/task-chain": "^1.0"
   },
   "authors": [
     {

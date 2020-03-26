@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c676ad283f024f985982ac6a9220b51f",
+    "content-hash": "e4cfa927694b85e51428eb46d3be9dd9",
     "packages": [
         {
             "name": "erusev/parsedown",
@@ -53,17 +53,64 @@
             "time": "2019-12-30T22:54:17+00:00"
         },
         {
-            "name": "gameplayjdk/pimple-package-utility",
-            "version": "v1.0.0",
+            "name": "erusev/parsedown-extra",
+            "version": "0.8.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/GameplayJDK/pimple-package-utility.git",
-                "reference": "38ee72a924d73c554c7bb5e56f7370dfbebffa35"
+                "url": "https://github.com/erusev/parsedown-extra.git",
+                "reference": "91ac3ff98f0cea243bdccc688df43810f044dcef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GameplayJDK/pimple-package-utility/zipball/38ee72a924d73c554c7bb5e56f7370dfbebffa35",
-                "reference": "38ee72a924d73c554c7bb5e56f7370dfbebffa35",
+                "url": "https://api.github.com/repos/erusev/parsedown-extra/zipball/91ac3ff98f0cea243bdccc688df43810f044dcef",
+                "reference": "91ac3ff98f0cea243bdccc688df43810f044dcef",
+                "shasum": ""
+            },
+            "require": {
+                "erusev/parsedown": "^1.7.4"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8.35"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "ParsedownExtra": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Emanuil Rusev",
+                    "email": "hello@erusev.com",
+                    "homepage": "http://erusev.com"
+                }
+            ],
+            "description": "An extension of Parsedown that adds support for Markdown Extra.",
+            "homepage": "https://github.com/erusev/parsedown-extra",
+            "keywords": [
+                "markdown",
+                "markdown extra",
+                "parsedown",
+                "parser"
+            ],
+            "time": "2019-12-30T23:20:37+00:00"
+        },
+        {
+            "name": "gameplayjdk/pimple-package-utility",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/GameplayJDK/pimple-package-utility.git",
+                "reference": "41707f5ddde2f77655c900298065e5650ec10cea"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/GameplayJDK/pimple-package-utility/zipball/41707f5ddde2f77655c900298065e5650ec10cea",
+                "reference": "41707f5ddde2f77655c900298065e5650ec10cea",
                 "shasum": ""
             },
             "require": {
@@ -87,33 +134,69 @@
                 }
             ],
             "description": "Utility classes for pimple container based libraries and applications with configuration and tag support.",
-            "time": "2020-01-06T18:29:24+00:00"
+            "time": "2020-02-21T18:40:32+00:00"
         },
         {
-            "name": "pimple/pimple",
-            "version": "v3.2.3",
+            "name": "gameplayjdk/task-chain",
+            "version": "v1.0.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/silexphp/Pimple.git",
-                "reference": "9e403941ef9d65d20cba7d54e29fe906db42cf32"
+                "url": "https://github.com/GameplayJDK/task-chain.git",
+                "reference": "39765c08a983cb3fb6a5660996d965ca6b01c39d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/silexphp/Pimple/zipball/9e403941ef9d65d20cba7d54e29fe906db42cf32",
-                "reference": "9e403941ef9d65d20cba7d54e29fe906db42cf32",
+                "url": "https://api.github.com/repos/GameplayJDK/task-chain/zipball/39765c08a983cb3fb6a5660996d965ca6b01c39d",
+                "reference": "39765c08a983cb3fb6a5660996d965ca6b01c39d",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0",
+                "php": ">= 7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "TaskChain\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "GameplayJDK",
+                    "email": "github@gameplayjdk.de"
+                }
+            ],
+            "description": "Small library for the task chain pattern.",
+            "time": "2020-03-02T18:58:26+00:00"
+        },
+        {
+            "name": "pimple/pimple",
+            "version": "v3.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/silexphp/Pimple.git",
+                "reference": "e55d12f9d6a0e7f9c85992b73df1267f46279930"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/silexphp/Pimple/zipball/e55d12f9d6a0e7f9c85992b73df1267f46279930",
+                "reference": "e55d12f9d6a0e7f9c85992b73df1267f46279930",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2.5",
                 "psr/container": "^1.0"
             },
             "require-dev": {
-                "symfony/phpunit-bridge": "^3.2"
+                "symfony/phpunit-bridge": "^3.4|^4.4|^5.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.2.x-dev"
+                    "dev-master": "3.3.x-dev"
                 }
             },
             "autoload": {
@@ -132,12 +215,12 @@
                 }
             ],
             "description": "Pimple, a simple Dependency Injection Container",
-            "homepage": "http://pimple.sensiolabs.org",
+            "homepage": "https://pimple.symfony.com",
             "keywords": [
                 "container",
                 "dependency injection"
             ],
-            "time": "2018-01-21T07:42:36+00:00"
+            "time": "2020-03-03T09:12:48+00:00"
         },
         {
             "name": "psr/container",
@@ -470,7 +553,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=7.1 <7.4",
+        "php": ">=7.3 <7.4",
         "ext-json": "*"
     },
     "platform-dev": []

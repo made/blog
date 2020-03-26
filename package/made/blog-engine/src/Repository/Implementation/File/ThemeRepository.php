@@ -1,31 +1,32 @@
 <?php
 /**
- * The MIT License (MIT)
- * Copyright (c) 2020 Made
+ * Made Blog
+ * Copyright (c) 2019-2020 Made
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * This program  is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\MapperException;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Help\Directory;
 use Made\Blog\Engine\Help\File;
 use Made\Blog\Engine\Help\Json;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Theme;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\ThemeService;
@@ -37,6 +38,8 @@ use Made\Blog\Engine\Service\ThemeService;
  */
 class ThemeRepository implements ThemeRepositoryInterface
 {
+    use CriteriaHelperTrait;
+
     /**
      * @var Configuration
      */
@@ -61,7 +64,7 @@ class ThemeRepository implements ThemeRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getAll(): array
+    public function getAll(Criteria $criteria): array
     {
         $path = $this->getPath();
 
@@ -99,16 +102,18 @@ class ThemeRepository implements ThemeRepositoryInterface
 
             try {
                 return $this->themeMapper->fromData($data);
-            } catch (MapperException $exception) {
+            } catch (FailedOperationException $exception) {
                 // TODO: Logging.
             }
 
             return null;
         }, $list);
 
-        return array_filter($all, function (?Theme $theme): bool {
+        $all = array_filter($all, function (?Theme $theme): bool {
             return null !== $theme;
         });
+
+        return $this->applyCriteria($criteria, $all, Theme::class);
     }
 
     /**
@@ -116,7 +121,7 @@ class ThemeRepository implements ThemeRepositoryInterface
      */
     public function getOneByName(string $name): ?Theme
     {
-        $all = $this->getAll();
+        $all = $this->getAll(new Criteria());
 
         return array_reduce($all, function (?Theme $carry, Theme $theme) use ($name): ?Theme {
             if (null === $carry && $theme->getName() === $name) {
@@ -163,6 +168,7 @@ class ThemeRepository implements ThemeRepositoryInterface
     }
 
     /**
+     * TODO: Use ThemeService::getViewPath() instead.
      * @param string $entry
      * @return string
      */

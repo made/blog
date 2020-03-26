@@ -1,29 +1,29 @@
 <?php
 /**
- * The MIT License (MIT)
- * Copyright (c) 2020 Made
+ * Made Blog
+ * Copyright (c) 2019-2020 Made
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * This program  is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace Made\Blog\Engine\Service;
 
-use Made\Blog\Engine\Exception\ThemeException;
+use Made\Blog\Engine\Exception\InvalidArgumentException;
 use Made\Blog\Engine\Help\Path;
 use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
-use Twig\Error\LoaderError;
 use Twig\Loader\FilesystemLoader;
 use Twig\Loader\LoaderInterface;
 
@@ -50,7 +50,7 @@ class ThemeService
     const PATH_CONFIGURATION = '/theme.json';
 
     /**
-     * Namespace for Twig
+     * Namespace for Twig.
      */
     const NAMESPACE_VIEW = 'App';
 
@@ -76,18 +76,6 @@ class ThemeService
     }
 
     /**
-     * @param string $path
-     * @return string
-     */
-    private function getViewPath(string $path): string
-    {
-        return Path::join(...[
-            $path,
-            static::PATH_VIEW,
-        ]);
-    }
-
-    /**
      * @return string
      */
     public function getPath(): string
@@ -107,26 +95,38 @@ class ThemeService
     }
 
     /**
-     * TODO: This needs to be tested after the theme repository is implemented.
-     *
      * @param LoaderInterface $twigLoader
-     * @throws LoaderError
-     * @throws ThemeException
+     * @throws InvalidArgumentException
      */
     public function updateLoader(LoaderInterface $twigLoader): void
     {
         if (!($twigLoader instanceof FilesystemLoader)) {
             // TODO: Add proper exception message.
-            throw new ThemeException();
+            throw new InvalidArgumentException('Unsupported ' . LoaderInterface::class . ' implementation: ' . get_class($twigLoader));
         }
 
         /** @var FilesystemLoader $twigLoader */
 
-        $themeList = $this->themeRepository->getAll();
+        // TODO: Add order.
+        $themeListCriteria = new Criteria();
+        $themeList = $this->themeRepository->getAll($themeListCriteria);
+
         foreach ($themeList as $theme) {
             $path = $theme->getPath();
             // The name of the theme is used as the namespace.
-            $twigLoader->addPath($this->getViewPath($path), $theme->getName());
+            $twigLoader->setPaths($this->getViewPath($path), $theme->getName());
         }
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    private function getViewPath(string $path): string
+    {
+        return Path::join(...[
+            $path,
+            static::PATH_VIEW,
+        ]);
     }
 }

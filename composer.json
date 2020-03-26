@@ -3,18 +3,18 @@
   "description": "Simple blog software for developers.",
   "type": "project",
   "minimum-stability": "stable",
-  "license": "MIT",
+  "license": "GPL-3.0-or-later",
   "require": {
-    "php": ">=7.1 <7.4",
+    "php": ">=7.3 <7.4",
     "ext-json": "*",
     "slim/slim": "^4.0",
     "slim/psr7": "^0.6.0",
     "pimple/pimple": "^3.2",
     "slim/twig-view": "^3.0",
     "monolog/monolog": "^2.0",
-    "gameplayjdk/php-file-cache": "^1.0",
-    "gameplayjdk/pimple-package-utility": "^1.0",
-    "made/blog-engine": "dev-master"
+    "gameplayjdk/php-file-cache": "^1.2.1",
+    "gameplayjdk/pimple-package-utility": "^1.1",
+    "made/blog-engine": "dev-content-repository"
   },
   "authors": [
     {

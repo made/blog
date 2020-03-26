@@ -1,27 +1,26 @@
 <?php
 /**
- * The MIT License (MIT)
- * Copyright (c) 2020 Made
+ * Made Blog
+ * Copyright (c) 2019-2020 Made
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * This program  is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 namespace Made\Blog\Engine\Repository\Proxy;
 
-use Made\Blog\Engine\Exception\MapperException;
 use Made\Blog\Engine\Model\Theme;
-use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
+use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -33,8 +32,10 @@ use Psr\SimpleCache\InvalidArgumentException;
  */
 class CacheProxyThemeRepository implements ThemeRepositoryInterface
 {
-    const CACHE_KEY_ALL = 'theme-all';
-    const CACHE_KEY_ONE = 'theme-one-%1$s';
+    use CacheProxyIdentityHelperTrait;
+
+    const CACHE_KEY_ALL /*-----------*/ = 'th-all';
+    const CACHE_KEY_ONE_BY_NAME /*---*/ = 'th-one-by-name';
 
     /**
      * @var CacheInterface
@@ -47,49 +48,43 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
     private $themeRepository;
 
     /**
-     * @var ThemeMapper
-     */
-    private $themeMapper;
-
-    /**
      * CacheProxyThemeRepository constructor.
      * @param CacheInterface $cache
      * @param ThemeRepositoryInterface $themeRepository
-     * @param ThemeMapper $themeMapper
      */
-    public function __construct(CacheInterface $cache, ThemeRepositoryInterface $themeRepository, ThemeMapper $themeMapper)
+    public function __construct(CacheInterface $cache, ThemeRepositoryInterface $themeRepository)
     {
         $this->cache = $cache;
         $this->themeRepository = $themeRepository;
-        $this->themeMapper = $themeMapper;
     }
 
     /**
      * @inheritDoc
-     * @throws InvalidArgumentException
      */
-    public function getAll(): array
+    public function getAll(Criteria $criteria): array
     {
-        // TODO: Cache expiry for gameplayjdk/php-file-cache!
         $key = static::CACHE_KEY_ALL;
+        $key = $this->getCacheKeyForCriteria($key, $criteria);
 
-        /** @var array|Theme[] $all */
-        $allData = $this->cache->get($key, []);
         $all = [];
 
         try {
-            $all = $this->themeMapper->fromDataArray($allData);
-        } catch (MapperException $exception) {
-            // TODO: Logging.
+            /** @var array|Theme[] $all */
+            $all = $this->cache->get($key, []);
+        } catch (InvalidArgumentException $exception) {
+            // TODO: Log.
         }
 
         if (empty($all)) {
-            $all = $this->themeRepository->getAll();
+            $all = $this->themeRepository
+                ->getAll($criteria);
 
             if (!empty($all)) {
-                $allData = $this->themeMapper->toDataArray($all);
-
-                $this->cache->set($key, $allData);
+                try {
+                    $this->cache->set($key, $all);
+                } catch (InvalidArgumentException $exception) {
+                    // TODO: Log.
+                }
             }
         }
 
@@ -98,33 +93,74 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
 
     /**
      * @inheritDoc
-     * @throws InvalidArgumentException
      */
     public function getOneByName(string $name): ?Theme
     {
-        $key = vsprintf(static::CACHE_KEY_ONE, [
-            $name,
-        ]);
+        $key = static::CACHE_KEY_ONE_BY_NAME . '-' . $name;
 
-        $oneData = $this->cache->get($key);
         $one = null;
 
         try {
-            $one = $this->themeMapper->fromData($oneData);
-        } catch (MapperException $exception) {
-            // TODO: Logging.
+            /** @var null|Theme $one */
+            $one = $this->cache->get($key, null);
+        } catch (InvalidArgumentException $exception) {
+            // TODO: Log.
         }
 
         if (empty($one)) {
-            $one = $this->themeRepository->getOneByName($name);
+            $one = $this->themeRepository
+                ->getOneByName($name);
 
             if (!empty($one)) {
-                $oneData = $this->themeMapper->toData($one);
-
-                $this->cache->set($key, $oneData);
+                try {
+                    $this->cache->set($key, $one);
+                } catch (InvalidArgumentException $exception) {
+                    // TODO: Log.
+                }
             }
         }
 
         return $one;
+    }
+
+    /**
+     * @param string $format
+     * @param Criteria $criteria
+     * @return string
+     */
+    private function getCacheKeyForCriteria(string $format, Criteria $criteria): string
+    {
+        $offset = $criteria->getOffset();
+        if (-1 === $offset) {
+            $offset = 'null';
+        }
+
+        $limit = $criteria->getLimit();
+        if (-1 === $limit) {
+            $limit = 'null';
+        }
+
+        $filterName = 'null';
+        if (null !== ($filter = $criteria->getFilter())) {
+            $filterName = $filter->getName();
+
+            $callbackMap =$filter->getCallbackMap();
+            $filterName = $filterName . '_' . implode('_', array_keys($callbackMap));
+        }
+
+        $orderName = 'null';
+        if (null !== ($order = $criteria->getOrder())) {
+            $orderName = $order->getName();
+        }
+
+        $identity = $this->getIdentity([
+            'class' => get_class(),
+            'offset' /*--*/ => $offset,
+            'limit' /*---*/ => $limit,
+            'filter' /*--*/ => $filterName,
+            'order' /*---*/ => $orderName,
+        ], 'sha256');
+
+        return "{$format}_{$identity}";
     }
 }
