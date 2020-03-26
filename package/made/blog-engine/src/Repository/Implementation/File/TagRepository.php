@@ -42,14 +42,14 @@ class TagRepository implements TagRepositoryInterface
     use CriteriaHelperTrait;
 
     /**
-     * @var Configuration
-     */
-    private $configuration;
-
-    /**
      * @var TagMapper
      */
     private $tagMapper;
+
+    /**
+     * @var PostService
+     */
+    private $postService;
 
     /**
      * @var LoggerInterface
@@ -58,14 +58,14 @@ class TagRepository implements TagRepositoryInterface
 
     /**
      * TagRepository constructor.
-     * @param Configuration $configuration
      * @param TagMapper $tagMapper
+     * @param PostService $postService
      * @param LoggerInterface $logger
      */
-    public function __construct(Configuration $configuration, TagMapper $tagMapper, LoggerInterface $logger)
+    public function __construct(TagMapper $tagMapper, PostService $postService, LoggerInterface $logger)
     {
-        $this->configuration = $configuration;
         $this->tagMapper = $tagMapper;
+        $this->postService = $postService;
         $this->logger = $logger;
     }
 
@@ -87,12 +87,18 @@ class TagRepository implements TagRepositoryInterface
         $configurationPath = $this->getConfigurationPath();
         $list = [];
 
-        if (is_file($configurationPath)) {
-            // Even if the tag configuration file does not exist, this will return an empty array.
-            $list = $this->getContent($configurationPath);
-        } else {
-            // TODO: Logging.
+        if (!is_readable($configurationPath)) {
+            $this->logger->notice('Empty tag file at configuration path.', [
+                'configurationPath' => $configurationPath,
+            ]);
+
+            return $list;
         }
+
+        // Even if the tag configuration file does not exist, this will return an empty array.
+        $list = $this->getContent($configurationPath);
+
+        $list = array_filter($list, 'is_array');
 
         /** @var array|Tag[] $all */
         $all = array_map(function (array $data): ?Tag {
@@ -103,7 +109,10 @@ class TagRepository implements TagRepositoryInterface
             try {
                 return $this->tagMapper->fromData($data);
             } catch (FailedOperationException $exception) {
-                // TODO: Logging.
+                $this->logger->error('Unable to map tag data to a valid object. This is likely caused by some malformed format.', [
+                    'data' => $data,
+                    'exception' => $exception,
+                ]);
             }
 
             return null;
@@ -168,25 +177,12 @@ class TagRepository implements TagRepositoryInterface
             . 'The file repository can not be used for that type of action.');
     }
 
-
-    /**
-     * TODO: Use PostService::getPath() instead.
-     * @return string
-     */
-    private function getPath(): string
-    {
-        return Path::join(...[
-            $this->configuration->getRootDirectory(),
-            PostService::PATH_POST,
-        ]);
-    }
-
     /**
      * @return string
      */
     private function getConfigurationPath(): string
     {
-        $path = $this->getPath();
+        $path = $this->postService->getPath();
 
         return Path::join(...[
             $path,

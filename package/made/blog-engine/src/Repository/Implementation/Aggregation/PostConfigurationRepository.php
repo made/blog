@@ -27,8 +27,6 @@ use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 /**
  * Class PostConfigurationRepository
  *
- * TODO: The aggregation layer is needed inside the PostRepository.
- *
  * @package Made\Blog\Engine\Repository\Implementation\Aggregation
  */
 class PostConfigurationRepository implements PostConfigurationRepositoryInterface

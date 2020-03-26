@@ -30,6 +30,7 @@ use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Made\Blog\Engine\Service\ThemeService;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class ThemeRepository
@@ -41,24 +42,31 @@ class ThemeRepository implements ThemeRepositoryInterface
     use CriteriaHelperTrait;
 
     /**
-     * @var Configuration
-     */
-    private $configuration;
-
-    /**
      * @var ThemeMapper
      */
     private $themeMapper;
 
     /**
-     * ThemeRepository constructor.
-     * @param Configuration $configuration
-     * @param ThemeMapper $themeMapper
+     * @var ThemeService
      */
-    public function __construct(Configuration $configuration, ThemeMapper $themeMapper)
+    private $themeService;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * ThemeRepository constructor.
+     * @param ThemeMapper $themeMapper
+     * @param ThemeService $themeService
+     * @param LoggerInterface $logger
+     */
+    public function __construct(ThemeMapper $themeMapper, ThemeService $themeService, LoggerInterface $logger)
     {
-        $this->configuration = $configuration;
         $this->themeMapper = $themeMapper;
+        $this->themeService = $themeService;
+        $this->logger = $logger;
     }
 
     /**
@@ -66,7 +74,7 @@ class ThemeRepository implements ThemeRepositoryInterface
      */
     public function getAll(Criteria $criteria): array
     {
-        $path = $this->getPath();
+        $path = $this->themeService->getPath();
 
         $list = Directory::listCallback($path, function (string $entry): bool {
             if ('.' === $entry || '..' === $entry) {
@@ -74,11 +82,22 @@ class ThemeRepository implements ThemeRepositoryInterface
             }
 
             $themePath = $this->getThemePath($entry);
-            $viewPath = $this->getViewPath($entry);
+            $viewPath = $this->themeService->getViewPath($entry);
             $configurationPath = $this->getConfigurationPath($entry);
 
-            // TODO: Logging if below check is failed.
-            return is_dir($themePath) && is_dir($viewPath) && is_file($configurationPath);
+            $valid = is_dir($themePath) && is_dir($viewPath) && is_file($configurationPath);
+
+            if (!$valid) {
+                $this->logger->warning('Invalid directory in theme path!', [
+                    'entry' => $entry,
+                    'themePath' => $themePath,
+                    'viewPath' => $viewPath,
+                    'configurationPath' => $configurationPath,
+                    'valid' => $valid,
+                ]);
+            }
+
+            return $valid;
         });
 
         $all = array_map(function (string $entry): ?Theme {
@@ -103,7 +122,10 @@ class ThemeRepository implements ThemeRepositoryInterface
             try {
                 return $this->themeMapper->fromData($data);
             } catch (FailedOperationException $exception) {
-                // TODO: Logging.
+                $this->logger->error('Unable to map category data to a valid object. This is likely caused by some malformed format.', [
+                    'data' => $data,
+                    'exception' => $exception,
+                ]);
             }
 
             return null;
@@ -143,42 +165,16 @@ class ThemeRepository implements ThemeRepositoryInterface
     }
 
     /**
-     * @return string
-     */
-    private function getPath(): string
-    {
-        return Path::join(...[
-            $this->configuration->getRootDirectory(),
-            ThemeService::PATH_THEME,
-        ]);
-    }
-
-    /**
      * @param string $entry
      * @return string
      */
     private function getThemePath(string $entry): string
     {
-        $path = $this->getPath();
+        $path = $this->themeService->getPath();
 
         return Path::join(...[
             $path,
             $entry,
-        ]);
-    }
-
-    /**
-     * TODO: Use ThemeService::getViewPath() instead.
-     * @param string $entry
-     * @return string
-     */
-    private function getViewPath(string $entry): string
-    {
-        $path = $this->getThemePath($entry);
-
-        return Path::join(...[
-            $path,
-            ThemeService::PATH_VIEW,
         ]);
     }
 

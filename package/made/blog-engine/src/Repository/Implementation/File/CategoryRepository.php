@@ -19,11 +19,11 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\FailedOperationException;
-use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Help\File;
 use Help\Json;
 use Help\Path;
+use Made\Blog\Engine\Exception\FailedOperationException;
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
@@ -42,14 +42,14 @@ class CategoryRepository implements CategoryRepositoryInterface
     use CriteriaHelperTrait;
 
     /**
-     * @var Configuration
-     */
-    private $configuration;
-
-    /**
      * @var CategoryMapper
      */
     private $categoryMapper;
+
+    /**
+     * @var PostService
+     */
+    private $postService;
 
     /**
      * @var LoggerInterface
@@ -58,14 +58,14 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     /**
      * CategoryRepository constructor.
-     * @param Configuration $configuration
      * @param CategoryMapper $categoryMapper
+     * @param PostService $postService
      * @param LoggerInterface $logger
      */
-    public function __construct(Configuration $configuration, CategoryMapper $categoryMapper, LoggerInterface $logger)
+    public function __construct(CategoryMapper $categoryMapper, PostService $postService, LoggerInterface $logger)
     {
-        $this->configuration = $configuration;
         $this->categoryMapper = $categoryMapper;
+        $this->postService = $postService;
         $this->logger = $logger;
     }
 
@@ -87,12 +87,18 @@ class CategoryRepository implements CategoryRepositoryInterface
         $configurationPath = $this->getConfigurationPath();
         $list = [];
 
-        if (is_file($configurationPath)) {
-            // Even if the category configuration file does not exist, this will return an empty array.
-            $list = $this->getContent($configurationPath);
-        } else {
-            // TODO: Logging.
+        if (!is_readable($configurationPath)) {
+            $this->logger->notice('Empty category file at configuration path.', [
+                'configurationPath' => $configurationPath,
+            ]);
+
+            return $list;
         }
+
+        // Even if the category configuration file would not exist, this will return an empty array.
+        $list = $this->getContent($configurationPath);
+
+        $list = array_filter($list, 'is_array');
 
         /** @var array|Category[] $all */
         $all = array_map(function (array $data): ?Category {
@@ -103,7 +109,10 @@ class CategoryRepository implements CategoryRepositoryInterface
             try {
                 return $this->categoryMapper->fromData($data);
             } catch (FailedOperationException $exception) {
-                // TODO: Logging.
+                $this->logger->error('Unable to map category data to a valid object. This is likely caused by some malformed format.', [
+                    'data' => $data,
+                    'exception' => $exception,
+                ]);
             }
 
             return null;
@@ -169,23 +178,11 @@ class CategoryRepository implements CategoryRepositoryInterface
     }
 
     /**
-     * TODO: Use PostService::getPath() instead.
-     * @return string
-     */
-    private function getPath(): string
-    {
-        return Path::join(...[
-            $this->configuration->getRootDirectory(),
-            PostService::PATH_POST,
-        ]);
-    }
-
-    /**
      * @return string
      */
     private function getConfigurationPath(): string
     {
-        $path = $this->getPath();
+        $path = $this->postService->getPath();
 
         return Path::join(...[
             $path,

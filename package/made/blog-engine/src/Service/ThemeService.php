@@ -81,7 +81,23 @@ class ThemeService
     public function getPath(): string
     {
         $path = $this->configuration->getRootDirectory();
-        return $this->getViewPath($path);
+
+        return Path::join(...[
+            $path,
+            static::PATH_THEME,
+        ]);
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    public function getViewPath(string $path): string
+    {
+        return Path::join(...[
+            $path,
+            static::PATH_VIEW,
+        ]);
     }
 
     /**
@@ -90,7 +106,9 @@ class ThemeService
     public function getPathAndNamespace(): array
     {
         return [
-            static::NAMESPACE_VIEW => $this->getPath(),
+            static::NAMESPACE_VIEW => $this->getViewPath(
+                $path = $this->configuration->getRootDirectory()
+            ),
         ];
     }
 
@@ -101,7 +119,6 @@ class ThemeService
     public function updateLoader(LoaderInterface $twigLoader): void
     {
         if (!($twigLoader instanceof FilesystemLoader)) {
-            // TODO: Add proper exception message.
             throw new InvalidArgumentException('Unsupported ' . LoaderInterface::class . ' implementation: ' . get_class($twigLoader));
         }
 
@@ -116,17 +133,5 @@ class ThemeService
             // The name of the theme is used as the namespace.
             $twigLoader->setPaths($this->getViewPath($path), $theme->getName());
         }
-    }
-
-    /**
-     * @param string $path
-     * @return string
-     */
-    private function getViewPath(string $path): string
-    {
-        return Path::join(...[
-            $path,
-            static::PATH_VIEW,
-        ]);
     }
 }

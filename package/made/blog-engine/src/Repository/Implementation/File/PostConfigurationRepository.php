@@ -57,11 +57,6 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     private $defaultData;
 
     /**
-     * @var Configuration
-     */
-    private $configuration;
-
-    /**
      * @var PostConfigurationMapper
      */
     private $postConfigurationMapper;
@@ -87,6 +82,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     private $tagMapper;
 
     /**
+     * @var PostService
+     */
+    private $postService;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -94,23 +94,23 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     /**
      * PostConfigurationRepository constructor.
      * @param array $defaultData
-     * @param Configuration $configuration
      * @param PostConfigurationMapper $postConfigurationMapper
      * @param CategoryRepositoryInterface $categoryRepository
      * @param CategoryMapper $categoryMapper
      * @param TagRepositoryInterface $tagRepository
      * @param TagMapper $tagMapper
+     * @param PostService $postService
      * @param LoggerInterface $logger
      */
-    public function __construct(array $defaultData, Configuration $configuration, PostConfigurationMapper $postConfigurationMapper, CategoryRepositoryInterface $categoryRepository, CategoryMapper $categoryMapper, TagRepositoryInterface $tagRepository, TagMapper $tagMapper, LoggerInterface $logger)
+    public function __construct(array $defaultData, PostConfigurationMapper $postConfigurationMapper, CategoryRepositoryInterface $categoryRepository, CategoryMapper $categoryMapper, TagRepositoryInterface $tagRepository, TagMapper $tagMapper, PostService $postService, LoggerInterface $logger)
     {
         $this->defaultData = $defaultData;
-        $this->configuration = $configuration;
         $this->postConfigurationMapper = $postConfigurationMapper;
         $this->categoryRepository = $categoryRepository;
         $this->categoryMapper = $categoryMapper;
         $this->tagRepository = $tagRepository;
         $this->tagMapper = $tagMapper;
+        $this->postService = $postService;
         $this->logger = $logger;
     }
 
@@ -129,7 +129,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      */
     public function getAll(Criteria $criteria): array
     {
-        $path = $this->getPath();
+        $path = $this->postService->getPath();
 
         /** @var array|string[] $list */
         $list = Directory::listCallback($path, function (string $entry): bool {
@@ -140,8 +140,18 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             $postPath = $this->getPostPath($entry);
             $configurationPath = $this->getConfigurationPath($entry);
 
-            // TODO: Logging.
-            return is_dir($postPath) && is_file($configurationPath);
+            $valid = is_dir($postPath) && is_file($configurationPath);
+
+            if (!$valid) {
+                $this->logger->warning('Invalid directory in post path!', [
+                    'entry' => $entry,
+                    'postPath' => $postPath,
+                    'configurationPath' => $configurationPath,
+                    'valid' => $valid,
+                ]);
+            }
+
+            return $valid;
         });
 
         /** @var array|PostConfiguration[] $all */
@@ -159,7 +169,10 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             try {
                 return $this->postConfigurationMapper->fromData($data);
             } catch (FailedOperationException $exception) {
-                // TODO: Logging.
+                $this->logger->error('Unable to map post configuration data to a valid object. This is likely caused by some malformed format.', [
+                    'data' => $data,
+                    'exception' => $exception,
+                ]);
             }
 
             return null;
@@ -307,7 +320,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                     // Assume the array contains category data.
                     $categoryObject = $this->categoryMapper->fromData($category);
                 } catch (FailedOperationException $exception) {
-                    // TODO: Logging.
+                    $this->logger->error('Unable to map category data to a valid object. This is likely caused by some malformed format.', [
+                        'index' => $index,
+                        'category' => $category,
+                        'exception' => $exception,
+                    ]);
                 }
 
                 // If it does not, the object stays with a null value.
@@ -328,6 +345,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             }
 
             if (null === $categoryObject) {
+                $this->logger->notice('Failed to provision category data.', [
+                    'index' => $index,
+                    'category' => $category,
+                ]);
+
                 // Unset the index if the category data could not be provisioned.
                 unset($categoryList[$index]);
             } else {
@@ -355,7 +377,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                     // Assume the array contains tag data.
                     $tagObject = $this->tagMapper->fromData($tag);
                 } catch (FailedOperationException $exception) {
-                    // TODO: Logging.
+                    $this->logger->error('Unable to map tag data to a valid object. This is likely caused by some malformed format.', [
+                        'index' => $index,
+                        'tag' => $tag,
+                        'exception' => $exception,
+                    ]);
                 }
 
                 // If it does not, the object stays with a null value.
@@ -376,6 +402,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             }
 
             if (null === $tagObject) {
+                $this->logger->notice('Failed to provision tag data.', [
+                    'index' => $index,
+                    'tag' => $tag,
+                ]);
+
                 // Unset the index if the tag data could not be provisioned.
                 unset($tagList[$index]);
             } else {
@@ -388,24 +419,12 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     }
 
     /**
-     * TODO: Use PostService::getPath() instead.
-     * @return string
-     */
-    private function getPath(): string
-    {
-        return Path::join(...[
-            $this->configuration->getRootDirectory(),
-            PostService::PATH_POST,
-        ]);
-    }
-
-    /**
      * @param string $entry
      * @return string
      */
     private function getPostPath(string $entry): string
     {
-        $path = $this->getPath();
+        $path = $this->postService->getPath();
 
         return Path::join(...[
             $path,

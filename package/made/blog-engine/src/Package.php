@@ -254,12 +254,15 @@ class Package extends PackageAbstract
         });
 
         $this->registerTagAndService(ThemeRepositoryInterface::TAG_THEME_REPOSITORY, ThemeRepositoryFile::class, function (Container $container): ThemeRepositoryInterface {
-            /** @var Configuration $configuration */
-            $configuration = $container[Configuration::class];
             /** @var ThemeMapper $themeMapper */
             $themeMapper = $container[ThemeMapper::class];
+            // TODO: Solve the circular reference.
+            /** @var ThemeService $themeService */
+            $themeService = $container[ThemeService::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
-            return new ThemeRepositoryFile($configuration, $themeMapper);
+            return new ThemeRepositoryFile($themeMapper, $themeService, $logger);
         });
 
         $this->registerServiceLazy(ThemeRepositoryInterface::class, ThemeRepositoryFile::class);
@@ -334,14 +337,14 @@ class Package extends PackageAbstract
         });
 
         $this->registerTagAndService(CategoryRepositoryInterface::TAG_CATEGORY_REPOSITORY, CategoryRepositoryFile::class, function (Container $container): CategoryRepositoryInterface {
-            /** @var Configuration $configuration */
-            $configuration = $container[Configuration::class];
             /** @var CategoryMapper $categoryMapper */
             $categoryMapper = $container[CategoryMapper::class];
+            /** @var PostService $postService */
+            $postService = $container[PostService::class];
             /** @var LoggerInterface $logger */
             $logger = $container[LoggerInterface::class];
 
-            return new CategoryRepositoryFile($configuration, $categoryMapper, $logger);
+            return new CategoryRepositoryFile($categoryMapper, $postService, $logger);
         });
 
         $this->registerTagAndService(CategoryRepositoryInterface::TAG_CATEGORY_REPOSITORY, CategoryRepositoryAggregation::class, function (Container $container): CategoryRepositoryInterface {
@@ -363,14 +366,14 @@ class Package extends PackageAbstract
         });
 
         $this->registerTagAndService(TagRepositoryInterface::TAG_TAG_REPOSITORY, TagRepositoryFile::class, function (Container $container): TagRepositoryInterface {
-            /** @var Configuration $configuration */
-            $configuration = $container[Configuration::class];
             /** @var TagMapper $tagMapper */
             $tagMapper = $container[TagMapper::class];
+            /** @var PostService $postService */
+            $postService = $container[PostService::class];
             /** @var LoggerInterface $logger */
             $logger = $container[LoggerInterface::class];
 
-            return new TagRepositoryFile($configuration, $tagMapper, $logger);
+            return new TagRepositoryFile($tagMapper, $postService, $logger);
         });
 
         $this->registerTagAndService(TagRepositoryInterface::TAG_TAG_REPOSITORY, TagRepositoryAggregation::class, function (Container $container): TagRepositoryInterface {
@@ -397,8 +400,6 @@ class Package extends PackageAbstract
 
             unset($configuration);
 
-            /** @var Configuration $configuration */
-            $configuration = $container[Configuration::class];
             /** @var PostConfigurationMapper $postConfigurationMapper */
             $postConfigurationMapper = $container[PostConfigurationMapper::class];
             /** @var CategoryRepositoryInterface $categoryRepository */
@@ -409,10 +410,12 @@ class Package extends PackageAbstract
             $tagRepository = $container[TagRepositoryInterface::class];
             /** @var TagMapper $tagMapper */
             $tagMapper = $container[TagMapper::class];
+            /** @var PostService $postService */
+            $postService = $container[PostService::class];
             /** @var LoggerInterface $logger */
             $logger = $container[LoggerInterface::class];
 
-            return new PostConfigurationRepositoryFile($settings['default'], $configuration, $postConfigurationMapper, $categoryRepository, $categoryMapper, $tagRepository, $tagMapper, $logger);
+            return new PostConfigurationRepositoryFile($settings['default'], $postConfigurationMapper, $categoryRepository, $categoryMapper, $tagRepository, $tagMapper, $postService, $logger);
         });
 
         $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryAggregation::class, function (Container $container): PostConfigurationRepositoryInterface {
