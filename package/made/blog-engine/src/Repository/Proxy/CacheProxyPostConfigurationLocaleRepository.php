@@ -20,7 +20,7 @@
 namespace Made\Blog\Engine\Repository\Proxy;
 
 use DateTime;
-use Made\Blog\Engine\Help\Slug;
+use Help\Slug;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
@@ -453,6 +453,21 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             'limit' /*---*/ => $limit,
             'filter' /*--*/ => $filterName,
             'order' /*---*/ => $orderName,
+            'locale' /*--*/ => $locale,
+        ], 'sha256');
+
+        return "{$format}_{$identity}";
+    }
+
+    /**
+     * @param string $format
+     * @param string $locale
+     * @return string
+     */
+    private function getCacheKeyForLocale(string $format, string $locale): string
+    {
+        $identity = $this->getIdentity([
+            'class' => get_class(),
             'locale' /*--*/ => $locale,
         ], 'sha256');
 

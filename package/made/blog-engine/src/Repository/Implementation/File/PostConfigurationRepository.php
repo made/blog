@@ -21,11 +21,11 @@ namespace Made\Blog\Engine\Repository\Implementation\File;
 
 use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Exception\UnsupportedOperationException;
-use Made\Blog\Engine\Help\Directory;
-use Made\Blog\Engine\Help\File;
-use Made\Blog\Engine\Help\Json;
-use Made\Blog\Engine\Help\Path;
-use Made\Blog\Engine\Help\Slug;
+use Help\Directory;
+use Help\File;
+use Help\Json;
+use Help\Path;
+use Help\Slug;
 use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\PostConfiguration;

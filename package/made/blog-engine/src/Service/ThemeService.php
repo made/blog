@@ -20,7 +20,7 @@
 namespace Made\Blog\Engine\Service;
 
 use Made\Blog\Engine\Exception\InvalidArgumentException;
-use Made\Blog\Engine\Help\Path;
+use Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;

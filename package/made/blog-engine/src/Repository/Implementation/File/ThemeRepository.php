@@ -20,10 +20,10 @@
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
 use Made\Blog\Engine\Exception\FailedOperationException;
-use Made\Blog\Engine\Help\Directory;
-use Made\Blog\Engine\Help\File;
-use Made\Blog\Engine\Help\Json;
-use Made\Blog\Engine\Help\Path;
+use Help\Directory;
+use Help\File;
+use Help\Json;
+use Help\Path;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Theme;
 use Made\Blog\Engine\Repository\Criteria\Criteria;

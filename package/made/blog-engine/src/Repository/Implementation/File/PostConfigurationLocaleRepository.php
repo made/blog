@@ -21,7 +21,7 @@ namespace Made\Blog\Engine\Repository\Implementation\File;
 
 use DateTime;
 use Made\Blog\Engine\Exception\UnsupportedOperationException;
-use Made\Blog\Engine\Help\Slug;
+use Help\Slug;
 use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;

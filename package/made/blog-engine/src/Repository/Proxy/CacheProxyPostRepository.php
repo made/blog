@@ -20,7 +20,7 @@
 namespace Made\Blog\Engine\Repository\Proxy;
 
 use DateTime;
-use Made\Blog\Engine\Help\Slug;
+use Help\Slug;
 use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;

@@ -21,8 +21,8 @@ namespace App\Controller;
 
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
-use Made\Blog\Engine\Help\Path;
-use Made\Blog\Engine\Help\Slug;
+use Help\Path;
+use Help\Slug;
 use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;

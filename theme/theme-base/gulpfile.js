@@ -1,6 +1,6 @@
 /*
  * The MIT License (MIT)
- * Copyright (c) 2020 Made
+ * Copyright (c) 2020 GameplayJDK
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
  * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -14,7 +14,6 @@
  * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
  */
 
 'use strict';
@@ -41,7 +40,6 @@ const gulp_sass = require("gulp-sass");
 const gulp_postcss = require("gulp-postcss");
 const gulp_sourcemaps = require("gulp-sourcemaps");
 const gulp_concat = require('gulp-concat');
-const gulp_rename = require('gulp-rename');
 const gulp_minify = require('gulp-minify');
 const gulp_imagemin = require('gulp-imagemin');
 const gulp_responsive = require('gulp-responsive');
@@ -81,15 +79,14 @@ option = (function (option) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// Configuration format:
 const path = {
     style: {
         // Additional scss dependencies are added through @import statements.
-        src: './asset/style/**/*.scss',
-        dest: '../../public/asset/style',
+        src: './asset/style/main.scss',
+        dest: './public/asset/style',
         map: './map',
         // Delete this when cleaning up.
-        del: '../../public/asset/style/**',
+        del: './public/asset/style/**',
     },
     script: {
         // Additional javascript dependencies are prepended to the final js.
@@ -103,7 +100,7 @@ const path = {
             './node_modules/small-module-js/src/main.js',
         ],
         src: './asset/script/module/*.js',
-        dest: '../../public/asset/script',
+        dest: './public/asset/script',
         map: './map',
         // The names for each step.
         rename: {
@@ -114,23 +111,31 @@ const path = {
             min: '.min.js',
         },
         // Delete this when cleaning up.
-        del: '../../public/asset/script/**',
+        del: './public/asset/script/**',
+    },
+    font: {
+        add: [
+            './node_modules/@fortawesome/fontawesome-free/webfonts/*',
+        ],
+        src: './asset/font/**/*',
+        dest: './public/asset/font/',
+        del: './public/asset/font/**',
     },
     image: {
         src: './asset/image/**/*.{png,jpg,jpeg,gif,svg}',
-        dest: '../../public/asset/image',
+        dest: './public/asset/image',
         // Delete this when cleaning up.
-        del: '../../public/asset/image/**',
+        del: './public/asset/image/**',
         // The responsive configuration, which is different from the normal one.
         responsive: {
             src: [
                 './asset/image/**/*.{png,jpg}',
                 '!./asset/image/responsive',
             ],
-            dest: '../../asset/image/responsive',
-            del: '../../asset/image/responsive/**',
+            dest: './asset/image/responsive',
+            del: './asset/image/responsive/**',
             config: {
-                '*.png': [
+                '**/*.png': [
                     {
                         width: 540,
                         rename: {
@@ -161,7 +166,7 @@ const path = {
                         },
                     },
                 ],
-                '*.jpg': [
+                '**/*.jpg': [
                     {
                         width: 540,
                         rename: {
@@ -197,8 +202,6 @@ const path = {
     },
 };
 
-const delOverridePath = '../../public/asset';
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const postcssPlugin = (function (option) {
@@ -220,9 +223,7 @@ const postcssPlugin = (function (option) {
 
 function cleanStyleTask() {
     return (
-        del(path.style.del, {
-            force: 0 === path.style.del.indexOf(delOverridePath),
-        })
+        del(path.style.del)
     );
 }
 
@@ -260,10 +261,25 @@ function cleanCompileStyleTask() {
 }
 
 function watchStyleTask() {
+    function fixPath(path) {
+        var segment = path.split('/');
+        var name = segment.pop();
+
+        if ('main.scss' === name) {
+            segment.push('**', '*.scss');
+        } else {
+            segment.push(name);
+        }
+
+        return segment.join('/');
+    }
+
     function watchStyleTask() {
+        var src = fixPath(path.style.src);
+
         return (
             gulp
-                .watch(path.style.src, compileStyleTask)
+                .watch(src, compileStyleTask)
         );
     }
 
@@ -280,9 +296,7 @@ function watchStyleTask() {
 
 function cleanScriptTask() {
     return (
-        del(path.script.del, {
-            force: 0 === path.script.del.indexOf(delOverridePath),
-        })
+        del(path.script.del)
     );
 }
 
@@ -345,11 +359,60 @@ function watchScriptTask() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+function cleanFontTask() {
+    return (
+        del(path.font.del)
+    );
+}
+
+function compileFontTask() {
+    return (
+        gulp
+            .src(function () {
+                let src = path.font.add;
+                src.push(path.font.src);
+
+                return src;
+            }())
+            .pipe(
+                gulp.dest(path.font.dest)
+            )
+    );
+}
+
+function cleanCompileFontTask() {
+
+    return (
+        gulp
+            .series([
+                cleanFontTask,
+                compileFontTask,
+            ])
+    );
+}
+
+function watchFontTask() {
+    function watchFontTask() {
+        return (
+            gulp
+                .watch(path.font.src, compileFontTask())
+        );
+    }
+
+    return (
+        gulp
+            .series([
+                compileFontTask,
+                watchFontTask,
+            ])
+    );
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 function cleanImageTask() {
     return (
-        del(path.image.del, {
-            force: 0 === path.image.del.indexOf(delOverridePath),
-        })
+        del(path.image.del)
     );
 }
 
@@ -397,9 +460,7 @@ function watchImageTask() {
 
 function responsiveImageTask() {
     function cleanImageTask() {
-        return del(path.image.responsive.del, {
-            force: 0 === path.image.responsive.del.indexOf(delOverridePath),
-        });
+        return del(path.image.responsive.del);
     }
 
     function compileImageTask() {
@@ -453,6 +514,7 @@ function cleanDefaultTask() {
             .parallel([
                 cleanStyleTask,
                 cleanScriptTask,
+                cleanFontTask,
                 cleanImageTask,
             ])
     );
@@ -464,6 +526,7 @@ function compileDefaultTask() {
             .parallel([
                 compileStyleTask,
                 compileScriptTask,
+                compileFontTask,
                 compileImageTask,
             ])
     );
@@ -485,6 +548,7 @@ function watchDefaultTask() {
             .parallel([
                 watchStyleTask(),
                 watchScriptTask(),
+                watchFontTask(),
                 watchImageTask(),
             ])
     );
@@ -506,6 +570,11 @@ gulp.task('script', cleanCompileScriptTask());
 gulp.task('script:clean', cleanScriptTask);
 gulp.task('script:compile', compileScriptTask);
 gulp.task('script:watch', watchScriptTask());
+
+gulp.task('font', cleanCompileFontTask());
+gulp.task('font:clean', cleanFontTask);
+gulp.task('font:compile', compileFontTask);
+gulp.task('font:watch', watchFontTask());
 
 gulp.task('image', cleanCompileImageTask());
 gulp.task('image:clean', cleanImageTask);

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ec892c9c15ef5b43625deb32e0742eac",
+    "content-hash": "a5d9892db32132c569b9fc81f5323741",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -230,6 +230,43 @@
             ],
             "description": "Low-level, file based cache using var_export() and some magic. Optionally PSR-16 compliant.",
             "time": "2020-03-23T13:40:01+00:00"
+        },
+        {
+            "name": "gameplayjdk/php-static-help",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/GameplayJDK/php-static-help.git",
+                "reference": "ee358612c112c003980268c6943bab8f337b81d4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/GameplayJDK/php-static-help/zipball/ee358612c112c003980268c6943bab8f337b81d4",
+                "reference": "ee358612c112c003980268c6943bab8f337b81d4",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Help\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "GameplayJDK",
+                    "email": "github@gameplayjdk.de"
+                }
+            ],
+            "description": "Common static helper classes.",
+            "time": "2020-03-26T19:58:34+00:00"
         },
         {
             "name": "gameplayjdk/pimple-package-utility",
