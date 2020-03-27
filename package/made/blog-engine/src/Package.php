@@ -282,8 +282,10 @@ class Package extends PackageAbstract
         $this->container->extend(ThemeRepositoryInterface::class, function (ThemeRepositoryInterface $themeRepository, Container $container): ThemeRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
-            return new CacheProxyThemeRepository($cache, $themeRepository);
+            return new CacheProxyThemeRepository($cache, $themeRepository, $logger);
         });
     }
 
@@ -373,8 +375,10 @@ class Package extends PackageAbstract
         $this->container->extend(CategoryRepositoryInterface::class, function (CategoryRepositoryInterface $categoryRepository, Container $container): CategoryRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
-            return new CacheProxyCategoryRepository($cache, $categoryRepository);
+            return new CacheProxyCategoryRepository($cache, $categoryRepository, $logger);
         });
 
         $this->registerTagAndService(TagRepositoryInterface::TAG_TAG_REPOSITORY, TagRepositoryFile::class, function (Container $container): TagRepositoryInterface {
@@ -402,8 +406,10 @@ class Package extends PackageAbstract
         $this->container->extend(TagRepositoryInterface::class, function (TagRepositoryInterface $tagRepository, Container $container): TagRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
-            return new CacheProxyTagRepository($cache, $tagRepository);
+            return new CacheProxyTagRepository($cache, $tagRepository, $logger);
         });
 
         $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container) use ($configuration): PostConfigurationRepositoryInterface {
@@ -442,8 +448,10 @@ class Package extends PackageAbstract
         $this->container->extend(PostConfigurationRepositoryInterface::class, function (PostConfigurationRepositoryInterface $postConfigurationRepository, Container $container): PostConfigurationRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
-            return new CacheProxyPostConfigurationRepository($cache, $postConfigurationRepository);
+            return new CacheProxyPostConfigurationRepository($cache, $postConfigurationRepository, $logger);
         });
 
         $this->registerTagAndService(PostConfigurationLocaleRepositoryInterface::TAG_POST_CONFIGURATION_LOCALE_REPOSITORY, PostConfigurationLocaleRepositoryFile::class, function (Container $container): PostConfigurationLocaleRepositoryInterface {
@@ -470,8 +478,10 @@ class Package extends PackageAbstract
         $this->container->extend(PostConfigurationLocaleRepositoryInterface::class, function (PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository, Container $container): PostConfigurationLocaleRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
-            return new CacheProxyPostConfigurationLocaleRepository($cache, $postConfigurationLocaleRepository);
+            return new CacheProxyPostConfigurationLocaleRepository($cache, $postConfigurationLocaleRepository, $logger);
         });
     }
 
@@ -490,7 +500,6 @@ class Package extends PackageAbstract
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
         $this->registerService(TaskChain::class, $this->container->factory(function (Container $container): TaskChain {
-            // TODO: Make configurable.
             return new TaskChain(false);
         }));
 
@@ -512,8 +521,10 @@ class Package extends PackageAbstract
             $postService = $container[PostService::class];
             /** @var Environment $environment */
             $environment = $container[Environment::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
-            return new RenderTwigTask($settings[RenderTwigTask::class], $postService, $environment);
+            return new RenderTwigTask($settings[RenderTwigTask::class], $postService, $environment, $logger);
         });
 
         $this->registerTagAndService(PostContentProviderFile::TAG_POST_CONTENT_PROVIDER_TASK, RenderParsedownTask::class, function (Container $container) use ($configuration): TaskAbstract {
@@ -560,8 +571,10 @@ class Package extends PackageAbstract
         $this->container->extend(PostRepositoryInterface::class, function (PostRepositoryInterface $postRepository, Container $container): PostRepositoryInterface {
             /** @var CacheInterface $cache */
             $cache = $container[CacheInterface::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
 
-            return new CacheProxyPostRepository($cache, $postRepository);
+            return new CacheProxyPostRepository($cache, $postRepository, $logger);
         });
     }
 

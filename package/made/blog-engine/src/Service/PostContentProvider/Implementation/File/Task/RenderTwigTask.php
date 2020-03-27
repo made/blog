@@ -23,8 +23,11 @@ use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Model\PostContent;
 use Made\Blog\Engine\Service\PostService;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
+use Psr\Log\LoggerInterface;
 use Twig\Environment;
-use Twig\Error\Error;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 /**
  * Class RenderTwigTask
@@ -46,17 +49,24 @@ class RenderTwigTask extends TaskAbstract
     private $environment;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * RenderTwigTask constructor.
      * @param int $priority
      * @param PostService $postService
      * @param Environment $environment
+     * @param LoggerInterface $logger
      */
-    public function __construct(int $priority, PostService $postService, Environment $environment)
+    public function __construct(int $priority, PostService $postService, Environment $environment, LoggerInterface $logger)
     {
         parent::__construct($priority);
 
         $this->postService = $postService;
         $this->environment = $environment;
+        $this->logger = $logger;
     }
 
     /**
@@ -86,9 +96,12 @@ class RenderTwigTask extends TaskAbstract
         $content = $postContent->getContent();
 
         try {
-            $content = $this->environment->render($path, $context);
-        } catch (Error $e) {
-            // TODO: Logging.
+            $content = $this->environment
+                ->render($path, $context);
+        } catch (LoaderError | RuntimeError | SyntaxError $error) {
+            $this->logger->error('Error on twig render: ' . $error->getRawMessage(), [
+                'error', $error,
+            ]);
         }
 
         // As the content is an object it has the same instance in the further input and does not require to be updated there.

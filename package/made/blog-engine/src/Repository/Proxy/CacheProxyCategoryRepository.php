@@ -22,6 +22,7 @@ namespace Made\Blog\Engine\Repository\Proxy;
 use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -49,14 +50,21 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
     private $categoryRepository;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * CacheProxyCategoryRepository constructor.
      * @param CacheInterface $cache
      * @param CategoryRepositoryInterface $categoryRepository
+     * @param LoggerInterface $logger
      */
-    public function __construct(CacheInterface $cache, CategoryRepositoryInterface $categoryRepository)
+    public function __construct(CacheInterface $cache, CategoryRepositoryInterface $categoryRepository, LoggerInterface $logger)
     {
         $this->cache = $cache;
         $this->categoryRepository = $categoryRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -81,7 +89,11 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
             /** @var array|Category[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'criteria' => $criteria,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($all)) {
@@ -92,7 +104,11 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'criteria' => $criteria,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -113,7 +129,11 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
             /** @var null|Category $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'id' => $id,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -124,7 +144,11 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'id' => $id,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -145,7 +169,11 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
             /** @var null|Category $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'name' => $name,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -156,7 +184,11 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'name' => $name,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }

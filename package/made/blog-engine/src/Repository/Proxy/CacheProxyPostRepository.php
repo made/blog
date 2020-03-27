@@ -25,15 +25,12 @@ use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
  * Class CacheProxyPostRepository
- *
- * TODO: Check if a single-key cache would be better. That would not use natsort() and implode() on the parameter, but
- *  pull each parameter entry from the cache and make the result unique by id. E.g.: Find "tag-1, tag-2" would not
- *  result in the cache key "tag-1-tag-2", but in "tag-1" and "tag-2" separately.
  *
  * @package Made\Blog\Engine\Repository\Proxy
  */
@@ -61,14 +58,21 @@ class CacheProxyPostRepository implements PostRepositoryInterface
     private $postRepository;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * CacheProxyPostRepository constructor.
      * @param CacheInterface $cache
      * @param PostRepositoryInterface $postRepository
+     * @param LoggerInterface $logger
      */
-    public function __construct(CacheInterface $cache, PostRepositoryInterface $postRepository)
+    public function __construct(CacheInterface $cache, PostRepositoryInterface $postRepository, LoggerInterface $logger)
     {
         $this->cache = $cache;
         $this->postRepository = $postRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -94,7 +98,11 @@ class CacheProxyPostRepository implements PostRepositoryInterface
             /** @var array|Post[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'criteria' => $criteria,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($all)) {
@@ -105,7 +113,11 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'criteria' => $criteria,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -128,7 +140,12 @@ class CacheProxyPostRepository implements PostRepositoryInterface
             /** @var array|Post[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'criteria' => $criteria,
+                'dateTime' => $dateTime,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($all)) {
@@ -139,7 +156,12 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'criteria' => $criteria,
+                        'dateTime' => $dateTime,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -176,7 +198,13 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                 /** @var array|Post[] $all */
                 $all = $this->cache->get($key, []);
             } catch (InvalidArgumentException $exception) {
-                // TODO: Log.
+                $this->logger->error('Unable to get requested value from the cache.', [
+                    'criteria' => $criteria,
+                    'index' => $index,
+                    'status' => $status,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
 
             if (empty($all)) {
@@ -187,7 +215,13 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                     try {
                         $this->cache->set($key, $all);
                     } catch (InvalidArgumentException $exception) {
-                        // TODO: Log.
+                        $this->logger->error('Unable to set requested value to the cache.', [
+                            'criteria' => $criteria,
+                            'index' => $index,
+                            'status' => $status,
+                            'key' => $key,
+                            'exception' => $exception,
+                        ]);
                     }
                 }
             }
@@ -227,7 +261,13 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                 /** @var array|Post[] $all */
                 $all = $this->cache->get($key, []);
             } catch (InvalidArgumentException $exception) {
-                // TODO: Log.
+                $this->logger->error('Unable to get requested value from the cache.', [
+                    'criteria' => $criteria,
+                    'index' => $index,
+                    'category' => $category,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
 
             if (empty($all)) {
@@ -238,7 +278,13 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                     try {
                         $this->cache->set($key, $all);
                     } catch (InvalidArgumentException $exception) {
-                        // TODO: Log.
+                        $this->logger->error('Unable to set requested value to the cache.', [
+                            'criteria' => $criteria,
+                            'index' => $index,
+                            'category' => $category,
+                            'key' => $key,
+                            'exception' => $exception,
+                        ]);
                     }
                 }
             }
@@ -278,7 +324,13 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                 /** @var array|Post[] $all */
                 $all = $this->cache->get($key, []);
             } catch (InvalidArgumentException $exception) {
-                // TODO: Log.
+                $this->logger->error('Unable to get requested value from the cache.', [
+                    'criteria' => $criteria,
+                    'index' => $index,
+                    'tag' => $tag,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
 
             if (empty($all)) {
@@ -289,7 +341,13 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                     try {
                         $this->cache->set($key, $all);
                     } catch (InvalidArgumentException $exception) {
-                        // TODO: Log.
+                        $this->logger->error('Unable to set requested value to the cache.', [
+                            'criteria' => $criteria,
+                            'index' => $index,
+                            'tag' => $tag,
+                            'key' => $key,
+                            'exception' => $exception,
+                        ]);
                     }
                 }
             }
@@ -314,7 +372,12 @@ class CacheProxyPostRepository implements PostRepositoryInterface
             /** @var null|Post $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'locale' => $locale,
+                'id' => $id,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -325,7 +388,12 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'locale' => $locale,
+                        'id' => $id,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -349,7 +417,12 @@ class CacheProxyPostRepository implements PostRepositoryInterface
             /** @var null|Post $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'locale' => $locale,
+                'slug' => $slug,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -360,7 +433,12 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'locale' => $locale,
+                        'slug' => $slug,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -384,7 +462,12 @@ class CacheProxyPostRepository implements PostRepositoryInterface
             /** @var null|Post $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'locale' => $locale,
+                'slugRedirect' => $slugRedirect,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -395,7 +478,12 @@ class CacheProxyPostRepository implements PostRepositoryInterface
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'locale' => $locale,
+                        'slugRedirect' => $slugRedirect,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }

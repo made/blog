@@ -22,6 +22,7 @@ namespace Made\Blog\Engine\Repository\Proxy;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -48,14 +49,21 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
     private $postConfigurationRepository;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * CacheProxyPostConfigurationRepository constructor.
      * @param CacheInterface $cache
      * @param PostConfigurationRepositoryInterface $postConfigurationRepository
+     * @param LoggerInterface $logger
      */
-    public function __construct(CacheInterface $cache, PostConfigurationRepositoryInterface $postConfigurationRepository)
+    public function __construct(CacheInterface $cache, PostConfigurationRepositoryInterface $postConfigurationRepository, LoggerInterface $logger)
     {
         $this->cache = $cache;
         $this->postConfigurationRepository = $postConfigurationRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -81,7 +89,11 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
             /** @var array|PostConfiguration[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'criteria' => $criteria,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($all)) {
@@ -92,7 +104,11 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'criteria' => $criteria,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -113,7 +129,11 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
             /** @var null|PostConfiguration $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'id' => $id,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -124,7 +144,11 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'id' => $id,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }

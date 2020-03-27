@@ -25,6 +25,7 @@ use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -57,14 +58,21 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
     private $postConfigurationLocaleRepository;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * CacheProxyPostConfigurationLocaleRepository constructor.
      * @param CacheInterface $cache
      * @param PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository
+     * @param LoggerInterface $logger
      */
-    public function __construct(CacheInterface $cache, PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository)
+    public function __construct(CacheInterface $cache, PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository, LoggerInterface $logger)
     {
         $this->cache = $cache;
         $this->postConfigurationLocaleRepository = $postConfigurationLocaleRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -90,7 +98,11 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             /** @var array|PostConfigurationLocale[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'criteria' => $criteria,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($all)) {
@@ -101,7 +113,11 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'criteria' => $criteria,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -124,7 +140,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             /** @var array|PostConfigurationLocale[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'criteria' => $criteria,
+                'dateTime' => $dateTime,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($all)) {
@@ -135,7 +156,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'criteria' => $criteria,
+                        'dateTime' => $dateTime,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -171,7 +197,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             try {
                 $all = $this->cache->get($key, []);
             } catch (InvalidArgumentException $exception) {
-                // TODO: Log.
+                $this->logger->error('Unable to get requested value from the cache.', [
+                    'criteria' => $criteria,
+                    'index' => $index,
+                    'status' => $status,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
 
             if (empty($all)) {
@@ -182,7 +214,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                     try {
                         $this->cache->set($key, $all);
                     } catch (InvalidArgumentException $exception) {
-                        // TODO: Log.
+                        $this->logger->error('Unable to set requested value to the cache.', [
+                            'criteria' => $criteria,
+                            'index' => $index,
+                            'status' => $status,
+                            'key' => $key,
+                            'exception' => $exception,
+                        ]);
                     }
                 }
             }
@@ -221,7 +259,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             try {
                 $all = $this->cache->get($key, []);
             } catch (InvalidArgumentException $exception) {
-                // TODO: Log.
+                $this->logger->error('Unable to get requested value from the cache.', [
+                    'criteria' => $criteria,
+                    'index' => $index,
+                    'category' => $category,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
 
             if (empty($all)) {
@@ -232,7 +276,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                     try {
                         $this->cache->set($key, $all);
                     } catch (InvalidArgumentException $exception) {
-                        // TODO: Log.
+                        $this->logger->error('Unable to set requested value to the cache.', [
+                            'criteria' => $criteria,
+                            'index' => $index,
+                            'category' => $category,
+                            'key' => $key,
+                            'exception' => $exception,
+                        ]);
                     }
                 }
             }
@@ -272,7 +322,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                 /** @var array|PostConfigurationLocale[] $all */
                 $all = $this->cache->get($key, []);
             } catch (InvalidArgumentException $exception) {
-                // TODO: Log.
+                $this->logger->error('Unable to get requested value from the cache.', [
+                    'criteria' => $criteria,
+                    'index' => $index,
+                    'tag' => $tag,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
 
             if (empty($all)) {
@@ -283,7 +339,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                     try {
                         $this->cache->set($key, $all);
                     } catch (InvalidArgumentException $exception) {
-                        // TODO: Log.
+                        $this->logger->error('Unable to set requested value to the cache.', [
+                            'criteria' => $criteria,
+                            'index' => $index,
+                            'tag' => $tag,
+                            'key' => $key,
+                            'exception' => $exception,
+                        ]);
                     }
                 }
             }
@@ -308,7 +370,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             /** @var null|PostConfigurationLocale $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'locale' => $locale,
+                'id' => $id,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -319,7 +386,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'locale' => $locale,
+                        'id' => $id,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -343,7 +415,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             /** @var null|PostConfigurationLocale $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'locale' => $locale,
+                'slug' => $slug,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -354,7 +431,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'locale' => $locale,
+                        'slug' => $slug,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -378,7 +460,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             /** @var null|PostConfigurationLocale $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'locale' => $locale,
+                'slugRedirect' => $slugRedirect,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -389,7 +476,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'locale' => $locale,
+                        'slugRedirect' => $slugRedirect,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -436,7 +528,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         if (null !== ($filter = $criteria->getFilter())) {
             $filterName = $filter->getName();
 
-            $callbackMap =$filter->getCallbackMap();
+            $callbackMap = $filter->getCallbackMap();
             $filterName = $filterName . '_' . implode('_', array_keys($callbackMap));
         }
 

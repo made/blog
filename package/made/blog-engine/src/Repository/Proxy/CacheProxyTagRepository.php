@@ -22,6 +22,7 @@ namespace Made\Blog\Engine\Repository\Proxy;
 use Made\Blog\Engine\Model\Tag;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -49,14 +50,21 @@ class CacheProxyTagRepository implements TagRepositoryInterface
     private $tagRepository;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * CacheProxyTagRepository constructor.
      * @param CacheInterface $cache
      * @param TagRepositoryInterface $tagRepository
+     * @param LoggerInterface $logger
      */
-    public function __construct(CacheInterface $cache, TagRepositoryInterface $tagRepository)
+    public function __construct(CacheInterface $cache, TagRepositoryInterface $tagRepository, LoggerInterface $logger)
     {
         $this->cache = $cache;
         $this->tagRepository = $tagRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -82,7 +90,11 @@ class CacheProxyTagRepository implements TagRepositoryInterface
             /** @var array|Tag[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'criteria' => $criteria,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($all)) {
@@ -93,7 +105,11 @@ class CacheProxyTagRepository implements TagRepositoryInterface
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'criteria' => $criteria,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -114,7 +130,11 @@ class CacheProxyTagRepository implements TagRepositoryInterface
             /** @var null|Tag $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'id' => $id,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -125,7 +145,11 @@ class CacheProxyTagRepository implements TagRepositoryInterface
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'id' => $id,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -146,7 +170,11 @@ class CacheProxyTagRepository implements TagRepositoryInterface
             /** @var null|Tag $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'name' => $name,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -157,7 +185,11 @@ class CacheProxyTagRepository implements TagRepositoryInterface
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'name' => $name,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }

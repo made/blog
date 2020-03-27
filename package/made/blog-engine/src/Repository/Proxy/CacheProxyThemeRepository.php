@@ -22,6 +22,7 @@ namespace Made\Blog\Engine\Repository\Proxy;
 use Made\Blog\Engine\Model\Theme;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -48,14 +49,21 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
     private $themeRepository;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * CacheProxyThemeRepository constructor.
      * @param CacheInterface $cache
      * @param ThemeRepositoryInterface $themeRepository
+     * @param LoggerInterface $logger
      */
-    public function __construct(CacheInterface $cache, ThemeRepositoryInterface $themeRepository)
+    public function __construct(CacheInterface $cache, ThemeRepositoryInterface $themeRepository, LoggerInterface $logger)
     {
         $this->cache = $cache;
         $this->themeRepository = $themeRepository;
+        $this->logger = $logger;
     }
 
     /**
@@ -72,7 +80,11 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
             /** @var array|Theme[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'criteria' => $criteria,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($all)) {
@@ -83,7 +95,11 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'criteria' => $criteria,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
@@ -104,7 +120,11 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
             /** @var null|Theme $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
-            // TODO: Log.
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'name' => $name,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
         }
 
         if (empty($one)) {
@@ -115,7 +135,11 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
-                    // TODO: Log.
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'name' => $name,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
                 }
             }
         }
