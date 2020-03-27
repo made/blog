@@ -20,8 +20,6 @@
 namespace Made\Blog\Engine\Service;
 
 use Made\Blog\Engine\Exception\InvalidArgumentException;
-use Help\Path;
-use Made\Blog\Engine\Model\Configuration;
 use Twig\Loader\FilesystemLoader;
 use Twig\Loader\LoaderInterface;
 
@@ -33,54 +31,22 @@ use Twig\Loader\LoaderInterface;
 class PostService
 {
     /**
-     * Path to the post folder relative to the root directory.
-     */
-    const PATH_POST = '/posts';
-
-    /**
-     * Path to the post configuration file (json).
-     */
-    const PATH_CONFIGURATION = 'configuration.json';
-
-    /**
-     * Path to the category configuration file (json).
-     */
-    const PATH_CONFIGURATION_CATEGORY = 'configuration_category.json';
-
-    /**
-     * Path to the tag configuration file (json).
-     */
-    const PATH_CONFIGURATION_TAG = 'configuration_tag.json';
-
-    /**
      * Namespace for twig.
      */
-    const NAMESPACE_POST = 'Post';
+    const NAMESPACE = 'Post';
 
     /**
-     * @var Configuration
+     * @var PathService
      */
-    private $configuration;
+    private $pathService;
 
     /**
      * PostService constructor.
-     * @param Configuration $configuration
+     * @param PathService $pathService
      */
-    public function __construct(Configuration $configuration)
+    public function __construct(PathService $pathService)
     {
-        $this->configuration = $configuration;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPath(): string
-    {
-        $path = $this->configuration->getRootDirectory();
-        return Path::join(...[
-            $path,
-            static::PATH_POST,
-        ]);
+        $this->pathService = $pathService;
     }
 
     /**
@@ -89,9 +55,9 @@ class PostService
      */
     public function getNamespacePath(string $id): string
     {
-        $namespace = static::NAMESPACE_POST;
+        $namespace = static::NAMESPACE;
 
-        return "@{$namespace}/$id/content.md.twig";
+        return "@{$namespace}/{$id}/content.md.twig";
     }
 
     /**
@@ -106,6 +72,9 @@ class PostService
 
         /** @var FilesystemLoader $twigLoader */
 
-        $twigLoader->setPaths($this->getPath(), static::NAMESPACE_POST);
+        $path = $this->pathService
+            ->getPathPost();
+
+        $twigLoader->setPaths($path, static::NAMESPACE);
     }
 }

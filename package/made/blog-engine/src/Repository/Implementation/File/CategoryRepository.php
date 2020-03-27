@@ -21,15 +21,13 @@ namespace Made\Blog\Engine\Repository\Implementation\File;
 
 use Help\File;
 use Help\Json;
-use Help\Path;
 use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\Category;
-use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\Mapper\CategoryMapper;
-use Made\Blog\Engine\Service\PostService;
+use Made\Blog\Engine\Service\PathService;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -42,14 +40,14 @@ class CategoryRepository implements CategoryRepositoryInterface
     use CriteriaHelperTrait;
 
     /**
+     * @var PathService
+     */
+    private $pathService;
+
+    /**
      * @var CategoryMapper
      */
     private $categoryMapper;
-
-    /**
-     * @var PostService
-     */
-    private $postService;
 
     /**
      * @var LoggerInterface
@@ -58,14 +56,14 @@ class CategoryRepository implements CategoryRepositoryInterface
 
     /**
      * CategoryRepository constructor.
+     * @param PathService $pathService
      * @param CategoryMapper $categoryMapper
-     * @param PostService $postService
      * @param LoggerInterface $logger
      */
-    public function __construct(CategoryMapper $categoryMapper, PostService $postService, LoggerInterface $logger)
+    public function __construct(PathService $pathService, CategoryMapper $categoryMapper, LoggerInterface $logger)
     {
+        $this->pathService = $pathService;
         $this->categoryMapper = $categoryMapper;
-        $this->postService = $postService;
         $this->logger = $logger;
     }
 
@@ -84,7 +82,9 @@ class CategoryRepository implements CategoryRepositoryInterface
      */
     public function getAll(Criteria $criteria): array
     {
-        $configurationPath = $this->getConfigurationPath();
+        $configurationPath = $this->pathService
+            ->getPathCategoryConfiguration();
+
         $list = [];
 
         if (!is_readable($configurationPath)) {
@@ -107,7 +107,8 @@ class CategoryRepository implements CategoryRepositoryInterface
             }
 
             try {
-                return $this->categoryMapper->fromData($data);
+                return $this->categoryMapper
+                    ->fromData($data);
             } catch (FailedOperationException $exception) {
                 $this->logger->error('Unable to map category data to a valid object. This is likely caused by some malformed format.', [
                     'data' => $data,
@@ -175,19 +176,6 @@ class CategoryRepository implements CategoryRepositoryInterface
     {
         throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
             . 'The file repository can not be used for that type of action.');
-    }
-
-    /**
-     * @return string
-     */
-    private function getConfigurationPath(): string
-    {
-        $path = $this->postService->getPath();
-
-        return Path::join(...[
-            $path,
-            PostService::PATH_CONFIGURATION_CATEGORY,
-        ]);
     }
 
     /**

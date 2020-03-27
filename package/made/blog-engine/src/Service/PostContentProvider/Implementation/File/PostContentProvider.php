@@ -24,7 +24,6 @@ use Made\Blog\Engine\Model\PostContent;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Made\Blog\Engine\Service\PostContentProviderInterface;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
-use TaskChain\TaskChain;
 use TaskChain\TaskChainInterface;
 
 /**

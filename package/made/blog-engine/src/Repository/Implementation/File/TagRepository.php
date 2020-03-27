@@ -19,17 +19,15 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\FailedOperationException;
-use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Help\File;
 use Help\Json;
-use Help\Path;
-use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Exception\FailedOperationException;
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\Tag;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\Mapper\TagMapper;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
-use Made\Blog\Engine\Service\PostService;
+use Made\Blog\Engine\Service\PathService;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -42,14 +40,14 @@ class TagRepository implements TagRepositoryInterface
     use CriteriaHelperTrait;
 
     /**
+     * @var PathService
+     */
+    private $pathService;
+
+    /**
      * @var TagMapper
      */
     private $tagMapper;
-
-    /**
-     * @var PostService
-     */
-    private $postService;
 
     /**
      * @var LoggerInterface
@@ -58,14 +56,14 @@ class TagRepository implements TagRepositoryInterface
 
     /**
      * TagRepository constructor.
+     * @param PathService $pathService
      * @param TagMapper $tagMapper
-     * @param PostService $postService
      * @param LoggerInterface $logger
      */
-    public function __construct(TagMapper $tagMapper, PostService $postService, LoggerInterface $logger)
+    public function __construct(PathService $pathService, TagMapper $tagMapper, LoggerInterface $logger)
     {
+        $this->pathService = $pathService;
         $this->tagMapper = $tagMapper;
-        $this->postService = $postService;
         $this->logger = $logger;
     }
 
@@ -84,7 +82,9 @@ class TagRepository implements TagRepositoryInterface
      */
     public function getAll(Criteria $criteria): array
     {
-        $configurationPath = $this->getConfigurationPath();
+        $configurationPath = $this->pathService
+            ->getPathTagConfiguration();
+
         $list = [];
 
         if (!is_readable($configurationPath)) {
@@ -107,7 +107,8 @@ class TagRepository implements TagRepositoryInterface
             }
 
             try {
-                return $this->tagMapper->fromData($data);
+                return $this->tagMapper
+                    ->fromData($data);
             } catch (FailedOperationException $exception) {
                 $this->logger->error('Unable to map tag data to a valid object. This is likely caused by some malformed format.', [
                     'data' => $data,
@@ -175,19 +176,6 @@ class TagRepository implements TagRepositoryInterface
     {
         throw new UnsupportedOperationException('Unsupported operation: ' . __METHOD__ . '! '
             . 'The file repository can not be used for that type of action.');
-    }
-
-    /**
-     * @return string
-     */
-    private function getConfigurationPath(): string
-    {
-        $path = $this->postService->getPath();
-
-        return Path::join(...[
-            $path,
-            PostService::PATH_CONFIGURATION_TAG,
-        ]);
     }
 
     /**

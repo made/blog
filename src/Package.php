@@ -121,7 +121,7 @@ class Package extends PackageAbstract
             /** @var ThemeService $themeService */
             $themeService = $container[ThemeService::class];
 
-            $twig = Twig::create($themeService->getPathAndNamespace(), $settings);
+            $twig = Twig::create($themeService->getNamespaceAndPath(), $settings);
             $themeService->updateLoader($twig->getLoader());
 
             $twigEnvironment = $twig->getEnvironment();

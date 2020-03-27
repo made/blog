@@ -19,15 +19,13 @@
 
 namespace Made\Blog\Engine\Repository\Implementation\File;
 
-use Made\Blog\Engine\Exception\FailedOperationException;
-use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Help\Directory;
 use Help\File;
 use Help\Json;
-use Help\Path;
 use Help\Slug;
+use Made\Blog\Engine\Exception\FailedOperationException;
+use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\Category;
-use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Model\Tag;
@@ -39,7 +37,7 @@ use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
 use Made\Blog\Engine\Repository\Mapper\TagMapper;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
-use Made\Blog\Engine\Service\PostService;
+use Made\Blog\Engine\Service\PathService;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -55,6 +53,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      * @var array
      */
     private $defaultData;
+
+    /**
+     * @var PathService
+     */
+    private $pathService;
 
     /**
      * @var PostConfigurationMapper
@@ -82,11 +85,6 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     private $tagMapper;
 
     /**
-     * @var PostService
-     */
-    private $postService;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -94,23 +92,23 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     /**
      * PostConfigurationRepository constructor.
      * @param array $defaultData
+     * @param PathService $pathService
      * @param PostConfigurationMapper $postConfigurationMapper
      * @param CategoryRepositoryInterface $categoryRepository
      * @param CategoryMapper $categoryMapper
      * @param TagRepositoryInterface $tagRepository
      * @param TagMapper $tagMapper
-     * @param PostService $postService
      * @param LoggerInterface $logger
      */
-    public function __construct(array $defaultData, PostConfigurationMapper $postConfigurationMapper, CategoryRepositoryInterface $categoryRepository, CategoryMapper $categoryMapper, TagRepositoryInterface $tagRepository, TagMapper $tagMapper, PostService $postService, LoggerInterface $logger)
+    public function __construct(array $defaultData, PathService $pathService, PostConfigurationMapper $postConfigurationMapper, CategoryRepositoryInterface $categoryRepository, CategoryMapper $categoryMapper, TagRepositoryInterface $tagRepository, TagMapper $tagMapper, LoggerInterface $logger)
     {
         $this->defaultData = $defaultData;
+        $this->pathService = $pathService;
         $this->postConfigurationMapper = $postConfigurationMapper;
         $this->categoryRepository = $categoryRepository;
         $this->categoryMapper = $categoryMapper;
         $this->tagRepository = $tagRepository;
         $this->tagMapper = $tagMapper;
-        $this->postService = $postService;
         $this->logger = $logger;
     }
 
@@ -129,7 +127,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      */
     public function getAll(Criteria $criteria): array
     {
-        $path = $this->postService->getPath();
+        $path = $this->pathService
+            ->getPathPost();
 
         /** @var array|string[] $list */
         $list = Directory::listCallback($path, function (string $entry): bool {
@@ -137,8 +136,10 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 return false;
             }
 
-            $postPath = $this->getPostPath($entry);
-            $configurationPath = $this->getConfigurationPath($entry);
+            $postPath = $this->pathService
+                ->getPathPostEntry($entry);
+            $configurationPath = $this->pathService
+                ->getPathPostConfiguration($entry);
 
             $valid = is_dir($postPath) && is_file($configurationPath);
 
@@ -156,7 +157,9 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
 
         /** @var array|PostConfiguration[] $all */
         $all = array_map(function (string $entry): ?PostConfiguration {
-            $configurationPath = $this->getConfigurationPath($entry);
+            $configurationPath = $this->pathService
+                ->getPathPostConfiguration($entry);
+
             $data = $this->getContent($configurationPath);
 
             if (empty($data)) {
@@ -167,7 +170,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             $data = $this->provisionIntersectingData($data);
 
             try {
-                return $this->postConfigurationMapper->fromData($data);
+                return $this->postConfigurationMapper
+                    ->fromData($data);
             } catch (FailedOperationException $exception) {
                 $this->logger->error('Unable to map post configuration data to a valid object. This is likely caused by some malformed format.', [
                     'data' => $data,
@@ -318,7 +322,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             if (is_array($category)) {
                 try {
                     // Assume the array contains category data.
-                    $categoryObject = $this->categoryMapper->fromData($category);
+                    $categoryObject = $this->categoryMapper
+                        ->fromData($category);
                 } catch (FailedOperationException $exception) {
                     $this->logger->error('Unable to map category data to a valid object. This is likely caused by some malformed format.', [
                         'index' => $index,
@@ -354,7 +359,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 unset($categoryList[$index]);
             } else {
                 // Push it back into the list.
-                $categoryList[$index] = $this->categoryMapper->toData($categoryObject);
+                $categoryList[$index] = $this->categoryMapper
+                    ->toData($categoryObject);
             }
         }
 
@@ -375,7 +381,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             if (is_array($tag)) {
                 try {
                     // Assume the array contains tag data.
-                    $tagObject = $this->tagMapper->fromData($tag);
+                    $tagObject = $this->tagMapper
+                        ->fromData($tag);
                 } catch (FailedOperationException $exception) {
                     $this->logger->error('Unable to map tag data to a valid object. This is likely caused by some malformed format.', [
                         'index' => $index,
@@ -411,39 +418,12 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                 unset($tagList[$index]);
             } else {
                 // Push it back into the list.
-                $tagList[$index] = $this->tagMapper->toData($tagObject);
+                $tagList[$index] = $this->tagMapper
+                    ->toData($tagObject);
             }
         }
 
         return $tagList;
-    }
-
-    /**
-     * @param string $entry
-     * @return string
-     */
-    private function getPostPath(string $entry): string
-    {
-        $path = $this->postService->getPath();
-
-        return Path::join(...[
-            $path,
-            $entry,
-        ]);
-    }
-
-    /**
-     * @param string $entry
-     * @return string
-     */
-    private function getConfigurationPath(string $entry): string
-    {
-        $path = $this->getPostPath($entry);
-
-        return Path::join(...[
-            $path,
-            PostService::PATH_CONFIGURATION,
-        ]);
     }
 
     /**

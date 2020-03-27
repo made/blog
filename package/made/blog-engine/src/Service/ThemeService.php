@@ -19,8 +19,8 @@
 
 namespace Made\Blog\Engine\Service;
 
-use Made\Blog\Engine\Exception\InvalidArgumentException;
 use Help\Path;
+use Made\Blog\Engine\Exception\InvalidArgumentException;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
@@ -35,29 +35,19 @@ use Twig\Loader\LoaderInterface;
 class ThemeService
 {
     /**
-     * Path to the theme folder relative to the root directory.
-     */
-    const PATH_THEME = '/theme';
-
-    /**
-     * Path to the theme base view folder relative to the root directory.
-     */
-    const PATH_VIEW = '/view';
-
-    /**
-     * Path to the theme configuration file (json).
-     */
-    const PATH_CONFIGURATION = '/theme.json';
-
-    /**
      * Namespace for Twig.
      */
-    const NAMESPACE_VIEW = 'App';
+    const NAMESPACE = 'App';
 
     /**
      * @var Configuration
      */
     private $configuration;
+
+    /**
+     * @var PathService
+     */
+    private $pathService;
 
     /**
      * @var ThemeRepositoryInterface
@@ -67,48 +57,25 @@ class ThemeService
     /**
      * ThemeService constructor.
      * @param Configuration $configuration
+     * @param PathService $pathService
      * @param ThemeRepositoryInterface $themeRepository
      */
-    public function __construct(Configuration $configuration, ThemeRepositoryInterface $themeRepository)
+    public function __construct(Configuration $configuration, PathService $pathService, ThemeRepositoryInterface $themeRepository)
     {
         $this->configuration = $configuration;
+        $this->pathService = $pathService;
         $this->themeRepository = $themeRepository;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPath(): string
-    {
-        $path = $this->configuration->getRootDirectory();
-
-        return Path::join(...[
-            $path,
-            static::PATH_THEME,
-        ]);
-    }
-
-    /**
-     * @param string $path
-     * @return string
-     */
-    public function getViewPath(string $path): string
-    {
-        return Path::join(...[
-            $path,
-            static::PATH_VIEW,
-        ]);
     }
 
     /**
      * @return array
      */
-    public function getPathAndNamespace(): array
+    public function getNamespaceAndPath(): array
     {
+        $path = $this->configuration->getRootDirectory();
+
         return [
-            static::NAMESPACE_VIEW => $this->getViewPath(
-                $path = $this->configuration->getRootDirectory()
-            ),
+            static::NAMESPACE => $this->getPathThemeView($path),
         ];
     }
 
@@ -129,9 +96,25 @@ class ThemeService
         $themeList = $this->themeRepository->getAll($themeListCriteria);
 
         foreach ($themeList as $theme) {
+            $name = $theme->getName();
+
             $path = $theme->getPath();
+            $path = $this->getPathThemeView($path);
+
             // The name of the theme is used as the namespace.
-            $twigLoader->setPaths($this->getViewPath($path), $theme->getName());
+            $twigLoader->setPaths($path, $name);
         }
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    private function getPathThemeView(string $path): string
+    {
+        return Path::join(...[
+            $path,
+            PathService::PATH_THEME_VIEW,
+        ]);
     }
 }
