@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a5d9892db32132c569b9fc81f5323741",
+    "content-hash": "c133c77a6fce03627c6ab5db7fa3ade0",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -191,20 +191,21 @@
         },
         {
             "name": "gameplayjdk/php-file-cache",
-            "version": "v1.2.1",
+            "version": "v1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/GameplayJDK/php-file-cache.git",
-                "reference": "7e1c1426b63ee0659afebfd688673c9255b8f0dc"
+                "reference": "e3c4e21fc64265c8970107b2c5fd663e49239c66"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GameplayJDK/php-file-cache/zipball/7e1c1426b63ee0659afebfd688673c9255b8f0dc",
-                "reference": "7e1c1426b63ee0659afebfd688673c9255b8f0dc",
+                "url": "https://api.github.com/repos/GameplayJDK/php-file-cache/zipball/e3c4e21fc64265c8970107b2c5fd663e49239c66",
+                "reference": "e3c4e21fc64265c8970107b2c5fd663e49239c66",
                 "shasum": ""
             },
             "require": {
                 "brick/varexporter": "^0.3.2",
+                "gameplayjdk/php-static-help": "^1.0",
                 "php": ">= 7.1",
                 "psr/simple-cache": "^1.0",
                 "symfony/filesystem": "^5.0"
@@ -229,7 +230,7 @@
                 }
             ],
             "description": "Low-level, file based cache using var_export() and some magic. Optionally PSR-16 compliant.",
-            "time": "2020-03-23T13:40:01+00:00"
+            "time": "2020-03-27T10:01:43+00:00"
         },
         {
             "name": "gameplayjdk/php-static-help",
@@ -347,12 +348,12 @@
             "dist": {
                 "type": "path",
                 "url": "package/made/blog-engine",
-                "reference": "4a8aac2b9d71edd0a617dc89f7257bf58d74229b",
-                "shasum": null
+                "reference": "9059823423b384e8ffa521afc549b1abc3ae1dc8"
             },
             "require": {
                 "erusev/parsedown-extra": "^0.8.1",
                 "ext-json": "*",
+                "gameplayjdk/php-static-help": "^1.0",
                 "gameplayjdk/pimple-package-utility": "^1.1",
                 "gameplayjdk/task-chain": "^1.0",
                 "php": ">=7.3 <7.4",
@@ -1279,16 +1280,16 @@
         },
         {
             "name": "symfony/polyfill-ctype",
-            "version": "v1.14.0",
+            "version": "v1.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-ctype.git",
-                "reference": "fbdeaec0df06cf3d51c93de80c7eb76e271f5a38"
+                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/fbdeaec0df06cf3d51c93de80c7eb76e271f5a38",
-                "reference": "fbdeaec0df06cf3d51c93de80c7eb76e271f5a38",
+                "url": "https://api.github.com/repos/symfony/polyfill-ctype/zipball/4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
+                "reference": "4719fa9c18b0464d399f1a63bf624b42b6fa8d14",
                 "shasum": ""
             },
             "require": {
@@ -1300,7 +1301,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.14-dev"
+                    "dev-master": "1.15-dev"
                 }
             },
             "autoload": {
@@ -1333,20 +1334,20 @@
                 "polyfill",
                 "portable"
             ],
-            "time": "2020-01-13T11:15:53+00:00"
+            "time": "2020-02-27T09:26:54+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.14.0",
+            "version": "v1.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "34094cfa9abe1f0f14f48f490772db7a775559f2"
+                "reference": "81ffd3a9c6d707be22e3012b827de1c9775fc5ac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/34094cfa9abe1f0f14f48f490772db7a775559f2",
-                "reference": "34094cfa9abe1f0f14f48f490772db7a775559f2",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/81ffd3a9c6d707be22e3012b827de1c9775fc5ac",
+                "reference": "81ffd3a9c6d707be22e3012b827de1c9775fc5ac",
                 "shasum": ""
             },
             "require": {
@@ -1358,7 +1359,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.14-dev"
+                    "dev-master": "1.15-dev"
                 }
             },
             "autoload": {
@@ -1392,7 +1393,7 @@
                 "portable",
                 "shim"
             ],
-            "time": "2020-01-13T11:15:53+00:00"
+            "time": "2020-03-09T19:04:49+00:00"
         },
         {
             "name": "twig/twig",
