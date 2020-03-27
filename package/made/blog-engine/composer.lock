@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e4cfa927694b85e51428eb46d3be9dd9",
+    "content-hash": "8c493f9729b751e8da0426739ebba97c",
     "packages": [
         {
             "name": "erusev/parsedown",
@@ -98,6 +98,43 @@
                 "parser"
             ],
             "time": "2019-12-30T23:20:37+00:00"
+        },
+        {
+            "name": "gameplayjdk/php-static-help",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/GameplayJDK/php-static-help.git",
+                "reference": "ee358612c112c003980268c6943bab8f337b81d4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/GameplayJDK/php-static-help/zipball/ee358612c112c003980268c6943bab8f337b81d4",
+                "reference": "ee358612c112c003980268c6943bab8f337b81d4",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Help\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "GameplayJDK",
+                    "email": "github@gameplayjdk.de"
+                }
+            ],
+            "description": "Common static helper classes.",
+            "time": "2020-03-26T19:58:34+00:00"
         },
         {
             "name": "gameplayjdk/pimple-package-utility",

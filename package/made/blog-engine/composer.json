@@ -13,6 +13,7 @@
     "twig/twig": "^3.0",
     "erusev/parsedown-extra": "^0.8.1",
     "gameplayjdk/pimple-package-utility": "^1.1",
+    "gameplayjdk/php-static-help": "^1.0",
     "gameplayjdk/task-chain": "^1.0"
   },
   "authors": [
