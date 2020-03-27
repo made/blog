@@ -1,5 +1,5 @@
 {
-  "name": "made-blog",
+  "name": "@made-blog/base-theme",
   "version": "1.0.0",
   "description": "Simple blog software for developers.",
   "main": "gulpfile.js",
@@ -8,27 +8,28 @@
   },
   "license": "MIT",
   "dependencies": {
-    "bootstrap": "^4.3.1",
+    "@fortawesome/fontawesome-free": "^5.13.0",
+    "bootstrap": "^4.4.1",
     "jquery": "^3.4.1",
-    "lazysizes": "^5.2.0-beta1",
-    "popper.js": "^1.16.0",
-    "small-module-js": "^1.0.0"
+    "lazysizes": "^5.2.0",
+    "popper.js": "^1.16.1",
+    "small-module-js": "^1.0.1"
   },
   "devDependencies": {
-    "autoprefixer": "^9.7.2",
+    "autoprefixer": "^9.7.5",
     "cssnano": "^4.1.10",
     "del": "^5.1.0",
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
-    "gulp-imagemin": "^6.2.0",
+    "gulp-imagemin": "^7.1.0",
     "gulp-minify": "^3.1.0",
     "gulp-postcss": "^8.0.0",
-    "gulp-rename": "^1.4.0",
+    "gulp-rename": "^2.0.0",
     "gulp-responsive": "^3.0.1",
     "gulp-sass": "^4.0.2",
     "gulp-sourcemaps": "^2.6.5",
-    "minimist": "^1.2.0",
-    "node-sass": "^4.13.0"
+    "minimist": "^1.2.5",
+    "node-sass": "^4.13.1"
   },
   "private": true
 }

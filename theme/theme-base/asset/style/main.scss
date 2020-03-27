@@ -18,9 +18,6 @@
 
 @import "variables";
 
-// Use option B from https://getbootstrap.com/docs/4.1/getting-started/theming/#sass!
-//@import "../../../node_modules/bootstrap/scss/bootstrap";
-
 @import "../../node_modules/bootstrap/scss/functions";
 @import "../../node_modules/bootstrap/scss/variables";
 @import "../../node_modules/bootstrap/scss/mixins";
@@ -59,5 +56,18 @@
 @import "../../node_modules/bootstrap/scss/spinners";
 @import "../../node_modules/bootstrap/scss/utilities";
 @import "../../node_modules/bootstrap/scss/print";
+
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/variables";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/mixins";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/core";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/larger";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/fixed-width";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/list";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/bordered-pulled";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/animated";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/rotated-flipped";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/stacked";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/icons";
+@import "../../node_modules/@fortawesome/fontawesome-free/scss/screen-reader";
 
 // TODO: Implement other style.
