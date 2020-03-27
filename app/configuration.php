@@ -41,7 +41,7 @@ return [
 
     Cache::class => [
         'path' => dirname(__DIR__) . '/var/cache',
-        'time' => strtotime('-24 Hour'),
+        'time' => strtotime('-0 Hour'),
     ],
 
     PostConfigurationRepositoryFile::class => [

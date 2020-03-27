@@ -5,8 +5,9 @@
 # Library
 
 node_modules/
+vendor/
 
 # Asset
 
-asset/image/responsive
+asset/image/responsive/*
 !asset/image/responsive/.gitignore

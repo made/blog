@@ -12,6 +12,9 @@ vendor/
 /posts/*
 !/posts/.gitignore
 
+/theme/*
+!/theme/.gitignore
+
 # Temporary
 
 /var/*

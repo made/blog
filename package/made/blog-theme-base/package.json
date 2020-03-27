@@ -1,5 +1,5 @@
 {
-  "name": "@made-blog/base-theme",
+  "name": "@made-blog/blog-theme-base",
   "version": "1.0.0",
   "description": "Simple blog software for developers.",
   "main": "gulpfile.js",

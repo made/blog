@@ -1,19 +1,21 @@
 /*
- * The MIT License (MIT)
+ * Made Blog
+ * Copyright (c) 2019-2020 Made
  * Copyright (c) 2020 GameplayJDK
+ *   https://github.com/GameplayJDK/gulpfile
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ * This program  is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 'use strict';
@@ -83,10 +85,10 @@ const path = {
     style: {
         // Additional scss dependencies are added through @import statements.
         src: './asset/style/main.scss',
-        dest: './public/asset/style',
+        dest: '../../public/asset/style',
         map: './map',
         // Delete this when cleaning up.
-        del: './public/asset/style/**',
+        del: '../../public/asset/style/**',
     },
     script: {
         // Additional javascript dependencies are prepended to the final js.
@@ -100,7 +102,7 @@ const path = {
             './node_modules/small-module-js/src/main.js',
         ],
         src: './asset/script/module/*.js',
-        dest: './public/asset/script',
+        dest: '../../public/asset/script',
         map: './map',
         // The names for each step.
         rename: {
@@ -111,21 +113,21 @@ const path = {
             min: '.min.js',
         },
         // Delete this when cleaning up.
-        del: './public/asset/script/**',
+        del: '../../public/asset/script/**',
     },
     font: {
         add: [
             './node_modules/@fortawesome/fontawesome-free/webfonts/*',
         ],
         src: './asset/font/**/*',
-        dest: './public/asset/font/',
-        del: './public/asset/font/**',
+        dest: '../../public/asset/font/',
+        del: '../../public/asset/font/**',
     },
     image: {
         src: './asset/image/**/*.{png,jpg,jpeg,gif,svg}',
-        dest: './public/asset/image',
+        dest: '../../public/asset/image',
         // Delete this when cleaning up.
-        del: './public/asset/image/**',
+        del: '../../public/asset/image/**',
         // The responsive configuration, which is different from the normal one.
         responsive: {
             src: [
@@ -202,6 +204,8 @@ const path = {
     },
 };
 
+const delOverridePath = '../../public/asset';
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const postcssPlugin = (function (option) {
@@ -223,7 +227,9 @@ const postcssPlugin = (function (option) {
 
 function cleanStyleTask() {
     return (
-        del(path.style.del)
+        del(path.style.del, {
+            force: 0 === path.style.del.indexOf(delOverridePath),
+        })
     );
 }
 
@@ -296,7 +302,9 @@ function watchStyleTask() {
 
 function cleanScriptTask() {
     return (
-        del(path.script.del)
+        del(path.script.del, {
+            force: 0 === path.script.del.indexOf(delOverridePath),
+        })
     );
 }
 
@@ -361,7 +369,9 @@ function watchScriptTask() {
 
 function cleanFontTask() {
     return (
-        del(path.font.del)
+        del(path.font.del, {
+            force: 0 === path.font.del.indexOf(delOverridePath),
+        })
     );
 }
 
@@ -369,7 +379,8 @@ function compileFontTask() {
     return (
         gulp
             .src(function () {
-                let src = path.font.add;
+                var src = path.font.add;
+
                 src.push(path.font.src);
 
                 return src;
@@ -412,7 +423,9 @@ function watchFontTask() {
 
 function cleanImageTask() {
     return (
-        del(path.image.del)
+        del(path.image.del, {
+            force: 0 === path.image.del.indexOf(delOverridePath),
+        })
     );
 }
 

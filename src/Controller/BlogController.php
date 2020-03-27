@@ -27,6 +27,7 @@ use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Made\Blog\Engine\Service\SlugParserInterface;
+use Made\Blog\Theme\Base\Controller\BaseController;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -41,18 +42,33 @@ use Twig\Error\SyntaxError;
  *
  * @package App\Controller
  */
-class BlogController implements ControllerInterface
+class BlogController extends BaseController implements ControllerInterface
 {
-    const ROUTE_SLUG = 'blog.slug';
-
     /**
      * @inheritDoc
      */
     public static function register(App $app): void
     {
-        // This is the most generic pattern, thus its route has to be registered last.
-        $app->get('/{slug:.*}', BlogController::class . ':slugAction')
-            ->setName(BlogController::ROUTE_SLUG);
+        $routeMap = static::getRouteMap();
+
+        foreach ($routeMap as $pattern => $route) {
+            [
+                BaseController::METHOD => $method,
+                BaseController::ACTION => $action,
+                BaseController::NAME => $name,
+            ] = $route;
+
+            $action = static::class . ':' . $action;
+
+            if (!is_array($method)) {
+                $method = [
+                    $method,
+                ];
+            }
+
+            $app->map($method, $pattern, $action)
+                ->setName($name);
+        }
     }
 
     /**
@@ -84,6 +100,8 @@ class BlogController implements ControllerInterface
      */
     public function __construct(Twig $twig, LoggerInterface $logger, PostRepositoryInterface $postRepository, SlugParserInterface $slugParser)
     {
+        parent::__construct($twig, $logger);
+
         $this->twig = $twig;
         $this->logger = $logger;
         $this->postRepository = $postRepository;
@@ -98,7 +116,7 @@ class BlogController implements ControllerInterface
      * @param array $args
      * @return ResponseInterface
      */
-    public function slugAction(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function postAction(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         /** @var string $slug */
         $slug = $args['slug'];

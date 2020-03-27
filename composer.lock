@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c133c77a6fce03627c6ab5db7fa3ade0",
+    "content-hash": "4ff0c55aa6b64694298a668b39ad09f3",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -348,7 +348,8 @@
             "dist": {
                 "type": "path",
                 "url": "package/made/blog-engine",
-                "reference": "9059823423b384e8ffa521afc549b1abc3ae1dc8"
+                "reference": "9059823423b384e8ffa521afc549b1abc3ae1dc8",
+                "shasum": null
             },
             "require": {
                 "erusev/parsedown-extra": "^0.8.1",
@@ -382,6 +383,39 @@
                 }
             ],
             "description": "The Made Blog Engine library."
+        },
+        {
+            "name": "made/blog-theme-base",
+            "version": "dev-content-repository",
+            "dist": {
+                "type": "path",
+                "url": "package/made/blog-theme-base",
+                "reference": "d6e52b19b4a729e151c0019d4a286e4170b884b2",
+                "shasum": null
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Made\\Blog\\Theme\\Base\\": "src/"
+                }
+            },
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "GameplayJDK",
+                    "email": "github@gameplayjdk.de"
+                },
+                {
+                    "name": "Dennis Barlowe",
+                    "email": "dennis@dennzo.com"
+                }
+            ],
+            "description": "The base theme for made/blog."
         },
         {
             "name": "monolog/monolog",
@@ -1230,16 +1264,16 @@
         },
         {
             "name": "symfony/filesystem",
-            "version": "v5.0.5",
+            "version": "v5.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
-                "reference": "3afadc0f57cd74f86379d073e694b0f2cda2a88c"
+                "reference": "81daae1bc46cb8eef557f5faa36e9c785f983db1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/filesystem/zipball/3afadc0f57cd74f86379d073e694b0f2cda2a88c",
-                "reference": "3afadc0f57cd74f86379d073e694b0f2cda2a88c",
+                "url": "https://api.github.com/repos/symfony/filesystem/zipball/81daae1bc46cb8eef557f5faa36e9c785f983db1",
+                "reference": "81daae1bc46cb8eef557f5faa36e9c785f983db1",
                 "shasum": ""
             },
             "require": {
@@ -1276,7 +1310,7 @@
             ],
             "description": "Symfony Filesystem Component",
             "homepage": "https://symfony.com",
-            "time": "2020-01-21T08:40:24+00:00"
+            "time": "2020-03-16T13:02:39+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -1462,7 +1496,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "made/blog-engine": 20
+        "made/blog-engine": 20,
+        "made/blog-theme-base": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

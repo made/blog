@@ -1,0 +1,25 @@
+{
+  "name": "made/blog-theme-base",
+  "description": "The base theme for made/blog.",
+  "type": "library",
+  "minimum-stability": "stable",
+  "license": "GPL-3.0-or-later",
+  "require": {
+    "php": ">=7.1"
+  },
+  "authors": [
+    {
+      "name": "GameplayJDK",
+      "email": "github@gameplayjdk.de"
+    },
+    {
+      "name": "Dennis Barlowe",
+      "email": "dennis@dennzo.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Made\\Blog\\Theme\\Base\\": "src/"
+    }
+  }
+}

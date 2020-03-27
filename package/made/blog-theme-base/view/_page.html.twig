@@ -1,0 +1,28 @@
+{% set configuration = post.configuration.localeList.current %}
+
+<!doctype html>
+<html lang="{{ configuration.locale }}">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    {% block style %}
+        <link rel="stylesheet" href="/asset/style/main.css">
+        <!-- Include google-fonts -->
+        <link rel="stylesheet"
+              href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Playfair+Display:400,700&display=swap">
+    {% endblock %}
+
+    <title>{{ configuration.title }}</title>
+</head>
+<body>
+{% block content %}
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript" src="/asset/script/main.js">
+    </script>
+{% endblock %}
+</body>
+</html>
