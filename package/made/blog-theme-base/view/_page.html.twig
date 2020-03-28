@@ -1,7 +1,5 @@
-{% set configuration = post.configuration.localeList.current %}
-
 <!doctype html>
-<html lang="{{ configuration.locale }}">
+<html lang="{{ locale }}">
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -11,10 +9,13 @@
         <link rel="stylesheet" href="/asset/style/main.css">
         <!-- Include google-fonts -->
         <link rel="stylesheet"
-              href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Playfair+Display:400,700&display=swap">
+              href="https://fonts.googleapis.com/css?family=Open+Sans:400,700">
+        <link rel="stylesheet"
+              href="https://fonts.googleapis.com/css?family=Playfair+Display:400,700">
     {% endblock %}
 
-    <title>{{ configuration.title }}</title>
+    {# TODO: Allow setting the title. #}
+    <title>{% block title %}{% endblock %} - Blog</title>
 </head>
 <body>
 {% block content %}

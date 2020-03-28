@@ -1,4 +1,5 @@
-/*!
+<?php
+/**
  * Made Blog
  * Copyright (c) 2019-2020 Made
  *
@@ -16,6 +17,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-$fa-font-path: '../font';
+namespace Made\Blog\Engine\Service;
 
-// TODO: Override variables.
+/**
+ * Interface PageDataProviderInterface
+ *
+ * @package Made\Blog\Engine\Service
+ */
+interface PageDataProviderInterface
+{
+    /**
+     * @param array $slugData
+     * @return bool
+     */
+    public function accept(array $slugData): bool;
+
+    /**
+     * @param array $slugData
+     * @return array
+     */
+    public function provide(array $slugData): ?array;
+}

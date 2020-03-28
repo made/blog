@@ -1,4 +1,5 @@
-/*!
+<?php
+/**
  * Made Blog
  * Copyright (c) 2019-2020 Made
  *
@@ -16,6 +17,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-$fa-font-path: '../font';
+namespace Made\Blog\Engine\Service;
 
-// TODO: Override variables.
+/**
+ * Interface PageDataResolverInterface
+ *
+ * @package Made\Blog\Engine\Service
+ */
+interface PageDataResolverInterface
+{
+    /**
+     * @param string $slug
+     * @return array|null
+     */
+    public function resolve(string $slug): ?array;
+}

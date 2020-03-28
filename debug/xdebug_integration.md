@@ -1,6 +1,6 @@
 # Xdebug integration
 
-To control xdebug specific cookies, use the [Bookmarklet generator](https://www.jetbrains.com/phpstorm/marklets/).
+To control xdebug specific cookies, use the [bookmarklet generator](https://www.jetbrains.com/phpstorm/marklets/).
 
 The configuration needed for xdebug to work locally (inside `php.ini`):
 

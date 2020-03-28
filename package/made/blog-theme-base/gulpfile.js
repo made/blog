@@ -59,6 +59,15 @@ const minimist = require('minimist');
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+const cp_cwd = require('./cp_cwd.js');
+
+var cwd = cp_cwd();
+cwd = (function (cwd) {
+    return cwd.trim();
+}(cwd));
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 var option = minimist(process.argv.slice(2), {
     string: [
         'env',
@@ -229,6 +238,7 @@ function cleanStyleTask() {
     return (
         del(path.style.del, {
             force: 0 === path.style.del.indexOf(delOverridePath),
+            cwd: cwd,
         })
     );
 }
@@ -236,7 +246,10 @@ function cleanStyleTask() {
 function compileStyleTask() {
     return (
         gulp
-            .src(path.style.src)
+            .src(path.style.src, {
+                cwd: cwd,
+                // follow: true,
+            })
             .pipe(
                 gulp_sourcemaps.init()
             )
@@ -251,7 +264,9 @@ function compileStyleTask() {
                 gulp_sourcemaps.write(path.style.map)
             )
             .pipe(
-                gulp.dest(path.style.dest)
+                gulp.dest(path.style.dest, {
+                    cwd: cwd,
+                })
             )
     );
 }
@@ -285,7 +300,9 @@ function watchStyleTask() {
 
         return (
             gulp
-                .watch(src, compileStyleTask)
+                .watch(src, compileStyleTask, {
+                    cwd: cwd,
+                })
         );
     }
 
@@ -304,6 +321,7 @@ function cleanScriptTask() {
     return (
         del(path.script.del, {
             force: 0 === path.script.del.indexOf(delOverridePath),
+            cwd: cwd,
         })
     );
 }
@@ -317,7 +335,10 @@ function compileScriptTask() {
                 src.push(path.script.src);
 
                 return src;
-            }())
+            }(), {
+                cwd: cwd,
+                // follow: true,
+            })
             .pipe(
                 gulp_sourcemaps.init()
             )
@@ -333,7 +354,9 @@ function compileScriptTask() {
                 gulp_sourcemaps.write(path.script.map)
             )
             .pipe(
-                gulp.dest(path.script.dest)
+                gulp.dest(path.script.dest, {
+                    cwd: cwd,
+                })
             )
     );
 }
@@ -352,7 +375,9 @@ function watchScriptTask() {
     function watchScriptTask() {
         return (
             gulp
-                .watch(path.script.src, compileScriptTask)
+                .watch(path.script.src, compileScriptTask, {
+                    cwd: cwd,
+                })
         );
     }
 
@@ -371,6 +396,7 @@ function cleanFontTask() {
     return (
         del(path.font.del, {
             force: 0 === path.font.del.indexOf(delOverridePath),
+            cwd: cwd,
         })
     );
 }
@@ -384,9 +410,14 @@ function compileFontTask() {
                 src.push(path.font.src);
 
                 return src;
-            }())
+            }(), {
+                cwd: cwd,
+                // follow: true,
+            })
             .pipe(
-                gulp.dest(path.font.dest)
+                gulp.dest(path.font.dest, {
+                    cwd: cwd,
+                })
             )
     );
 }
@@ -406,7 +437,9 @@ function watchFontTask() {
     function watchFontTask() {
         return (
             gulp
-                .watch(path.font.src, compileFontTask())
+                .watch(path.font.src, compileFontTask, {
+                    cwd: cwd,
+                })
         );
     }
 
@@ -425,6 +458,7 @@ function cleanImageTask() {
     return (
         del(path.image.del, {
             force: 0 === path.image.del.indexOf(delOverridePath),
+            cwd: cwd,
         })
     );
 }
@@ -432,12 +466,17 @@ function cleanImageTask() {
 function compileImageTask() {
     return (
         gulp
-            .src(path.image.src)
+            .src(path.image.src, {
+                cwd: cwd,
+                // follow: true,
+            })
             .pipe(
                 gulp_imagemin()
             )
             .pipe(
-                gulp.dest(path.image.dest)
+                gulp.dest(path.image.dest, {
+                    cwd: cwd,
+                })
             )
     );
 }
@@ -456,7 +495,9 @@ function watchImageTask() {
     function watchImageTask() {
         return (
             gulp
-                .watch(path.image.src, compileImageTask)
+                .watch(path.image.src, compileImageTask, {
+                    cwd: cwd,
+                })
         );
     }
 
@@ -473,13 +514,18 @@ function watchImageTask() {
 
 function responsiveImageTask() {
     function cleanImageTask() {
-        return del(path.image.responsive.del);
+        return del(path.image.responsive.del, {
+            cwd: cwd,
+        });
     }
 
     function compileImageTask() {
         return (
             gulp
-                .src(path.image.responsive.src)
+                .src(path.image.responsive.src, {
+                    cwd: cwd,
+                    // follow: true,
+                })
                 .pipe(
                     gulp_responsive(path.image.responsive.config, {
                         quality: 70,
@@ -495,7 +541,9 @@ function responsiveImageTask() {
                     })
                 )
                 .pipe(
-                    gulp.dest(path.image.responsive.dest)
+                    gulp.dest(path.image.responsive.dest, {
+                        cwd: cwd,
+                    })
                 )
         );
     }

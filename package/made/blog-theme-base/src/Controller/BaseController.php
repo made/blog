@@ -43,41 +43,42 @@ class BaseController
     const METHOD = 'method';
     const ACTION = 'action';
     const NAME = 'name';
+
     /**
      * @return array
      */
     public static function getRouteMap(): array
     {
         return [
-            '/' => [
+            '/{locale:[a-zA-z]}/' => [
                 static::METHOD => 'GET',
                 static::ACTION => 'homeAction',
                 static::NAME => 'base.home',
             ],
 
-            '/post' => [
+            '/{locale:[a-zA-z]}/post' => [
                 static::METHOD => 'GET',
                 static::ACTION => 'postOverviewAction',
                 static::NAME => 'base.post',
             ],
 
-            '/category' => [
+            '/{locale:[a-zA-z]}/category' => [
                 static::METHOD => 'GET',
                 static::ACTION => 'categoryOverviewAction',
                 static::NAME => 'base.category.overview',
             ],
-            '/category/{id:[a-zA-Z0-9\-]}' => [
+            '/{locale:[a-zA-z]}/category/{id:[a-zA-Z0-9\-]}' => [
                 static::METHOD => 'GET',
                 static::ACTION => 'categoryAction',
                 static::NAME => 'base.category',
             ],
 
-            '/tag' => [
+            '/{locale:[a-zA-z]}/tag' => [
                 static::METHOD => 'GET',
                 static::ACTION => 'tagOverviewAction',
                 static::NAME => 'base.tag.overview',
             ],
-            '/tag/{id:[a-zA-Z0-9\-]}' => [
+            '/{locale:[a-zA-z]}/tag/{id:[a-zA-Z0-9\-]}' => [
                 static::METHOD => 'GET',
                 static::ACTION => 'tagAction',
                 static::NAME => 'base.tag',
