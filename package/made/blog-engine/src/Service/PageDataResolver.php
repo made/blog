@@ -24,21 +24,13 @@ namespace Made\Blog\Engine\Service;
  *
  * @package Made\Blog\Engine\Service
  */
-class PageDataResolver implements PageDataProviderInterface
+class PageDataResolver implements PageDataResolverInterface
 {
     /**
      * @inheritDoc
      */
-    public function accept(array $slugData): bool
+    public function resolve(string $slug): ?array
     {
-        // TODO: Implement accept() method.
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function provide(array $slugData): ?array
-    {
-        // TODO: Implement provide() method.
+        // TODO: Implement resolve() method.
     }
 }
