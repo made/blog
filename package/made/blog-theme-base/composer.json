@@ -19,7 +19,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "Made\\Blog\\Theme\\Base\\": "src/"
+      "Made\\Blog\\Engine\\": "src/"
     }
   }
 }

@@ -21,18 +21,15 @@ namespace App\Controller;
 
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
-use Help\Path;
-use Help\Slug;
-use Made\Blog\Engine\Model\Post;
-use Made\Blog\Engine\Model\PostConfiguration;
-use Made\Blog\Engine\Repository\PostRepositoryInterface;
-use Made\Blog\Engine\Service\SlugParserInterface;
-use Made\Blog\Theme\Base\Controller\BaseController;
+use Made\Blog\Engine\Exception\FailedOperationException;
+use Made\Blog\Engine\Service\PageDataProvider\Implementation\Base\PageDataProvider;
+use Made\Blog\Engine\Service\PageDataResolverInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Slim\App;
 use Slim\Views\Twig;
+use Throwable;
 use Twig\Error\LoaderError;
 use Twig\Error\RuntimeError;
 use Twig\Error\SyntaxError;
@@ -42,33 +39,20 @@ use Twig\Error\SyntaxError;
  *
  * @package App\Controller
  */
-class BlogController extends BaseController implements ControllerInterface
+class BlogController implements ControllerInterface
 {
+    const ROUTE_SLUG = 'blog.slug';
+
+    const VARIABLE_TEMPLATE = PageDataProvider::VARIABLE_TEMPLATE;
+    const VARIABLE_REDIRECT = PageDataProvider::VARIABLE_REDIRECT;
+
     /**
      * @inheritDoc
      */
     public static function register(App $app): void
     {
-        $routeMap = static::getRouteMap();
-
-        foreach ($routeMap as $pattern => $route) {
-            [
-                BaseController::METHOD => $method,
-                BaseController::ACTION => $action,
-                BaseController::NAME => $name,
-            ] = $route;
-
-            $action = static::class . ':' . $action;
-
-            if (!is_array($method)) {
-                $method = [
-                    $method,
-                ];
-            }
-
-            $app->map($method, $pattern, $action)
-                ->setName($name);
-        }
+        $app->get('/{slug:.*}', static::class . ':slugAction')
+            ->setName(static::ROUTE_SLUG);
     }
 
     /**
@@ -77,35 +61,26 @@ class BlogController extends BaseController implements ControllerInterface
     private $twig;
 
     /**
+     * @var PageDataResolverInterface
+     */
+    private $pageDataResolver;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var PostRepositoryInterface
-     */
-    private $postRepository;
-
-    /**
-     * @var SlugParserInterface
-     */
-    private $slugParser;
-
-    /**
      * BlogController constructor.
      * @param Twig $twig
+     * @param PageDataResolverInterface $pageDataResolver
      * @param LoggerInterface $logger
-     * @param PostRepositoryInterface $postRepository
-     * @param SlugParserInterface $slugParser
      */
-    public function __construct(Twig $twig, LoggerInterface $logger, PostRepositoryInterface $postRepository, SlugParserInterface $slugParser)
+    public function __construct(Twig $twig, PageDataResolverInterface $pageDataResolver, LoggerInterface $logger)
     {
-        parent::__construct($twig, $logger);
-
         $this->twig = $twig;
+        $this->pageDataResolver = $pageDataResolver;
         $this->logger = $logger;
-        $this->postRepository = $postRepository;
-        $this->slugParser = $slugParser;
     }
 
     /**
@@ -116,7 +91,7 @@ class BlogController extends BaseController implements ControllerInterface
      * @param array $args
      * @return ResponseInterface
      */
-    public function postAction(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function slugAction(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
     {
         /** @var string $slug */
         $slug = $args['slug'];
@@ -127,90 +102,41 @@ class BlogController extends BaseController implements ControllerInterface
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
-        // Extract all needed information from the slug.
-        [
-            SlugParserInterface::MATCH_LOCALE => $matchLocale,
-            SlugParserInterface::MATCH_SLUG => $matchSlug,
-        ] = $this->slugParser
-            ->parse($slug);
+        try {
+            $data = $this->pageDataResolver
+                ->resolve($slug);
 
-        // And then forget about it.
-        unset($slug);
-
-        // If information is missing, stop right there.
-        if (empty($matchLocale) || empty($matchSlug)) {
-            return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
-        }
-
-        // Try to find the post.
-        $post = $this->postRepository
-            ->getOneBySlug($matchLocale, $matchSlug);
-
-        // If it is not found, try to find it by slug-redirect.
-        if (null === $post) {
-            $post = $this->postRepository
-                ->getOneBySlugRedirect($matchLocale, $matchSlug);
-
-            // And if it has not been found by now, give up.
-            if (null === $post) {
+            if (null === $data) {
                 return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
             }
 
-            // Otherwise create the slug.
-            $slug = $this->getPostSlug($post);
+            if (null !== ($slugRedirect = $data[static::VARIABLE_REDIRECT])) {
+                // And redirect there permanently.
+                return $response
+                    ->withHeader('Location', $slugRedirect)
+                    ->withStatus(StatusCodeInterface::STATUS_MOVED_PERMANENTLY);
+            }
 
-            // And redirect there permanently.
-            return $response
-                ->withHeader('Location', $slug)
-                ->withStatus(StatusCodeInterface::STATUS_MOVED_PERMANENTLY);
+            $template = $data[static::VARIABLE_TEMPLATE] ?? null;
+
+            if (null === $template) {
+                return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
+            }
+
+            try {
+                // Use the twig-view helper for that.
+                return $this->twig->render($response, $template, $data);
+            } catch (LoaderError | RuntimeError | SyntaxError $error) {
+                // In case of an error, go all in.
+                throw new FailedOperationException($error->getRawMessage());
+            }
+        } catch (Throwable $throwable) {
+            // Log everything that might fail.
+            $this->logger->error('Error on request: ' . $throwable->getMessage(), [
+                'throwable', $throwable,
+            ]);
         }
 
-        // Else, just render the page as usual.
-        $template = $this->getPostTemplate($post);
-
-        try {
-            // Use the twig-view helper for that.
-            return $this->twig->render($response, $template, [
-                'locale' => $matchLocale,
-                'post' => $post,
-            ]);
-        } catch (LoaderError | RuntimeError | SyntaxError $error) {
-            $this->logger->error('Error on twig render: ' . $error->getRawMessage(), [
-                'error', $error,
-            ]);
-
-            // In case of an error, go all in.
-            return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    /**
-     * @param Post $post
-     * @return string
-     */
-    private function getPostSlug(Post $post): string
-    {
-        $configuration = $post->getConfiguration()
-            ->getLocale(PostConfiguration::LOCALE_KEY_CURRENT);
-
-        $locale = $configuration->getLocale();
-        $slug = $configuration->getSlug();
-
-        $slug = Path::join($locale, $slug);
-        $slug = Slug::sanitize($slug);
-
-        return $slug;
-    }
-
-    /**
-     * @param Post $post
-     * @return string
-     */
-    private function getPostTemplate(Post $post): string
-    {
-        $configuration = $post->getConfiguration()
-            ->getLocale(PostConfiguration::LOCALE_KEY_CURRENT);
-
-        return $configuration->getTemplate();
+        return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
     }
 }

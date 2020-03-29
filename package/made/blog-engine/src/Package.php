@@ -51,6 +51,9 @@ use Made\Blog\Engine\Repository\Proxy\CacheProxyTagRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
+use Made\Blog\Engine\Service\PageDataProviderInterface;
+use Made\Blog\Engine\Service\PageDataResolver;
+use Made\Blog\Engine\Service\PageDataResolverInterface;
 use Made\Blog\Engine\Service\PathService;
 use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\PostContentProvider as PostContentProviderFile;
 use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task\RenderParsedownTask;
@@ -84,14 +87,7 @@ use Twig\Loader\LoaderInterface;
 class Package extends PackageAbstract
 {
     /**
-     * Registers services on the given container.
-     *
-     * This method should only be used to configure services and parameters.
-     * It should not get services.
-     *
-     * Make sure the parent is called when overriding this function.
-     *
-     * @param Container $pimple A container instance
+     * @inheritDoc
      * @throws PackageException
      */
     public function register(Container $pimple): void
@@ -121,11 +117,16 @@ class Package extends PackageAbstract
 
         $this->registerDataLayerTheme();
         $this->registerDataLayerPostConfiguration();
+
+        $this->registerPostContentResolver();
+
         $this->registerDataLayerPost();
 
         $this->registerThemeService();
 
         $this->registerSlugParser();
+
+        $this->registerPageDataResolver();
     }
 
     /**
@@ -488,7 +489,7 @@ class Package extends PackageAbstract
     /**
      * @throws PackageException
      */
-    private function registerDataLayerPost(): void
+    private function registerPostContentResolver(): void
     {
         $this->registerConfiguration(TaskAbstract::class, [
             WrapContextTask::class => 10,
@@ -546,7 +547,7 @@ class Package extends PackageAbstract
             return new PostContentProviderFile($taskChain, $serviceList);
         });
 
-        $this->registerService(PostContentResolver::class, function (Container $container): PostContentResolver {
+        $this->registerService(PostContentResolver::class, function (Container $container): PostContentResolverInterface {
             /** @var array|PostContentProviderInterface[] $serviceList */
             $serviceList = $this->resolveTag(PostContentProviderInterface::TAG_POST_CONTENT_PROVIDER, PostContentProviderInterface::class, null);
 
@@ -554,7 +555,13 @@ class Package extends PackageAbstract
         });
 
         $this->registerServiceAlias(PostContentResolverInterface::class, PostContentResolver::class);
+    }
 
+    /**
+     * @throws PackageException
+     */
+    private function registerDataLayerPost(): void
+    {
         $this->registerTagAndService(PostRepositoryInterface::TAG_POST_REPOSITORY, PostRepository::class, function (Container $container): PostRepositoryInterface {
             /** @var PostConfigurationRepositoryInterface $postConfigurationRepository */
             $postConfigurationRepository = $container[PostConfigurationRepositoryInterface::class];
@@ -599,5 +606,19 @@ class Package extends PackageAbstract
         });
 
         $this->registerServiceAlias(SlugParserInterface::class, SlugParser::class);
+    }
+
+    private function registerPageDataResolver(): void
+    {
+        $this->registerService(PageDataResolver::class, function (Container $container): PageDataResolverInterface {
+            /** @var array|PageDataProviderInterface[] $serviceList */
+            $serviceList = $this->resolveTag(PageDataProviderInterface::TAG_PAGE_DATA_PROVIDER, PageDataProviderInterface::class, null);
+            /** @var SlugParserInterface $slugParser */
+            $slugParser = $container[SlugParserInterface::class];
+
+            return new PageDataResolver($serviceList, $slugParser);
+        });
+
+        $this->registerServiceAlias(PageDataResolverInterface::class, PageDataResolver::class);
     }
 }

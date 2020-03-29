@@ -68,7 +68,7 @@ $errorMiddleware = $app->addErrorMiddleware(true, true, true);
 
 /** @var array|PackageInterface[] $packageList */
 $packageList = require dirname(__DIR__) . '/app/package.php';
-ksort($packageList);
+ksort($packageList, SORT_NUMERIC);
 
 $packageToInitialize = null;
 

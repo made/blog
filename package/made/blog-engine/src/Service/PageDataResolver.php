@@ -19,6 +19,9 @@
 
 namespace Made\Blog\Engine\Service;
 
+use Help\Slug;
+use Made\Blog\Engine\Exception\FailedOperationException;
+
 /**
  * Class PageDataResolver
  *
@@ -27,10 +30,56 @@ namespace Made\Blog\Engine\Service;
 class PageDataResolver implements PageDataResolverInterface
 {
     /**
+     * @var array|PageDataProviderInterface[]
+     */
+    private $pageDataProviderList;
+
+    /**
+     * @var SlugParserInterface
+     */
+    private $slugParser;
+
+    /**
+     * PageDataResolver constructor.
+     * @param array|PageDataProviderInterface[] $pageDataProviderList
+     * @param SlugParserInterface $slugParser
+     */
+    public function __construct(array $pageDataProviderList, SlugParserInterface $slugParser)
+    {
+        $this->pageDataProviderList = $pageDataProviderList;
+        $this->slugParser = $slugParser;
+    }
+
+    /**
      * @inheritDoc
+     * @throws FailedOperationException
      */
     public function resolve(string $slug): ?array
     {
-        // TODO: Implement resolve() method.
+        $slug = Slug::sanitize($slug);
+
+        $slugData = $this->slugParser
+            ->parse($slug);
+
+        if (null !== ($pageDataProvider = $this->getPageDataProvider($slugData))) {
+            return $pageDataProvider->provide($slugData);
+        }
+
+        throw new FailedOperationException('Unable to resolve page data from slug: ' . $slug);
+    }
+
+    /**
+     * @param array $slugData
+     * @return PageDataProviderInterface
+     */
+    private function getPageDataProvider(array $slugData): PageDataProviderInterface
+    {
+        return array_reduce($this->pageDataProviderList, function (?PageDataProviderInterface $carry, PageDataProviderInterface $pageDataProvider) use ($slugData): ?PageDataProviderInterface {
+            if (null === $carry && $pageDataProvider->accept($slugData)) {
+                return $pageDataProvider;
+            }
+
+            return $carry;
+        }, null);
     }
 }

@@ -25,6 +25,7 @@ use App\Middleware\TrailingSlashMiddleware;
 use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
+use Made\Blog\Engine\Service\PageDataResolverInterface;
 use Made\Blog\Engine\Service\SlugParserInterface;
 use Made\Blog\Engine\Service\ThemeService;
 use Monolog\Handler\RotatingFileHandler;
@@ -79,6 +80,14 @@ class Package extends PackageAbstract
         $this->registerService(App::class, function (Container $container) {
             return $this->app;
         });
+
+        if (!$this->hasTagSupport(false)) {
+            $this->addTagSupport();
+        }
+
+        if (!$this->hasConfigurationSupport(false)) {
+            $this->addConfigurationSupport();
+        }
 
         $this->registerClientDependency();
         $this->registerPackageDependency();
@@ -200,14 +209,12 @@ class Package extends PackageAbstract
         $this->registerService(BlogController::class, function (Container $container): BlogController {
             /** @var Twig $twig */
             $twig = $container[Twig::class];
+            /** @var PageDataResolverInterface $pageDataResolver */
+            $pageDataResolver = $container[PageDataResolverInterface::class];
             /** @var Logger $logger */
             $logger = $container[Logger::class];
-            /** @var PostRepositoryInterface $postRepository */
-            $postRepository = $container[PostRepositoryInterface::class];
-            /** @var SlugParserInterface $slugParser */
-            $slugParser = $container[SlugParserInterface::class];
 
-            return new BlogController($twig, $logger, $postRepository, $slugParser);
+            return new BlogController($twig, $pageDataResolver, $logger);
         });
     }
 }

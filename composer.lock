@@ -390,7 +390,7 @@
             "dist": {
                 "type": "path",
                 "url": "package/made/blog-theme-base",
-                "reference": "d6e52b19b4a729e151c0019d4a286e4170b884b2",
+                "reference": "a041ad3f419e8749be02b7f626f583fbd663f7aa",
                 "shasum": null
             },
             "require": {
@@ -399,7 +399,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "Made\\Blog\\Theme\\Base\\": "src/"
+                    "Made\\Blog\\Engine\\": "src/"
                 }
             },
             "license": [

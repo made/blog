@@ -26,6 +26,8 @@ namespace Made\Blog\Engine\Service;
  */
 interface PageDataProviderInterface
 {
+    const TAG_PAGE_DATA_PROVIDER = 'provider.page_data';
+
     /**
      * @param array $slugData
      * @return bool

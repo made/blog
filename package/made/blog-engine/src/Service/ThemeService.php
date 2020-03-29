@@ -93,7 +93,8 @@ class ThemeService
 
         // TODO: Add order.
         $themeListCriteria = new Criteria();
-        $themeList = $this->themeRepository->getAll($themeListCriteria);
+        $themeList = $this->themeRepository
+            ->getAll($themeListCriteria);
 
         foreach ($themeList as $theme) {
             $name = $theme->getName();

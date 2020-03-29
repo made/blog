@@ -30,28 +30,41 @@ class SlugParser implements SlugParserInterface
 {
     /**
      * Basic format supports:
-     * - `en/some-slug-of-a-post`
-     * - `/en/some-slug-of-a-post`
-     * - `en/some-slug-of-a-post/`
-     * - `/en/some-slug-of-a-post/`
-     * - `/en/some-slug-of-a-post/asdf/1234/`
-     * - `/en/some-slug-of-a-post/asdf/1234`
-     * - `en/some-slug-of-a-post/1234_`
-     * - `/en/some-slug-of-a-post/1234_`
+     * - /
+     * - /de
+     * - /en
+     * - /de/asdf/asdf/post-slug
+     * - /de/asdf/asdf/post-slug/
+     * - /en/asdf/asdf/as-df
+     * - /en/asdf/asdf/as-df/
+     * - /de/post-slug
+     * - /en/post-slug
+     * - /de/post
+     * - /en/post
+     * - /de/category
+     * - /de/category/10
+     * - /en/category
+     * - /en/category/10
+     * - /de/tag
+     * - /de/tag/10
+     * - /en/tag
+     * - /en/tag/10
      *
      * Basic format does not support:
-     * - `/en/some-slug-of-a-post-`
-     * - `/some-slug-of-a-post`
+     * - /de/post-slug-
+     * - /en/post-slug-
+     * - /_asdf
      *
-     * {@see https://regex101.com/r/WvXbIE/2}
+     * {@see https://regex101.com/r/WvXbIE/6}
      */
-    const PATTERN = '/^\/?([a-z]{2})\/([\w\-\/]+\w)\/?$/';
+    const PATTERN = '/^\/([a-z]{2})(\/[\w\-\/]+\w)?\/?|\/$/';
 
     /**
      * @inheritDoc
      */
     public function parse(string $slug): array
     {
+        // TODO: Put this mechanic into a 'Preg' static helper class. It is also used inside the page data provider.
         $identifier = [
             static::MATCH_FULL,
             static::MATCH_LOCALE,
@@ -59,8 +72,9 @@ class SlugParser implements SlugParserInterface
         ];
         $match = [];
 
-        $result = preg_match(static::PATTERN, $slug, $match);
+        $result = preg_match(static::PATTERN, $slug, $match, PREG_UNMATCHED_AS_NULL);
 
+        // TODO: Test if the check for 0 is still needed.
         if (0 === $result || false === $result) {
             $match = array_fill(0, count($identifier), null);
         }
