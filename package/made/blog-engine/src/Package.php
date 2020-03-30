@@ -51,6 +51,7 @@ use Made\Blog\Engine\Repository\Proxy\CacheProxyTagRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
+use Made\Blog\Engine\Service\PageDataProvider\Implementation\Basic\PageDataProvider as PageDataProviderBasic;
 use Made\Blog\Engine\Service\PageDataProviderInterface;
 use Made\Blog\Engine\Service\PageDataResolver;
 use Made\Blog\Engine\Service\PageDataResolverInterface;
@@ -154,6 +155,7 @@ class Package extends PackageAbstract
         $this->registerConfiguration(Configuration::class, [
             Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__, 4),
             Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE => 'en',
+            Configuration::CONFIGURATION_NAME_THEME_NAME => 'theme-base',
         ]);
 
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
@@ -164,7 +166,8 @@ class Package extends PackageAbstract
 
             return (new Configuration())
                 ->setRootDirectory($settings[Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY])
-                ->setFallbackLocale($settings[Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE]);
+                ->setFallbackLocale($settings[Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE])
+                ->setThemeName($settings[Configuration::CONFIGURATION_NAME_THEME_NAME]);
         });
     }
 
@@ -608,8 +611,33 @@ class Package extends PackageAbstract
         $this->registerServiceAlias(SlugParserInterface::class, SlugParser::class);
     }
 
+    /**
+     * @throws PackageException
+     */
     private function registerPageDataResolver(): void
     {
+        $this->registerConfiguration(PageDataProviderBasic::class, [
+        ]);
+
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
+
+        $this->registerTagAndService(PageDataProviderInterface::TAG_PAGE_DATA_PROVIDER, PageDataProviderBasic::class, function (Container $container) use ($configuration): PageDataProviderInterface {
+            $settings = $configuration[PageDataProviderBasic::class];
+
+            unset($configuration);
+
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
+            /** @var CategoryRepositoryInterface $categoryRepository */
+            $categoryRepository = $container[CategoryRepositoryInterface::class];
+            /** @var TagRepositoryInterface $tagRepository */
+            $tagRepository = $container[TagRepositoryInterface::class];
+            /** @var PostRepositoryInterface $postRepository */
+            $postRepository = $container[PostRepositoryInterface::class];
+
+            return new PageDataProviderBasic($settings, $configuration, $categoryRepository, $tagRepository, $postRepository);
+        });
+
         $this->registerService(PageDataResolver::class, function (Container $container): PageDataResolverInterface {
             /** @var array|PageDataProviderInterface[] $serviceList */
             $serviceList = $this->resolveTag(PageDataProviderInterface::TAG_PAGE_DATA_PROVIDER, PageDataProviderInterface::class, null);

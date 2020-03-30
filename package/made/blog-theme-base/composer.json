@@ -16,10 +16,5 @@
       "name": "Dennis Barlowe",
       "email": "dennis@dennzo.com"
     }
-  ],
-  "autoload": {
-    "psr-4": {
-      "Made\\Blog\\Engine\\": "src/"
-    }
-  }
+  ]
 }

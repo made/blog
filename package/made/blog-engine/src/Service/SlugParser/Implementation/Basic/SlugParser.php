@@ -72,11 +72,9 @@ class SlugParser implements SlugParserInterface
         ];
         $match = [];
 
-        $result = preg_match(static::PATTERN, $slug, $match, PREG_UNMATCHED_AS_NULL);
-
-        // TODO: Test if the check for 0 is still needed.
-        if (0 === $result || false === $result) {
-            $match = array_fill(0, count($identifier), null);
+        preg_match(static::PATTERN, $slug, $match, PREG_UNMATCHED_AS_NULL);
+        while (count($match) < count($identifier)) {
+            $match[] = null;
         }
 
         return array_combine($identifier, $match) ?: [];

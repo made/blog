@@ -72,7 +72,8 @@ class ThemeService
      */
     public function getNamespaceAndPath(): array
     {
-        $path = $this->configuration->getRootDirectory();
+        $path = $this->configuration
+            ->getRootDirectory();
 
         return [
             static::NAMESPACE => $this->getPathThemeView($path),

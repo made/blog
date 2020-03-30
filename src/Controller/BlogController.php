@@ -22,7 +22,7 @@ namespace App\Controller;
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
 use Made\Blog\Engine\Exception\FailedOperationException;
-use Made\Blog\Engine\Service\PageDataProvider\Implementation\Base\PageDataProvider;
+use Made\Blog\Engine\Service\PageDataProvider\Implementation\Basic\PageDataProvider;
 use Made\Blog\Engine\Service\PageDataResolverInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -110,7 +110,7 @@ class BlogController implements ControllerInterface
                 return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
             }
 
-            if (null !== ($slugRedirect = $data[static::VARIABLE_REDIRECT])) {
+            if (null !== ($slugRedirect = $data[static::VARIABLE_REDIRECT] ?? null)) {
                 // And redirect there permanently.
                 return $response
                     ->withHeader('Location', $slugRedirect)

@@ -28,6 +28,7 @@ class Configuration
 {
     const CONFIGURATION_NAME_ROOT_DIRECTORY = 'root_directory';
     const CONFIGURATION_NAME_FALLBACK_LOCALE = 'fallback_locale';
+    const CONFIGURATION_NAME_THEME_NAME = 'theme_name';
 
     /**
      * 'root_directory'
@@ -42,6 +43,13 @@ class Configuration
      * @var string
      */
     private $fallbackLocale;
+
+    /**
+     * 'theme_name'
+     *
+     * @var string
+     */
+    private $themeName;
 
     /**
      * @return string
@@ -76,6 +84,24 @@ class Configuration
     public function setFallbackLocale(string $fallbackLocale): Configuration
     {
         $this->fallbackLocale = $fallbackLocale;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getThemeName(): string
+    {
+        return $this->themeName;
+    }
+
+    /**
+     * @param string $themeName
+     * @return Configuration
+     */
+    public function setThemeName(string $themeName): Configuration
+    {
+        $this->themeName = $themeName;
         return $this;
     }
 }

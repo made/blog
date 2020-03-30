@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Service\PageDataProvider\Implementation\Base;
+namespace Made\Blog\Engine\Service\PageDataProvider\Implementation\Basic;
 
 use Help\Path;
 use Help\Slug;
@@ -35,7 +35,7 @@ use Made\Blog\Engine\Service\PageDataProviderInterface;
 /**
  * Class PageDataProvider
  *
- * @package Made\Blog\Engine\Service\PageDataProvider\Implementation\Base
+ * @package Made\Blog\Engine\Service\PageDataProvider\Implementation\Basic
  */
 class PageDataProvider implements PageDataProviderInterface
 {
@@ -59,6 +59,8 @@ class PageDataProvider implements PageDataProviderInterface
     const VARIABLE_TEMPLATE = 'template';
     const VARIABLE_REDIRECT = 'redirect';
 
+    const VARIABLE_LOCALE = 'locale';
+
     const VARIABLE_CATEGORY_LIST = 'categoryList';
     const VARIABLE_CATEGORY = 'category';
 
@@ -69,13 +71,15 @@ class PageDataProvider implements PageDataProviderInterface
 
     // Template paths below:
 
-    const TEMPLATE_HOME = '@theme-base/home.html.twig';
+    const TEMPLATE_NAME_HOME = 'home';
 
-    const TEMPLATE_CATEGORY_OVERVIEW = '@theme-base/category-overview.html.twig';
-    const TEMPLATE_CATEGORY = '@theme-base/category.html.twig';
+    const TEMPLATE_NAME_CATEGORY_OVERVIEW = 'category-overview';
+    const TEMPLATE_NAME_CATEGORY = 'category';
 
-    const TEMPLATE_TAG_OVERVIEW = '@theme-base/tag-overview.html.twig';
-    const TEMPLATE_TAG = '@theme-base/tag.html.twig';
+    const TEMPLATE_NAME_TAG_OVERVIEW = 'tag-overview';
+    const TEMPLATE_NAME_TAG = 'tag';
+
+    const TEMPLATE_EXTENSION = '.html.twig';
 
     /**
      * @var array
@@ -223,11 +227,25 @@ class PageDataProvider implements PageDataProviderInterface
     /**
      * @param $locale
      * @return array|null
-     * @throws UnsupportedOperationException
      */
     protected function provideDataHome(string $locale): ?array
     {
-        throw new UnsupportedOperationException('Currently not implemented! (' . __METHOD__ . ')');
+        $categoryListCriteria = new Criteria();
+        $categoryList = $this->categoryRepository
+            ->getAll($categoryListCriteria);
+
+        $tagListCriteria = new Criteria();
+        $tagList = $this->tagRepository
+            ->getAll($tagListCriteria);
+
+        $template = $this->getTemplate(static::TEMPLATE_NAME_HOME);
+
+        return $this->provideData([
+            static::VARIABLE_LOCALE => $locale,
+            static::VARIABLE_TEMPLATE => $template,
+            static::VARIABLE_CATEGORY_LIST => $categoryList,
+            static::VARIABLE_TAG_LIST => $tagList,
+        ]);
     }
 
     /**
@@ -274,8 +292,10 @@ class PageDataProvider implements PageDataProviderInterface
         $categoryList = $this->categoryRepository
             ->getAll($categoryListCriteria);
 
+        $template = $this->getTemplate(static::TEMPLATE_NAME_CATEGORY_OVERVIEW);
+
         return $this->provideData([
-            static::VARIABLE_TEMPLATE => static::TEMPLATE_CATEGORY_OVERVIEW,
+            static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_CATEGORY_LIST => $categoryList,
         ]);
     }
@@ -294,8 +314,10 @@ class PageDataProvider implements PageDataProviderInterface
             return null;
         }
 
+        $template = $this->getTemplate(static::TEMPLATE_NAME_CATEGORY);
+
         return $this->provideData([
-            static::VARIABLE_TEMPLATE => static::TEMPLATE_CATEGORY,
+            static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_CATEGORY => $category,
         ]);
     }
@@ -344,8 +366,10 @@ class PageDataProvider implements PageDataProviderInterface
         $tagList = $this->tagRepository
             ->getAll($tagListCriteria);
 
+        $template = $this->getTemplate(static::TEMPLATE_NAME_TAG_OVERVIEW);
+
         return $this->provideData([
-            static::VARIABLE_TEMPLATE => static::TEMPLATE_TAG_OVERVIEW,
+            static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_TAG_LIST => $tagList,
         ]);
     }
@@ -364,8 +388,10 @@ class PageDataProvider implements PageDataProviderInterface
             return null;
         }
 
+        $template = $this->getTemplate(static::TEMPLATE_NAME_TAG);
+
         return $this->provideData([
-            static::VARIABLE_TEMPLATE => static::TEMPLATE_TAG,
+            static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_TAG => $tag,
         ]);
     }
@@ -427,6 +453,28 @@ class PageDataProvider implements PageDataProviderInterface
             ->getLocale(PostConfiguration::LOCALE_KEY_CURRENT);
 
         return $configuration->getTemplate();
+    }
+
+    /**
+     * @param string $template
+     * @return string
+     */
+    protected function getTemplate(string $template): string
+    {
+        $themeName = $this->configuration
+            ->getThemeName();
+
+        $template = trim($template);
+
+        if (substr($template, -1 * strlen(self::TEMPLATE_EXTENSION)) !== self::TEMPLATE_EXTENSION) {
+            $template .= self::TEMPLATE_EXTENSION;
+        }
+
+        if (0 !== strpos($template, '@')) {
+            $template = "@{$themeName}/{$template}";
+        }
+
+        return $template;
     }
 
     /**

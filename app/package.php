@@ -26,7 +26,6 @@ use Slim\App;
 
 // Keep the namespace near the package class or use an alias for better readability. Lowest number first.
 return [
-    91 => new Made\Blog\Engine\Service\PageDataProvider\Implementation\Base\Package($container),
     90 => new Made\Blog\Engine\Package($container),
     10 => new Package($container, $app),
 ];
