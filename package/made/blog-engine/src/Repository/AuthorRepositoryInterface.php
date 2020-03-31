@@ -29,6 +29,8 @@ use Made\Blog\Engine\Repository\Criteria\Criteria;
  */
 interface AuthorRepositoryInterface
 {
+    const TAG_AUTHOR_REPOSITORY = 'repository.author';
+
     /**
      * @param Author $author
      * @return bool
@@ -37,9 +39,16 @@ interface AuthorRepositoryInterface
 
     /**
      * @param Criteria $criteria
-     * @return array
+     * @return array|Author[]
      */
     public function getAll(Criteria $criteria): array;
+
+    /**
+     * @param Criteria $criteria
+     * @param string $location
+     * @return array|Author[]
+     */
+    public function getAllByLocation(Criteria $criteria, string $location): array;
 
     /**
      * @param string $name
@@ -52,4 +61,16 @@ interface AuthorRepositoryInterface
      * @return Author|null
      */
     public function getOneByNameDisplay(string $nameDisplay): ?Author;
+
+    /**
+     * @param Author $author
+     * @return bool
+     */
+    public function modify(Author $author): bool;
+
+    /**
+     * @param Author $author
+     * @return bool
+     */
+    public function destroy(Author $author): bool;
 }

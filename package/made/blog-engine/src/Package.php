@@ -20,17 +20,21 @@
 namespace Made\Blog\Engine;
 
 use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
+use Made\Blog\Engine\Repository\Implementation\Aggregation\AuthorRepository as AuthorRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\CategoryRepository as CategoryRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationLocaleRepository as PostConfigurationLocaleRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\PostConfigurationRepository as PostConfigurationRepositoryAggregation;
 use Made\Blog\Engine\Repository\Implementation\Aggregation\TagRepository as TagRepositoryAggregation;
+use Made\Blog\Engine\Repository\Implementation\File\AuthorRepository as AuthorRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\CategoryRepository as CategoryRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationLocaleRepository as PostConfigurationLocaleRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\TagRepository as TagRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\File\ThemeRepository as ThemeRepositoryFile;
 use Made\Blog\Engine\Repository\Implementation\PostRepository;
+use Made\Blog\Engine\Repository\Mapper\AuthorMapper;
 use Made\Blog\Engine\Repository\Mapper\CategoryMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
@@ -43,6 +47,7 @@ use Made\Blog\Engine\Repository\Mapper\ThemeMapper;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
+use Made\Blog\Engine\Repository\Proxy\CacheProxyAuthorRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyCategoryRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyPostConfigurationLocaleRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyPostConfigurationRepository;
@@ -312,15 +317,21 @@ class Package extends PackageAbstract
             return new TagMapper();
         });
 
+        $this->registerService(AuthorMapper::class, function (Container $container): AuthorMapper {
+            return new AuthorMapper();
+        });
+
         $this->registerService(PostConfigurationMetaCustomMapper::class, function (Container $container): PostConfigurationMetaCustomMapper {
             return new PostConfigurationMetaCustomMapper();
         });
 
         $this->registerService(PostConfigurationMetaMapper::class, function (Container $container): PostConfigurationMetaMapper {
+            /** @var AuthorMapper $authorMapper */
+            $authorMapper = $container[AuthorMapper::class];
             /** @var PostConfigurationMetaCustomMapper $postConfigurationMetaCustomMapper */
             $postConfigurationMetaCustomMapper = $container[PostConfigurationMetaCustomMapper::class];
 
-            return new PostConfigurationMetaMapper($postConfigurationMetaCustomMapper);
+            return new PostConfigurationMetaMapper($authorMapper, $postConfigurationMetaCustomMapper);
         });
 
         $this->registerService(PostConfigurationLocaleMapper::class, function (Container $container): PostConfigurationLocaleMapper {
@@ -416,6 +427,48 @@ class Package extends PackageAbstract
             return new CacheProxyTagRepository($cache, $tagRepository, $logger);
         });
 
+        $this->registerTagAndService(AuthorRepositoryInterface::TAG_AUTHOR_REPOSITORY, AuthorRepositoryFile::class, function (Container $container): AuthorRepositoryInterface {
+            /** @var PathService $pathService */
+            $pathService = $container[PathService::class];
+            /** @var AuthorMapper $authorMapper */
+            $authorMapper = $container[AuthorMapper::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
+
+            return new AuthorRepositoryFile($pathService, $authorMapper, $logger);
+        });
+
+        $this->registerTagAndService(AuthorRepositoryInterface::TAG_AUTHOR_REPOSITORY, AuthorRepositoryAggregation::class, function (Container $container): AuthorRepositoryInterface {
+            /** @var array|AuthorRepositoryInterface[] $serviceList */
+            $serviceList = $this->resolveTag(AuthorRepositoryInterface::TAG_AUTHOR_REPOSITORY, AuthorRepositoryInterface::class, [
+                AuthorRepositoryAggregation::class,
+            ]);
+
+            return new AuthorRepositoryAggregation($serviceList);
+        });
+
+        $this->registerServiceLazy(AuthorRepositoryInterface::class, AuthorRepositoryAggregation::class);
+
+        $this->container->extend(AuthorRepositoryInterface::class, function (AuthorRepositoryInterface $authorRepository, Container $container): AuthorRepositoryInterface {
+            /** @var CacheInterface $cache */
+            $cache = $container[CacheInterface::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
+
+            return new CacheProxyAuthorRepository($cache, $authorRepository, $logger);
+        });
+
+        $this->registerTagAndService(AuthorRepositoryInterface::TAG_AUTHOR_REPOSITORY, AuthorRepositoryFile::class, function (Container $container): AuthorRepositoryInterface {
+            /** @var PathService $pathService */
+            $pathService = $container[PathService::class];
+            /** @var AuthorMapper $authorMapper */
+            $authorMapper = $container[AuthorMapper::class];
+            /** @var LoggerInterface $logger */
+            $logger = $container[LoggerInterface::class];
+
+            return new AuthorRepositoryFile($pathService, $authorMapper, $logger);
+        });
+
         $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container) use ($configuration): PostConfigurationRepositoryInterface {
             /** @var array $settings */
             $settings = $configuration[PostConfigurationRepositoryFile::class];
@@ -432,10 +485,14 @@ class Package extends PackageAbstract
             $tagRepository = $container[TagRepositoryInterface::class];
             /** @var TagMapper $tagMapper */
             $tagMapper = $container[TagMapper::class];
+            /** @var AuthorRepositoryInterface $authorRepository */
+            $authorRepository = $container[AuthorRepositoryInterface::class];
+            /** @var AuthorMapper $authorMapper */
+            $authorMapper = $container[AuthorMapper::class];
             /** @var LoggerInterface $logger */
             $logger = $container[LoggerInterface::class];
 
-            return new PostConfigurationRepositoryFile($settings['default'], $pathService, $postConfigurationMapper, $categoryRepository, $categoryMapper, $tagRepository, $tagMapper, $logger);
+            return new PostConfigurationRepositoryFile($settings['default'], $pathService, $postConfigurationMapper, $categoryRepository, $categoryMapper, $tagRepository, $tagMapper, $authorRepository, $authorMapper, $logger);
         });
 
         $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryAggregation::class, function (Container $container): PostConfigurationRepositoryInterface {

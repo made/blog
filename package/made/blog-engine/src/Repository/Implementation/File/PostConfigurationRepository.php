@@ -25,15 +25,19 @@ use Help\Json;
 use Help\Slug;
 use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Exception\UnsupportedOperationException;
+use Made\Blog\Engine\Model\Author;
 use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Model\Tag;
+use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
+use Made\Blog\Engine\Repository\Mapper\AuthorMapper;
 use Made\Blog\Engine\Repository\Mapper\CategoryMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Made\Blog\Engine\Repository\Mapper\PostConfigurationMapper;
+use Made\Blog\Engine\Repository\Mapper\PostConfigurationMetaMapper;
 use Made\Blog\Engine\Repository\Mapper\TagMapper;
 use Made\Blog\Engine\Repository\PostConfigurationRepositoryInterface;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
@@ -85,6 +89,16 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     private $tagMapper;
 
     /**
+     * @var AuthorRepositoryInterface
+     */
+    private $authorRepository;
+
+    /**
+     * @var AuthorMapper
+     */
+    private $authorMapper;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -98,9 +112,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      * @param CategoryMapper $categoryMapper
      * @param TagRepositoryInterface $tagRepository
      * @param TagMapper $tagMapper
+     * @param AuthorRepositoryInterface $authorRepository
+     * @param AuthorMapper $authorMapper
      * @param LoggerInterface $logger
      */
-    public function __construct(array $defaultData, PathService $pathService, PostConfigurationMapper $postConfigurationMapper, CategoryRepositoryInterface $categoryRepository, CategoryMapper $categoryMapper, TagRepositoryInterface $tagRepository, TagMapper $tagMapper, LoggerInterface $logger)
+    public function __construct(array $defaultData, PathService $pathService, PostConfigurationMapper $postConfigurationMapper, CategoryRepositoryInterface $categoryRepository, CategoryMapper $categoryMapper, TagRepositoryInterface $tagRepository, TagMapper $tagMapper, AuthorRepositoryInterface $authorRepository, AuthorMapper $authorMapper, LoggerInterface $logger)
     {
         $this->defaultData = $defaultData;
         $this->pathService = $pathService;
@@ -109,6 +125,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
         $this->categoryMapper = $categoryMapper;
         $this->tagRepository = $tagRepository;
         $this->tagMapper = $tagMapper;
+        $this->authorRepository = $authorRepository;
+        $this->authorMapper = $authorMapper;
         $this->logger = $logger;
     }
 
@@ -266,6 +284,11 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                     Slug::sanitize($localeData[PostConfigurationLocaleMapper::KEY_SLUG]);
             }
 
+            if (isset($localeData[PostConfigurationLocaleMapper::KEY_META])) {
+                $localeData[PostConfigurationLocaleMapper::KEY_META] =
+                    $this->provisionMetaData($localeData[PostConfigurationLocaleMapper::KEY_META]);
+            }
+
             // Provision the category list from an array of string or array to an array of array when not empty.
             if (isset($localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST])
                 && !empty($localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST])) {
@@ -309,6 +332,66 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     }
 
     /**
+     * TODO: Use custom mapper instead.
+     *
+     * @param array $meta
+     * @return array
+     */
+    private function provisionMetaData(array $meta): array
+    {
+        if (isset($meta[PostConfigurationMetaMapper::KEY_AUTHOR])) {
+            $author = $meta[PostConfigurationMetaMapper::KEY_AUTHOR];
+            $authorObject = null;
+
+            // Check if it is an array.
+            if (is_array($author)) {
+                try {
+                    // Assume the array contains author data.
+                    $authorObject = $this->authorMapper
+                        ->fromData($author);
+                } catch (FailedOperationException $exception) {
+                    $this->logger->error('Unable to map author data to a valid object. This is likely caused by some malformed format.', [
+                        'author' => $author,
+                        'exception' => $exception,
+                    ]);
+                }
+
+                // If it does not, the object stays with a null value.
+            }
+
+            // Check if it is a string.
+            if (is_string($author)) {
+                // Assume that string is the name of an author and get that author data from the repository.
+                $authorObject = $this->authorRepository
+                    ->getOneByName($author);
+
+                // If there was no author found above, just create a new author with the name.
+                if (null === $authorObject) {
+                    $authorObject = (new Author())
+                        ->setName($author);
+                }
+            }
+
+            if (null === $authorObject) {
+                $this->logger->notice('Failed to provision author data.', [
+                    'author' => $author,
+                ]);
+
+                // Unset the index if the author data could not be provisioned.
+                unset($meta[PostConfigurationMetaMapper::KEY_AUTHOR]);
+            } else {
+                // Push it back into the list.
+                $meta[PostConfigurationMetaMapper::KEY_AUTHOR] = $this->authorMapper
+                    ->toData($authorObject);
+            }
+        }
+
+        return $meta;
+    }
+
+    /**
+     * TODO: Use custom mapper instead.
+     *
      * @param array|string[]|array[] $categoryList
      * @return array
      */
@@ -368,6 +451,8 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     }
 
     /**
+     * TODO: Use custom mapper instead.
+     *
      * @param array $tagList
      * @return array
      */

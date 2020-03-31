@@ -32,27 +32,27 @@ class Author
     private $name;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $nameDisplay;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $location;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $title;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $picture;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $description;
 
@@ -75,90 +75,90 @@ class Author
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getNameDisplay(): string
+    public function getNameDisplay(): ?string
     {
         return $this->nameDisplay;
     }
 
     /**
-     * @param string $nameDisplay
+     * @param string|null $nameDisplay
      * @return Author
      */
-    public function setNameDisplay(string $nameDisplay): Author
+    public function setNameDisplay(?string $nameDisplay): Author
     {
         $this->nameDisplay = $nameDisplay;
         return $this;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getLocation(): string
+    public function getLocation(): ?string
     {
         return $this->location;
     }
 
     /**
-     * @param string $location
+     * @param string|null $location
      * @return Author
      */
-    public function setLocation(string $location): Author
+    public function setLocation(?string $location): Author
     {
         $this->location = $location;
         return $this;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTitle(): string
+    public function getTitle(): ?string
     {
         return $this->title;
     }
 
     /**
-     * @param string $title
+     * @param string|null $title
      * @return Author
      */
-    public function setTitle(string $title): Author
+    public function setTitle(?string $title): Author
     {
         $this->title = $title;
         return $this;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getPicture(): string
+    public function getPicture(): ?string
     {
         return $this->picture;
     }
 
     /**
-     * @param string $picture
+     * @param string|null $picture
      * @return Author
      */
-    public function setPicture(string $picture): Author
+    public function setPicture(?string $picture): Author
     {
         $this->picture = $picture;
         return $this;
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getDescription(): string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
     /**
-     * @param string $description
+     * @param string|null $description
      * @return Author
      */
-    public function setDescription(string $description): Author
+    public function setDescription(?string $description): Author
     {
         $this->description = $description;
         return $this;

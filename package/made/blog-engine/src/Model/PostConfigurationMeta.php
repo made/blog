@@ -27,7 +27,7 @@ namespace Made\Blog\Engine\Model;
 class PostConfigurationMeta
 {
     /**
-     * @var string|null
+     * @var Author|null
      */
     private $author;
 
@@ -57,18 +57,18 @@ class PostConfigurationMeta
     private $customMetaList;
 
     /**
-     * @return string|null
+     * @return Author|null
      */
-    public function getAuthor(): ?string
+    public function getAuthor(): ?Author
     {
         return $this->author;
     }
 
     /**
-     * @param string|null $author
+     * @param Author|null $author
      * @return PostConfigurationMeta
      */
-    public function setAuthor(?string $author): PostConfigurationMeta
+    public function setAuthor(?Author $author): PostConfigurationMeta
     {
         $this->author = $author;
         return $this;

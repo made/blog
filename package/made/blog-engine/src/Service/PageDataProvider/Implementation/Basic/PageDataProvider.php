@@ -139,7 +139,6 @@ class PageDataProvider implements PageDataProviderInterface
     /**
      * @inheritDoc
      * @throws InvalidArgumentException
-     * @throws UnsupportedOperationException
      */
     public function provide(array $slugData): ?array
     {

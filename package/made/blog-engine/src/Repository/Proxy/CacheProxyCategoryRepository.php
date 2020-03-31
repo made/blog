@@ -235,7 +235,7 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
         if (null !== ($filter = $criteria->getFilter())) {
             $filterName = $filter->getName();
 
-            $callbackMap =$filter->getCallbackMap();
+            $callbackMap = $filter->getCallbackMap();
             $filterName = $filterName . '_' . implode('_', array_keys($callbackMap));
         }
 

@@ -204,7 +204,8 @@ class PostConfigurationLocaleMapper
         $array = [];
 
         foreach ($dataArray as $data) {
-            $array[] = $this->fromData($data);
+            $postConfiguration = $this->fromData($data);
+            $array[$postConfiguration->getLocale()] = $postConfiguration;
         }
 
         return $array;

@@ -65,6 +65,11 @@ class PathService
     const PATH_TAG_CONFIGURATION = 'configuration_tag.json';
 
     /**
+     * Path to the author configuration file (json).
+     */
+    const PATH_AUTHOR_CONFIGURATION = 'configuration_author.json';
+
+    /**
      * @var Configuration
      */
     private $configuration;
@@ -197,6 +202,19 @@ class PathService
         return Path::join(...[
             $path,
             static::PATH_TAG_CONFIGURATION,
+        ]);
+    }
+
+    /**
+     * @return string
+     */
+    public function getPathAuthorConfiguration(): string
+    {
+        $path = $this->getPathPost();
+
+        return Path::join(...[
+            $path,
+            static::PATH_AUTHOR_CONFIGURATION,
         ]);
     }
 }

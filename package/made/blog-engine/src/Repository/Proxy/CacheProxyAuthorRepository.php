@@ -19,25 +19,28 @@
 
 namespace Made\Blog\Engine\Repository\Proxy;
 
-use Made\Blog\Engine\Model\Tag;
+use Made\Blog\Engine\Model\Author;
+use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
-use Made\Blog\Engine\Repository\TagRepositoryInterface;
+use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
- * Class CacheProxyTagRepository
+ * Class CacheProxyAuthorRepository
  *
  * @package Made\Blog\Engine\Repository\Proxy
  */
-class CacheProxyTagRepository implements TagRepositoryInterface
+class CacheProxyAuthorRepository implements AuthorRepositoryInterface
 {
     use CacheProxyIdentityHelperTrait;
 
-    const CACHE_KEY_ALL /*-----------*/ = 't-all';
-    const CACHE_KEY_ONE_BY_ID /*-----*/ = 't-one-by-id';
-    const CACHE_KEY_ONE_BY_NAME /*---*/ = 't-one-by-name';
+    const CACHE_KEY_ALL /*-------------------*/ = 'a-all';
+    const CACHE_KEY_ALL_BY_LOCATION /*-------*/ = 'a-all-by-location';
+    const CACHE_KEY_ONE_BY_ID /*-------------*/ = 'a-one-by-id';
+    const CACHE_KEY_ONE_BY_NAME /*-----------*/ = 'a-one-by-name';
+    const CACHE_KEY_ONE_BY_NAME_DISPLAY /*---*/ = 'a-one-by-name-display';
 
     /**
      * @var CacheInterface
@@ -45,9 +48,9 @@ class CacheProxyTagRepository implements TagRepositoryInterface
     private $cache;
 
     /**
-     * @var TagRepositoryInterface
+     * @var AuthorRepositoryInterface
      */
-    private $tagRepository;
+    private $authorRepository;
 
     /**
      * @var LoggerInterface
@@ -55,25 +58,25 @@ class CacheProxyTagRepository implements TagRepositoryInterface
     private $logger;
 
     /**
-     * CacheProxyTagRepository constructor.
+     * CacheProxyAuthorRepository constructor.
      * @param CacheInterface $cache
-     * @param TagRepositoryInterface $tagRepository
+     * @param AuthorRepositoryInterface $authorRepository
      * @param LoggerInterface $logger
      */
-    public function __construct(CacheInterface $cache, TagRepositoryInterface $tagRepository, LoggerInterface $logger)
+    public function __construct(CacheInterface $cache, AuthorRepositoryInterface $authorRepository, LoggerInterface $logger)
     {
         $this->cache = $cache;
-        $this->tagRepository = $tagRepository;
+        $this->authorRepository = $authorRepository;
         $this->logger = $logger;
     }
 
     /**
      * @inheritDoc
      */
-    public function create(Tag $tag): bool
+    public function create(Author $author): bool
     {
-        return $this->tagRepository
-            ->create($tag);
+        return $this->authorRepository
+            ->create($author);
     }
 
     /**
@@ -81,13 +84,12 @@ class CacheProxyTagRepository implements TagRepositoryInterface
      */
     public function getAll(Criteria $criteria): array
     {
-        $key = static::CACHE_KEY_ALL;
-        $key = $this->getCacheKeyForCriteria($key, $criteria);
+        $key = $this->getCacheKeyForCriteria(static::CACHE_KEY_ALL, $criteria);
 
         $all = [];
 
         try {
-            /** @var array|Tag[] $all */
+            /** @var array|Author[] $all */
             $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
@@ -98,7 +100,7 @@ class CacheProxyTagRepository implements TagRepositoryInterface
         }
 
         if (empty($all)) {
-            $all = $this->tagRepository
+            $all = $this->authorRepository
                 ->getAll($criteria);
 
             if (!empty($all)) {
@@ -120,33 +122,36 @@ class CacheProxyTagRepository implements TagRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function getOneById(string $id): ?Tag
+    public function getAllByLocation(Criteria $criteria, string $location): array
     {
-        $key = static::CACHE_KEY_ONE_BY_ID . '-' . $id;
+        $key = static::CACHE_KEY_ALL_BY_LOCATION . '-' . $location;
+        $key = $this->getCacheKeyForCriteria($key, $criteria);
 
-        $one = null;
+        $all = [];
 
         try {
-            /** @var null|Tag $one */
-            $one = $this->cache->get($key, null);
+            /** @var array|Author[] $all */
+            $all = $this->cache->get($key, []);
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
-                'id' => $id,
+                'criteria' => $criteria,
+                'location' => $location,
                 'key' => $key,
                 'exception' => $exception,
             ]);
         }
 
-        if (empty($one)) {
-            $one = $this->tagRepository
-                ->getOneById($id);
+        if (empty($all)) {
+            $all = $this->authorRepository
+                ->getAll($criteria);
 
-            if (!empty($one)) {
+            if (!empty($all)) {
                 try {
-                    $this->cache->set($key, $one);
+                    $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
                     $this->logger->error('Unable to set requested value to the cache.', [
-                        'id' => $id,
+                        'criteria' => $criteria,
+                        'location' => $location,
                         'key' => $key,
                         'exception' => $exception,
                     ]);
@@ -154,20 +159,18 @@ class CacheProxyTagRepository implements TagRepositoryInterface
             }
         }
 
-        return $one;
+        return $all;
     }
 
     /**
      * @inheritDoc
      */
-    public function getOneByName(string $name): ?Tag
+    public function getOneByName(string $name): ?Author
     {
         $key = static::CACHE_KEY_ONE_BY_NAME . '-' . $name;
 
-        $one = null;
-
         try {
-            /** @var null|Tag $one */
+            /** @var null|Author $one */
             $one = $this->cache->get($key, null);
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
@@ -178,7 +181,7 @@ class CacheProxyTagRepository implements TagRepositoryInterface
         }
 
         if (empty($one)) {
-            $one = $this->tagRepository
+            $one = $this->authorRepository
                 ->getOneByName($name);
 
             if (!empty($one)) {
@@ -200,19 +203,57 @@ class CacheProxyTagRepository implements TagRepositoryInterface
     /**
      * @inheritDoc
      */
-    public function modify(Tag $tag): bool
+    public function getOneByNameDisplay(string $nameDisplay): ?Author
     {
-        return $this->tagRepository
-            ->modify($tag);
+        $key = static::CACHE_KEY_ONE_BY_NAME_DISPLAY . '-' . $nameDisplay;
+
+        try {
+            /** @var null|Author $one */
+            $one = $this->cache->get($key, null);
+        } catch (InvalidArgumentException $exception) {
+            $this->logger->error('Unable to get requested value from the cache.', [
+                'nameDisplay' => $nameDisplay,
+                'key' => $key,
+                'exception' => $exception,
+            ]);
+        }
+
+        if (empty($one)) {
+            $one = $this->authorRepository
+                ->getOneByNameDisplay($nameDisplay);
+
+            if (!empty($one)) {
+                try {
+                    $this->cache->set($key, $one);
+                } catch (InvalidArgumentException $exception) {
+                    $this->logger->error('Unable to set requested value to the cache.', [
+                        'nameDisplay' => $nameDisplay,
+                        'key' => $key,
+                        'exception' => $exception,
+                    ]);
+                }
+            }
+        }
+
+        return $one;
     }
 
     /**
      * @inheritDoc
      */
-    public function destroy(Tag $tag): bool
+    public function modify(Author $author): bool
     {
-        return $this->tagRepository
-            ->destroy($tag);
+        return $this->authorRepository
+            ->modify($author);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function destroy(Author $author): bool
+    {
+        return $this->authorRepository
+            ->destroy($author);
     }
 
     /**
