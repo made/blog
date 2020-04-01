@@ -28,6 +28,7 @@ use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
+use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
 use Made\Blog\Engine\Service\PageDataProviderInterface;
@@ -68,6 +69,7 @@ class PageDataProvider implements PageDataProviderInterface
     const VARIABLE_TAG = 'tag';
 
     const VARIABLE_POST = 'post';
+    const VARIABLE_POST_LIST = 'postList';
 
     // Template paths below:
 
@@ -237,6 +239,10 @@ class PageDataProvider implements PageDataProviderInterface
         $tagList = $this->tagRepository
             ->getAll($tagListCriteria);
 
+        $postListCriteria = new CriteriaLocale($locale);
+        $postList = $this->postRepository
+            ->getAll($postListCriteria);
+
         $template = $this->getTemplate(static::TEMPLATE_NAME_HOME);
 
         return $this->provideData([
@@ -244,6 +250,7 @@ class PageDataProvider implements PageDataProviderInterface
             static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_CATEGORY_LIST => $categoryList,
             static::VARIABLE_TAG_LIST => $tagList,
+            static::VARIABLE_POST_LIST => $postList,
         ]);
     }
 
@@ -294,6 +301,7 @@ class PageDataProvider implements PageDataProviderInterface
         $template = $this->getTemplate(static::TEMPLATE_NAME_CATEGORY_OVERVIEW);
 
         return $this->provideData([
+            static::VARIABLE_LOCALE => $locale,
             static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_CATEGORY_LIST => $categoryList,
         ]);
@@ -316,6 +324,7 @@ class PageDataProvider implements PageDataProviderInterface
         $template = $this->getTemplate(static::TEMPLATE_NAME_CATEGORY);
 
         return $this->provideData([
+            static::VARIABLE_LOCALE => $locale,
             static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_CATEGORY => $category,
         ]);
@@ -368,6 +377,7 @@ class PageDataProvider implements PageDataProviderInterface
         $template = $this->getTemplate(static::TEMPLATE_NAME_TAG_OVERVIEW);
 
         return $this->provideData([
+            static::VARIABLE_LOCALE => $locale,
             static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_TAG_LIST => $tagList,
         ]);
@@ -390,6 +400,7 @@ class PageDataProvider implements PageDataProviderInterface
         $template = $this->getTemplate(static::TEMPLATE_NAME_TAG);
 
         return $this->provideData([
+            static::VARIABLE_LOCALE => $locale,
             static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_TAG => $tag,
         ]);
@@ -427,7 +438,7 @@ class PageDataProvider implements PageDataProviderInterface
         $template = $this->getTemplatePost($post);
 
         return $this->provideData([
-            // TODO: Add categoryList, tagList and more data as needed.
+            static::VARIABLE_LOCALE => $locale,
             static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_POST => $post,
         ]);

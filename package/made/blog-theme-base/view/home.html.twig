@@ -1,1 +1,44 @@
 {% extends '@theme-base/_page-layout.html.twig' %}
+
+{% block feature %}
+    {% include '@theme-base/include/_post-jumbotron.html.twig' with {
+        'post': post,
+        'configuration': configuration
+    } %}
+{% endblock %}
+
+{% block feature_below %}
+    <div class="row mb-2">
+        {% include '@theme-base/include/_post-card.html.twig' with {
+            'post': post,
+            'configuration': configuration
+        } %}
+        {% include '@theme-base/include/_post-card.html.twig' with {
+            'post': post,
+            'configuration': configuration
+        } %}
+    </div>
+{% endblock %}
+
+{% block side_left_inner %}
+    <h3 class="pb-4 mb-4 font-italic border-bottom">
+        Feed
+    </h3>
+
+    {% for post in postList %}
+        {% set configuration = post.configuration.localeList.current %}
+
+        {% include '@theme-base/include/_post-content.html.twig' with {
+            'post': post,
+            'configuration': configuration,
+        } %}
+    {% endfor %}
+
+    {# TODO: pagination #}
+
+    <nav class="blog-pagination">
+        <a class="btn btn-outline-primary" href="#">Older</a>
+        <a class="btn btn-outline-secondary disabled" href="#" tabindex="-1"
+           aria-disabled="true">Newer</a>
+    </nav>
+{% endblock %}

@@ -39,6 +39,7 @@ class PostConfigurationLocaleMapper
     const KEY_DATE = 'date';
     const KEY_SLUG = 'slug';
     const KEY_TITLE = 'title';
+    const KEY_AUTHOR = 'author';
     const KEY_META = 'meta';
     const KEY_CATEGORY_LIST = 'category';
     const KEY_TAG_LIST = 'tag';
@@ -71,6 +72,11 @@ class PostConfigurationLocaleMapper
     const DTS_FORMAT_TIME = 'Y-m-d H:i';
 
     /**
+     * @var AuthorMapper
+     */
+    private $authorMapper;
+
+    /**
      * @var PostConfigurationMetaMapper
      */
     private $postConfigurationMetaMapper;
@@ -87,12 +93,14 @@ class PostConfigurationLocaleMapper
 
     /**
      * PostConfigurationLocaleMapper constructor.
+     * @param AuthorMapper $authorMapper
      * @param PostConfigurationMetaMapper $postConfigurationMetaMapper
      * @param CategoryMapper $categoryMapper
      * @param TagMapper $tagMapper
      */
-    public function __construct(PostConfigurationMetaMapper $postConfigurationMetaMapper, CategoryMapper $categoryMapper, TagMapper $tagMapper)
+    public function __construct(AuthorMapper $authorMapper, PostConfigurationMetaMapper $postConfigurationMetaMapper, CategoryMapper $categoryMapper, TagMapper $tagMapper)
     {
+        $this->authorMapper = $authorMapper;
         $this->postConfigurationMetaMapper = $postConfigurationMetaMapper;
         $this->categoryMapper = $categoryMapper;
         $this->tagMapper = $tagMapper;
@@ -156,6 +164,13 @@ class PostConfigurationLocaleMapper
             $postConfigurationLocale->setTitle($data[static::KEY_TITLE]);
         } else {
             throw new FailedOperationException('Missing key: ' . static::KEY_TITLE);
+        }
+
+        // Required:
+        if (isset($data[static::KEY_AUTHOR]) && is_array($data[static::KEY_AUTHOR])) {
+            $postConfigurationLocale->setAuthor(
+                $this->authorMapper->fromData($data[static::KEY_AUTHOR])
+            );
         }
 
         // Optional:

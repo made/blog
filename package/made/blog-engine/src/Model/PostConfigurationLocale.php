@@ -68,6 +68,11 @@ class PostConfigurationLocale
     private $title;
 
     /**
+     * @var Author|null
+     */
+    private $author;
+
+    /**
      * @var PostConfigurationMeta|null
      */
     private $meta;
@@ -197,6 +202,24 @@ class PostConfigurationLocale
     public function setSlug(string $slug): PostConfigurationLocale
     {
         $this->slug = $slug;
+        return $this;
+    }
+
+    /**
+     * @return Author|null
+     */
+    public function getAuthor(): ?Author
+    {
+        return $this->author;
+    }
+
+    /**
+     * @param Author|null $author
+     * @return PostConfigurationLocale
+     */
+    public function setAuthor(?Author $author): PostConfigurationLocale
+    {
+        $this->author = $author;
         return $this;
     }
 

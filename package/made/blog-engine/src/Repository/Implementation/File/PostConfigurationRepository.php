@@ -284,23 +284,20 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
                     Slug::sanitize($localeData[PostConfigurationLocaleMapper::KEY_SLUG]);
             }
 
-            if (isset($localeData[PostConfigurationLocaleMapper::KEY_META])) {
-                $localeData[PostConfigurationLocaleMapper::KEY_META] =
-                    $this->provisionMetaData($localeData[PostConfigurationLocaleMapper::KEY_META]);
+            if (isset($localeData[PostConfigurationLocaleMapper::KEY_AUTHOR])) {
+                $localeData = $this->provisionAuthorData($localeData);
             }
 
             // Provision the category list from an array of string or array to an array of array when not empty.
             if (isset($localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST])
                 && !empty($localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST])) {
-                $localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST] =
-                    $this->provisionCategoryData($localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST]);
+                $localeData = $this->provisionCategoryData($localeData);
             }
 
             // Provision the tag list from an array of string or array to an array of array when not empty.
             if (isset($localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST])
                 && !empty($localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST])) {
-                $localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST] =
-                    $this->provisionTagData($localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST]);
+                $localeData = $this->provisionTagData($localeData);
             }
 
             // Set the template to the one set in the super page if defined there but not inside the locale data.
@@ -334,69 +331,71 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
     /**
      * TODO: Use custom mapper instead.
      *
-     * @param array $meta
+     * @param array $localeData
      * @return array
      */
-    private function provisionMetaData(array $meta): array
+    private function provisionAuthorData(array $localeData): array
     {
-        if (isset($meta[PostConfigurationMetaMapper::KEY_AUTHOR])) {
-            $author = $meta[PostConfigurationMetaMapper::KEY_AUTHOR];
-            $authorObject = null;
+        /** @var string|array $author */
+        $author = $localeData[PostConfigurationLocaleMapper::KEY_AUTHOR];
+        $authorObject = null;
 
-            // Check if it is an array.
-            if (is_array($author)) {
-                try {
-                    // Assume the array contains author data.
-                    $authorObject = $this->authorMapper
-                        ->fromData($author);
-                } catch (FailedOperationException $exception) {
-                    $this->logger->error('Unable to map author data to a valid object. This is likely caused by some malformed format.', [
-                        'author' => $author,
-                        'exception' => $exception,
-                    ]);
-                }
-
-                // If it does not, the object stays with a null value.
-            }
-
-            // Check if it is a string.
-            if (is_string($author)) {
-                // Assume that string is the name of an author and get that author data from the repository.
-                $authorObject = $this->authorRepository
-                    ->getOneByName($author);
-
-                // If there was no author found above, just create a new author with the name.
-                if (null === $authorObject) {
-                    $authorObject = (new Author())
-                        ->setName($author);
-                }
-            }
-
-            if (null === $authorObject) {
-                $this->logger->notice('Failed to provision author data.', [
+        // Check if it is an array.
+        if (is_array($author)) {
+            try {
+                // Assume the array contains author data.
+                $authorObject = $this->authorMapper
+                    ->fromData($author);
+            } catch (FailedOperationException $exception) {
+                $this->logger->error('Unable to map author data to a valid object. This is likely caused by some malformed format.', [
                     'author' => $author,
+                    'exception' => $exception,
                 ]);
+            }
 
-                // Unset the index if the author data could not be provisioned.
-                unset($meta[PostConfigurationMetaMapper::KEY_AUTHOR]);
-            } else {
-                // Push it back into the list.
-                $meta[PostConfigurationMetaMapper::KEY_AUTHOR] = $this->authorMapper
-                    ->toData($authorObject);
+            // If it does not, the object stays with a null value.
+        }
+
+        // Check if it is a string.
+        if (is_string($author)) {
+            // Assume that string is the name of an author and get that author data from the repository.
+            $authorObject = $this->authorRepository
+                ->getOneByName($author);
+
+            // If there was no author found above, just create a new author with the name.
+            if (null === $authorObject) {
+                $authorObject = (new Author())
+                    ->setName($author);
             }
         }
 
-        return $meta;
+        if (null === $authorObject) {
+            $this->logger->notice('Failed to provision author data.', [
+                'author' => $author,
+            ]);
+
+            // Unset the index if the author data could not be provisioned.
+            unset($localeData[PostConfigurationMetaMapper::KEY_AUTHOR]);
+        } else {
+            // Push it back into the list.
+            $localeData[PostConfigurationMetaMapper::KEY_AUTHOR] = $this->authorMapper
+                ->toData($authorObject);
+        }
+
+        return $localeData;
     }
 
     /**
      * TODO: Use custom mapper instead.
      *
-     * @param array|string[]|array[] $categoryList
+     * @param array $localeData
      * @return array
      */
-    private function provisionCategoryData(array $categoryList): array
+    private function provisionCategoryData(array $localeData): array
     {
+        /** @var array|string[]|array[] $categoryList $categoryList */
+        $categoryList = $localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST];
+
         // Pull the category data from the list.
         foreach ($categoryList as $index => $category) {
             $categoryObject = null;
@@ -447,17 +446,23 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             }
         }
 
-        return $categoryList;
+        // Put it back into the locale data.
+        $localeData[PostConfigurationLocaleMapper::KEY_CATEGORY_LIST] = $categoryList;
+
+        return $localeData;
     }
 
     /**
      * TODO: Use custom mapper instead.
      *
-     * @param array $tagList
+     * @param array $localeData
      * @return array
      */
-    private function provisionTagData(array $tagList): array
+    private function provisionTagData(array $localeData): array
     {
+        /** @var array|string[]|array[] $tagList */
+        $tagList = $localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST];
+
         // Pull the tag data from the list.
         foreach ($tagList as $index => $tag) {
             $tagObject = null;
@@ -508,7 +513,10 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
             }
         }
 
-        return $tagList;
+        // Put it back into the locale data.
+        $localeData[PostConfigurationLocaleMapper::KEY_TAG_LIST] = $tagList;
+
+        return $localeData;
     }
 
     /**

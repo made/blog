@@ -31,7 +31,13 @@
   "autoload": {
     "psr-4": {
       "App\\": "src/"
-    }
+    },
+    "exclude-from-classmap": [
+      "vendor/gameplayjdk/php-file-cache/src/Psr16/Cache.php"
+    ],
+    "files": [
+      "hotfix/gameplayjdk/php-file-cache/src/Psr16/Cache.php"
+    ]
   },
   "scripts": {
     "setup": "php vendor/made/blog-theme-base/setup.php"

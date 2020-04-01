@@ -326,15 +326,15 @@ class Package extends PackageAbstract
         });
 
         $this->registerService(PostConfigurationMetaMapper::class, function (Container $container): PostConfigurationMetaMapper {
-            /** @var AuthorMapper $authorMapper */
-            $authorMapper = $container[AuthorMapper::class];
             /** @var PostConfigurationMetaCustomMapper $postConfigurationMetaCustomMapper */
             $postConfigurationMetaCustomMapper = $container[PostConfigurationMetaCustomMapper::class];
 
-            return new PostConfigurationMetaMapper($authorMapper, $postConfigurationMetaCustomMapper);
+            return new PostConfigurationMetaMapper($postConfigurationMetaCustomMapper);
         });
 
         $this->registerService(PostConfigurationLocaleMapper::class, function (Container $container): PostConfigurationLocaleMapper {
+            /** @var AuthorMapper $authorMapper */
+            $authorMapper = $container[AuthorMapper::class];
             /** @var PostConfigurationMetaMapper $postConfigurationMetaMapper */
             $postConfigurationMetaMapper = $container[PostConfigurationMetaMapper::class];
             /** @var CategoryMapper $categoryMapper */
@@ -342,7 +342,7 @@ class Package extends PackageAbstract
             /** @var TagMapper $tagMapper */
             $tagMapper = $container[TagMapper::class];
 
-            return new PostConfigurationLocaleMapper($postConfigurationMetaMapper, $categoryMapper, $tagMapper);
+            return new PostConfigurationLocaleMapper($authorMapper, $postConfigurationMetaMapper, $categoryMapper, $tagMapper);
         });
 
         $this->registerService(PostConfigurationMapper::class, function (Container $container): PostConfigurationMapper {
@@ -456,17 +456,6 @@ class Package extends PackageAbstract
             $logger = $container[LoggerInterface::class];
 
             return new CacheProxyAuthorRepository($cache, $authorRepository, $logger);
-        });
-
-        $this->registerTagAndService(AuthorRepositoryInterface::TAG_AUTHOR_REPOSITORY, AuthorRepositoryFile::class, function (Container $container): AuthorRepositoryInterface {
-            /** @var PathService $pathService */
-            $pathService = $container[PathService::class];
-            /** @var AuthorMapper $authorMapper */
-            $authorMapper = $container[AuthorMapper::class];
-            /** @var LoggerInterface $logger */
-            $logger = $container[LoggerInterface::class];
-
-            return new AuthorRepositoryFile($pathService, $authorMapper, $logger);
         });
 
         $this->registerTagAndService(PostConfigurationRepositoryInterface::TAG_POST_CONFIGURATION_REPOSITORY, PostConfigurationRepositoryFile::class, function (Container $container) use ($configuration): PostConfigurationRepositoryInterface {

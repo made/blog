@@ -39,23 +39,16 @@ class PostConfigurationMetaMapper
     const KEY_CUSTOM_META_LIST = 'custom_meta';
 
     /**
-     * @var AuthorMapper
-     */
-    private $authorMapper;
-
-    /**
      * @var PostConfigurationMetaCustomMapper
      */
     private $postConfigurationMetaCustomMapper;
 
     /**
      * PostConfigurationMetaMapper constructor.
-     * @param AuthorMapper $authorMapper
      * @param PostConfigurationMetaCustomMapper $postConfigurationMetaCustomMapper
      */
-    public function __construct(AuthorMapper $authorMapper, PostConfigurationMetaCustomMapper $postConfigurationMetaCustomMapper)
+    public function __construct(PostConfigurationMetaCustomMapper $postConfigurationMetaCustomMapper)
     {
-        $this->authorMapper = $authorMapper;
         $this->postConfigurationMetaCustomMapper = $postConfigurationMetaCustomMapper;
     }
 
@@ -69,10 +62,8 @@ class PostConfigurationMetaMapper
         $postConfigurationMeta = new PostConfigurationMeta();
 
         // Optional:
-        if (isset($data[static::KEY_AUTHOR]) && is_array($data[static::KEY_AUTHOR])) {
-            $postConfigurationMeta->setAuthor(
-                $this->authorMapper->fromData($data[static::KEY_AUTHOR])
-            );
+        if (isset($data[static::KEY_AUTHOR]) && is_string($data[static::KEY_AUTHOR])) {
+            $postConfigurationMeta->setAuthor($data[static::KEY_AUTHOR]);
         }
 
         // Optional:

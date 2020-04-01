@@ -1,0 +1,50 @@
+{#
+
+required:
+- post
+- configuration
+
+optional:
+- style
+  - col
+
+#}
+
+{% set style = style is defined ? style : {} %}
+{% set style = {
+    'col': 6,
+}|merge(style) %}
+
+{% if post is defined and configuration is defined %}
+    {% set category = configuration.categoryList|first %}
+
+    <div class="col-md-{{ style.col }}">
+        <div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+            <div class="col p-4 d-flex flex-column position-static">
+                {% if category is not null %}
+                    <strong class="d-inline-block mb-2 text-primary">
+                        {{ category.name }}
+                    </strong>
+                {% endif %}
+
+                <h3 class="mb-0">{{ configuration.title }}</h3>
+
+                <div class="mb-1 text-muted">
+                    {{ configuration.date|date('F d, Y') }}
+                </div>
+
+                <p class="card-text mb-auto">
+                    This is a wider card with supporting text below as a natural lead-in to additional content.
+                </p>
+
+                <a href="#" class="stretched-link">Continue reading</a>
+            </div>
+
+            <div class="col-auto d-none d-lg-block">
+                {# TODO: Fix. #}
+                <img src="" width="200" height="250" background="#55595c" color="#eceeef"
+                     text="Thumbnail">
+            </div>
+        </div>
+    </div>
+{% endif %}

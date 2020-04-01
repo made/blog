@@ -21,6 +21,7 @@ use Cache\Cache;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
 use Monolog\Logger;
+use Cache\Psr16\Cache as Psr16Cache;
 use Slim\Views\Twig;
 
 return [
@@ -41,7 +42,10 @@ return [
 
     Cache::class => [
         'path' => dirname(__DIR__) . '/var/cache',
-        'time' => strtotime('-0 Hour'),
+    ],
+
+    Psr16Cache::class => [
+        'cache_expiry_time' => strtotime('-1 Hour', 0),
     ],
 
     PostConfigurationRepositoryFile::class => [
