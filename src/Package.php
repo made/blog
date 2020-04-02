@@ -24,7 +24,7 @@ use App\Controller\BlogController;
 use App\Middleware\TrailingSlashMiddleware;
 use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
-use Made\Blog\Engine\Service\PageDataResolverInterface;
+use Made\Blog\Engine\Controller\BlogController as BlogControllerBase;
 use Made\Blog\Engine\Service\ThemeService;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -207,12 +207,12 @@ class Package extends PackageAbstract
         $this->registerService(BlogController::class, function (Container $container): BlogController {
             /** @var Twig $twig */
             $twig = $container[Twig::class];
-            /** @var PageDataResolverInterface $pageDataResolver */
-            $pageDataResolver = $container[PageDataResolverInterface::class];
+            /** @var BlogControllerBase $blogController */
+            $blogController = $container[BlogControllerBase::class];
             /** @var Logger $logger */
             $logger = $container[Logger::class];
 
-            return new BlogController($twig, $pageDataResolver, $logger);
+            return new BlogController($twig, $blogController, $logger);
         });
     }
 }

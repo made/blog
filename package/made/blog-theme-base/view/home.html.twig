@@ -42,10 +42,8 @@
     </nav>
 
     <nav class="blog-pagination">
-        <a class="btn btn-outline-primary" href="{{ url_for('blog.slug', {
-            'slug': [
-                locale, 'post',
-            ]|join('/')
+        <a class="btn btn-outline-primary" href="{{ url_for('blog.post.list', {
+            'locale': locale,
         }) }}">
             View all
         </a>

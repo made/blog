@@ -17,10 +17,9 @@ optional:
         <h2 class="blog-post-title">{{ configuration.title }}</h2>
         <p class="blog-post-meta">
             {{ configuration.date|date('F d, Y') }} by
-            <a href="{{ url_for('blog.slug', {
-                'slug': [
-                    locale, 'author', configuration.author.nameDisplay,
-                ]|join('/'),
+            <a href="{{ url_for('blog.author', {
+                'locale': locale,
+                'name': configuration.author.name,
             }) }}">{{ configuration.author.nameDisplay }}</a>
         </p>
 

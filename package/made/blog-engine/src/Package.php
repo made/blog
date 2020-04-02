@@ -19,6 +19,7 @@
 
 namespace Made\Blog\Engine;
 
+use Made\Blog\Engine\Controller\BlogController;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
@@ -56,10 +57,6 @@ use Made\Blog\Engine\Repository\Proxy\CacheProxyTagRepository;
 use Made\Blog\Engine\Repository\Proxy\CacheProxyThemeRepository;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
-use Made\Blog\Engine\Service\PageDataProvider\Implementation\Basic\PageDataProvider as PageDataProviderBasic;
-use Made\Blog\Engine\Service\PageDataProviderInterface;
-use Made\Blog\Engine\Service\PageDataResolver;
-use Made\Blog\Engine\Service\PageDataResolverInterface;
 use Made\Blog\Engine\Service\PathService;
 use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\PostContentProvider as PostContentProviderFile;
 use Made\Blog\Engine\Service\PostContentProvider\Implementation\File\Task\RenderParsedownTask;
@@ -69,8 +66,6 @@ use Made\Blog\Engine\Service\PostContentProviderInterface;
 use Made\Blog\Engine\Service\PostContentResolver;
 use Made\Blog\Engine\Service\PostContentResolverInterface;
 use Made\Blog\Engine\Service\PostService;
-use Made\Blog\Engine\Service\SlugParser\Implementation\Basic\SlugParser;
-use Made\Blog\Engine\Service\SlugParserInterface;
 use Made\Blog\Engine\Service\TaskChain\TaskAbstract;
 use Made\Blog\Engine\Service\ThemeService;
 use ParsedownExtra;
@@ -130,9 +125,7 @@ class Package extends PackageAbstract
 
         $this->registerThemeService();
 
-        $this->registerSlugParser();
-
-        $this->registerPageDataResolver();
+        $this->registerController();
     }
 
     /**
@@ -648,27 +641,18 @@ class Package extends PackageAbstract
         });
     }
 
-    private function registerSlugParser(): void
-    {
-        $this->registerService(SlugParser::class, function (Container $container): SlugParserInterface {
-            return new SlugParser();
-        });
-
-        $this->registerServiceAlias(SlugParserInterface::class, SlugParser::class);
-    }
-
     /**
      * @throws PackageException
      */
-    private function registerPageDataResolver(): void
+    private function registerController(): void
     {
-        $this->registerConfiguration(PageDataProviderBasic::class, [
+        $this->registerConfiguration(BlogController::class, [
         ]);
 
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
 
-        $this->registerTagAndService(PageDataProviderInterface::TAG_PAGE_DATA_PROVIDER, PageDataProviderBasic::class, function (Container $container) use ($configuration): PageDataProviderInterface {
-            $settings = $configuration[PageDataProviderBasic::class];
+        $this->registerService(BlogController::class, function (Container $container) use ($configuration): BlogController {
+            $settings = $configuration[BlogController::class];
 
             unset($configuration);
 
@@ -678,21 +662,12 @@ class Package extends PackageAbstract
             $categoryRepository = $container[CategoryRepositoryInterface::class];
             /** @var TagRepositoryInterface $tagRepository */
             $tagRepository = $container[TagRepositoryInterface::class];
+            /** @var AuthorRepositoryInterface $authorRepository */
+            $authorRepository = $container[AuthorRepositoryInterface::class];
             /** @var PostRepositoryInterface $postRepository */
             $postRepository = $container[PostRepositoryInterface::class];
 
-            return new PageDataProviderBasic($settings, $configuration, $categoryRepository, $tagRepository, $postRepository);
+            return new BlogController($settings, $configuration, $categoryRepository, $tagRepository, $authorRepository, $postRepository);
         });
-
-        $this->registerService(PageDataResolver::class, function (Container $container): PageDataResolverInterface {
-            /** @var array|PageDataProviderInterface[] $serviceList */
-            $serviceList = $this->resolveTag(PageDataProviderInterface::TAG_PAGE_DATA_PROVIDER, PageDataProviderInterface::class, null);
-            /** @var SlugParserInterface $slugParser */
-            $slugParser = $container[SlugParserInterface::class];
-
-            return new PageDataResolver($serviceList, $slugParser);
-        });
-
-        $this->registerServiceAlias(PageDataResolverInterface::class, PageDataResolver::class);
     }
 }
