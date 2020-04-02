@@ -19,6 +19,8 @@
 
 namespace Made\Blog\Engine\Service;
 
+use Psr\Http\Message\ServerRequestInterface;
+
 /**
  * Interface PageDataProviderInterface
  *
@@ -29,14 +31,14 @@ interface PageDataProviderInterface
     const TAG_PAGE_DATA_PROVIDER = 'provider.page_data';
 
     /**
-     * @param array $slugData
+     * @param ServerRequestInterface $serverRequest
      * @return bool
      */
-    public function accept(array $slugData): bool;
+    public function accept(ServerRequestInterface $serverRequest): bool;
 
     /**
-     * @param array $slugData
+     * @param ServerRequestInterface $serverRequest
      * @return array
      */
-    public function provide(array $slugData): ?array;
+    public function provide(ServerRequestInterface $serverRequest): ?array;
 }

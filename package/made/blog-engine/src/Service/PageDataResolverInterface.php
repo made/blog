@@ -19,6 +19,8 @@
 
 namespace Made\Blog\Engine\Service;
 
+use Psr\Http\Message\ServerRequestInterface;
+
 /**
  * Interface PageDataResolverInterface
  *
@@ -27,8 +29,8 @@ namespace Made\Blog\Engine\Service;
 interface PageDataResolverInterface
 {
     /**
-     * @param string $slug
+     * @param ServerRequestInterface $serverRequest
      * @return array|null
      */
-    public function resolve(string $slug): ?array;
+    public function resolve(ServerRequestInterface $serverRequest): ?array;
 }

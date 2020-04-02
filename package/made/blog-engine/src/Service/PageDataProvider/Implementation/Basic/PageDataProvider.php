@@ -32,6 +32,8 @@ use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
 use Made\Blog\Engine\Service\PageDataProviderInterface;
+use Made\Blog\Engine\Service\PageDataResolver;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class PageDataProvider
@@ -57,6 +59,11 @@ class PageDataProvider implements PageDataProviderInterface
      */
     const PATTERN_TAG = '/^\/tag\/([\w\-]+)\/?$/';
 
+    /**
+     * TODO: Add regex101.com link.
+     */
+    const PATTERN_POST = '/^\/post\/([\w\-]+)\/?$/';
+
     const VARIABLE_TEMPLATE = 'template';
     const VARIABLE_REDIRECT = 'redirect';
 
@@ -80,6 +87,8 @@ class PageDataProvider implements PageDataProviderInterface
 
     const TEMPLATE_NAME_TAG_OVERVIEW = 'tag-overview';
     const TEMPLATE_NAME_TAG = 'tag';
+
+    const TEMPLATE_NAME_POST_OVERVIEW = 'post-overview';
 
     const TEMPLATE_EXTENSION = '.html.twig';
 
@@ -128,8 +137,15 @@ class PageDataProvider implements PageDataProviderInterface
     /**
      * @inheritDoc
      */
-    public function accept(array $slugData): bool
+    public function accept(ServerRequestInterface $serverRequest): bool
     {
+        /** @var array|null $slugData */
+        $slugData = $serverRequest->getAttribute(PageDataResolver::ATTRIBUTE_NAME_SLUG_DATA);
+
+        if (null === $slugData) {
+            return false;
+        }
+
         [
             static::MATCH_FULL => $matchFull,
         ] = $slugData;
@@ -142,8 +158,15 @@ class PageDataProvider implements PageDataProviderInterface
      * @inheritDoc
      * @throws InvalidArgumentException
      */
-    public function provide(array $slugData): ?array
+    public function provide(ServerRequestInterface $serverRequest): ?array
     {
+        /** @var array|null $slugData */
+        $slugData = $serverRequest->getAttribute(PageDataResolver::ATTRIBUTE_NAME_SLUG_DATA);
+
+        if (null === $slugData) {
+            throw new InvalidArgumentException('No slug data found as request attribute.');
+        }
+
         [
             /** @var string|null $matchLocale */
             static::MATCH_LOCALE => $matchLocale,
@@ -201,6 +224,13 @@ class PageDataProvider implements PageDataProviderInterface
             // - /en/tag/10
             if (0 === strpos($matchSlug, '/tag')) {
                 return $this->provideTag($matchLocale, $matchSlug);
+            }
+
+            // If the slug starts with '/post', we are probably at one of these slugs:
+            // - /de/post
+            // - /en/post
+            if (0 === strpos($matchSlug, '/post')) {
+                return $this->provideDataPostOverview($matchLocale);
             }
 
             // Else we are probably at one of these slugs:
@@ -403,6 +433,25 @@ class PageDataProvider implements PageDataProviderInterface
             static::VARIABLE_LOCALE => $locale,
             static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_TAG => $tag,
+        ]);
+    }
+
+    /**
+     * @param string $locale
+     * @return array|null
+     */
+    private function provideDataPostOverview(string $locale): ?array
+    {
+        $postListCriteria = new CriteriaLocale($locale);
+        $postList = $this->postRepository
+            ->getAll($postListCriteria);
+
+        $template = $this->getTemplate(static::TEMPLATE_NAME_POST_OVERVIEW);
+
+        return $this->provideData([
+            static::VARIABLE_LOCALE => $locale,
+            static::VARIABLE_TEMPLATE => $template,
+            static::VARIABLE_POST_LIST => $postList,
         ]);
     }
 

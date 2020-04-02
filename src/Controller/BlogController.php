@@ -103,8 +103,9 @@ class BlogController implements ControllerInterface
         }
 
         try {
+            /** @var array|null $data */
             $data = $this->pageDataResolver
-                ->resolve($slug);
+                ->resolve($request);
 
             if (null === $data) {
                 return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
@@ -117,6 +118,7 @@ class BlogController implements ControllerInterface
                     ->withStatus(StatusCodeInterface::STATUS_MOVED_PERMANENTLY);
             }
 
+            /** @var string|null $template */
             $template = $data[static::VARIABLE_TEMPLATE] ?? null;
 
             if (null === $template) {

@@ -21,6 +21,7 @@ namespace Made\Blog\Engine\Service;
 
 use Help\Slug;
 use Made\Blog\Engine\Exception\FailedOperationException;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class PageDataResolver
@@ -29,6 +30,8 @@ use Made\Blog\Engine\Exception\FailedOperationException;
  */
 class PageDataResolver implements PageDataResolverInterface
 {
+    const ATTRIBUTE_NAME_SLUG_DATA = 'slugData';
+
     /**
      * @var array|PageDataProviderInterface[]
      */
@@ -54,32 +57,52 @@ class PageDataResolver implements PageDataResolverInterface
      * @inheritDoc
      * @throws FailedOperationException
      */
-    public function resolve(string $slug): ?array
+    public function resolve(ServerRequestInterface $serverRequest): ?array
     {
-        $slug = Slug::sanitize($slug);
+        /** @var array $slugData */
+        $slugData = $serverRequest->getAttribute(static::ATTRIBUTE_NAME_SLUG_DATA);
+        if ($slugData === null || !is_array($slugData)) {
+            // Prepare the request with the slug data, if not already set.
+            $slug = $this->getSlug($serverRequest);
 
-        $slugData = $this->slugParser
-            ->parse($slug);
+            $slugData = $this->slugParser
+                ->parse($slug);
 
-        if (null !== ($pageDataProvider = $this->getPageDataProvider($slugData))) {
-            return $pageDataProvider->provide($slugData);
+            // Replace the request with the modified one.
+            $serverRequest = $serverRequest->withAttribute(static::ATTRIBUTE_NAME_SLUG_DATA, $slugData);
+        }
+
+        if (null !== ($pageDataProvider = $this->getPageDataProvider($serverRequest))) {
+            return $pageDataProvider->provide($serverRequest);
         }
 
         throw new FailedOperationException('Unable to resolve page data from slug: ' . $slug);
     }
 
     /**
-     * @param array $slugData
+     * @param ServerRequestInterface $serverRequest
      * @return PageDataProviderInterface
      */
-    private function getPageDataProvider(array $slugData): PageDataProviderInterface
+    private function getPageDataProvider(ServerRequestInterface $serverRequest): ?PageDataProviderInterface
     {
-        return array_reduce($this->pageDataProviderList, function (?PageDataProviderInterface $carry, PageDataProviderInterface $pageDataProvider) use ($slugData): ?PageDataProviderInterface {
-            if (null === $carry && $pageDataProvider->accept($slugData)) {
+        return array_reduce($this->pageDataProviderList, function (?PageDataProviderInterface $carry, PageDataProviderInterface $pageDataProvider) use ($serverRequest): ?PageDataProviderInterface {
+            if (null === $carry && $pageDataProvider->accept($serverRequest)) {
                 return $pageDataProvider;
             }
 
             return $carry;
         }, null);
+    }
+
+    /**
+     * @param ServerRequestInterface $serverRequest
+     * @return string
+     */
+    private function getSlug(ServerRequestInterface $serverRequest): string
+    {
+        $uri = $serverRequest->getUri();
+        $slug = $uri->getPath();
+
+        return Slug::sanitize($slug);
     }
 }
