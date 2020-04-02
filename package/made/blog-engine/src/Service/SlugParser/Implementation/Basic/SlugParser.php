@@ -24,6 +24,7 @@ use Made\Blog\Engine\Service\SlugParserInterface;
 /**
  * Class SlugParser
  *
+ * @deprecated Use client controller logic instead.
  * @package Made\Blog\Engine\Service
  */
 class SlugParser implements SlugParserInterface

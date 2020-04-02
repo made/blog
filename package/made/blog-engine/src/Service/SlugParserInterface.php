@@ -22,6 +22,7 @@ namespace Made\Blog\Engine\Service;
 /**
  * Interface SlugParserInterface
  *
+ * @deprecated Use client controller logic instead.
  * @package Made\Blog\Engine\Service
  */
 interface SlugParserInterface
