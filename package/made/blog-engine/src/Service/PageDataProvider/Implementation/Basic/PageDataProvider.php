@@ -22,7 +22,6 @@ namespace Made\Blog\Engine\Service\PageDataProvider\Implementation\Basic;
 use Help\Path;
 use Help\Slug;
 use Made\Blog\Engine\Exception\InvalidArgumentException;
-use Made\Blog\Engine\Exception\UnsupportedOperationException;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Model\PostConfiguration;
@@ -37,6 +36,13 @@ use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * Class PageDataProvider
+ *
+ * TODO: Refactor this class into multiple ones, each providing data for only one page. When using a common base class
+ *  that approach will be more modular. It also makes matching slugs easier and the overall structure more readable. The
+ *  slug parser then will only be needed inside the page data provider for the post page itself. In fact, the page data
+ *  resolver/provider are kind of the same thing as routing for template data, but a bit more flexible.
+ *
+ * TODO: Use the provided request object more extensively.
  *
  * @package Made\Blog\Engine\Service\PageDataProvider\Implementation\Basic
  */
@@ -58,11 +64,6 @@ class PageDataProvider implements PageDataProviderInterface
      * TODO: Add regex101.com link.
      */
     const PATTERN_TAG = '/^\/tag\/([\w\-]+)\/?$/';
-
-    /**
-     * TODO: Add regex101.com link.
-     */
-    const PATTERN_POST = '/^\/post\/([\w\-]+)\/?$/';
 
     const VARIABLE_TEMPLATE = 'template';
     const VARIABLE_REDIRECT = 'redirect';
@@ -440,7 +441,7 @@ class PageDataProvider implements PageDataProviderInterface
      * @param string $locale
      * @return array|null
      */
-    private function provideDataPostOverview(string $locale): ?array
+    protected function provideDataPostOverview(string $locale): ?array
     {
         $postListCriteria = new CriteriaLocale($locale);
         $postList = $this->postRepository
@@ -540,7 +541,7 @@ class PageDataProvider implements PageDataProviderInterface
      * @param Post $post
      * @return string
      */
-    private function getSlugPost(Post $post): string
+    protected function getSlugPost(Post $post): string
     {
         $configuration = $post->getConfiguration()
             ->getLocale(PostConfiguration::LOCALE_KEY_CURRENT);
