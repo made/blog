@@ -12,7 +12,7 @@
     "pimple/pimple": "^3.2",
     "slim/twig-view": "^3.0",
     "monolog/monolog": "^2.0",
-    "gameplayjdk/php-file-cache": "^1.2.2",
+    "gameplayjdk/php-file-cache": "^1.2.3",
     "gameplayjdk/pimple-package-utility": "^1.1",
     "gameplayjdk/php-static-help": "^1.0",
     "made/blog-engine": "dev-content-repository",
@@ -31,13 +31,7 @@
   "autoload": {
     "psr-4": {
       "App\\": "src/"
-    },
-    "exclude-from-classmap": [
-      "vendor/gameplayjdk/php-file-cache/src/Psr16/Cache.php"
-    ],
-    "files": [
-      "hotfix/gameplayjdk/php-file-cache/src/Psr16/Cache.php"
-    ]
+    }
   },
   "scripts": {
     "setup": "php vendor/made/blog-theme-base/setup.php"

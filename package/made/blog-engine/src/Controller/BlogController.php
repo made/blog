@@ -36,9 +36,9 @@ use Made\Blog\Engine\Repository\TagRepositoryInterface;
  *
  * A framework independent controller. Based on the following blog article series:
  *
- * - https://matthiasnoback.nl/2014/06/how-to-create-framework-independent-controllers/
- * - https://matthiasnoback.nl/2014/06/don-t-use-annotations-in-your-controllers/
- * - https://matthiasnoback.nl/2014/06/framework-independent-controllers-part-3/
+ * - {@link https://matthiasnoback.nl/2014/06/how-to-create-framework-independent-controllers/}
+ * - {@link https://matthiasnoback.nl/2014/06/don-t-use-annotations-in-your-controllers/}
+ * - {@link https://matthiasnoback.nl/2014/06/framework-independent-controllers-part-3/}
  *
  * @package Made\Blog\Engine\Controller
  */

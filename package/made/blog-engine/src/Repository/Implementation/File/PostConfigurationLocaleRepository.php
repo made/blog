@@ -194,6 +194,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
         $allLocale = $this->getAll(new CriteriaLocale($locale));
 
         return array_reduce($allLocale, function (?PostConfigurationLocale $carry, PostConfigurationLocale $oneLocale) use ($slugRedirect): ?PostConfigurationLocale {
+            // TODO: Unpacking on null!
             if (null === $carry && $this->matchSlug($slugRedirect, ...$oneLocale->getSlugRedirectList())) {
                 return $oneLocale;
             }
