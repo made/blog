@@ -84,10 +84,13 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
         $key = $this->getCacheKeyForCriteria(static::CACHE_KEY_ALL, $criteria);
 
         $all = [];
+        $fromCache = false;
 
         try {
             /** @var array|Category[] $all */
             $all = $this->cache->get($key, []);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'criteria' => $criteria,
@@ -100,7 +103,7 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
             $all = $this->categoryRepository
                 ->getAll($criteria);
 
-            if (!empty($all)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
@@ -124,10 +127,13 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
         $key = static::CACHE_KEY_ONE_BY_ID . '-' . $id;
 
         $one = null;
+        $fromCache = false;
 
         try {
             /** @var null|Category $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'id' => $id,
@@ -140,7 +146,7 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
             $one = $this->categoryRepository
                 ->getOneById($id);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
@@ -164,10 +170,13 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
         $key = static::CACHE_KEY_ONE_BY_NAME . '-' . $name;
 
         $one = null;
+        $fromCache = false;
 
         try {
             /** @var null|Category $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'name' => $name,
@@ -180,7 +189,7 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
             $one = $this->categoryRepository
                 ->getOneByName($name);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {

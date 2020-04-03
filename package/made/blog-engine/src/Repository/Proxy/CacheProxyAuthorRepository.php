@@ -87,10 +87,13 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
         $key = $this->getCacheKeyForCriteria(static::CACHE_KEY_ALL, $criteria);
 
         $all = [];
+        $fromCache = false;
 
         try {
             /** @var array|Author[] $all */
             $all = $this->cache->get($key, []);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'criteria' => $criteria,
@@ -103,7 +106,7 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
             $all = $this->authorRepository
                 ->getAll($criteria);
 
-            if (!empty($all)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
@@ -128,10 +131,13 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
         $key = $this->getCacheKeyForCriteria($key, $criteria);
 
         $all = [];
+        $fromCache = false;
 
         try {
             /** @var array|Author[] $all */
             $all = $this->cache->get($key, []);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'criteria' => $criteria,
@@ -145,7 +151,7 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
             $all = $this->authorRepository
                 ->getAll($criteria);
 
-            if (!empty($all)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
@@ -169,9 +175,14 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
     {
         $key = static::CACHE_KEY_ONE_BY_NAME . '-' . $name;
 
+        $one = null;
+        $fromCache = false;
+
         try {
             /** @var null|Author $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'name' => $name,
@@ -184,7 +195,7 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
             $one = $this->authorRepository
                 ->getOneByName($name);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
@@ -207,9 +218,14 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
     {
         $key = static::CACHE_KEY_ONE_BY_NAME_DISPLAY . '-' . $nameDisplay;
 
+        $one = null;
+        $fromCache = false;
+
         try {
             /** @var null|Author $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'nameDisplay' => $nameDisplay,
@@ -222,7 +238,7 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
             $one = $this->authorRepository
                 ->getOneByNameDisplay($nameDisplay);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {

@@ -84,10 +84,13 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
         $key = $this->getCacheKeyForCriteria($key, $criteria);
 
         $all = [];
+        $fromCache = false;
 
         try {
             /** @var array|PostConfiguration[] $all */
             $all = $this->cache->get($key, []);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'criteria' => $criteria,
@@ -100,7 +103,7 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
             $all = $this->postConfigurationRepository
                 ->getAll($criteria);
 
-            if (!empty($all)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
@@ -124,10 +127,13 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
         $key = static::CACHE_KEY_ONE_BY_ID . '-' . $id;
 
         $one = null;
+        $fromCache = false;
 
         try {
             /** @var null|PostConfiguration $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'id' => $id,
@@ -140,7 +146,7 @@ class CacheProxyPostConfigurationRepository implements PostConfigurationReposito
             $one = $this->postConfigurationRepository
                 ->getOneById($id);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {

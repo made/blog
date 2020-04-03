@@ -93,10 +93,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $key = $this->getCacheKeyForCriteria($key, $criteria);
 
         $all = [];
+        $fromCache = false;
 
         try {
             /** @var array|PostConfigurationLocale[] $all */
             $all = $this->cache->get($key, []);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'criteria' => $criteria,
@@ -109,7 +112,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             $all = $this->postConfigurationLocaleRepository
                 ->getAll($criteria);
 
-            if (!empty($all)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
@@ -135,10 +138,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $key = $this->getCacheKeyForCriteria($key, $criteria);
 
         $all = [];
+        $fromCache = false;
 
         try {
             /** @var array|PostConfigurationLocale[] $all */
             $all = $this->cache->get($key, []);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'criteria' => $criteria,
@@ -152,7 +158,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             $all = $this->postConfigurationLocaleRepository
                 ->getAllByPostDate($criteria, $dateTime);
 
-            if (!empty($all)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
@@ -193,9 +199,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
 
             /** @var array|PostConfigurationLocale[] $all */
             $all = [];
+            $fromCache = false;
 
             try {
                 $all = $this->cache->get($key, []);
+
+                $fromCache = true;
             } catch (InvalidArgumentException $exception) {
                 $this->logger->error('Unable to get requested value from the cache.', [
                     'criteria' => $criteria,
@@ -210,7 +219,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                 $all = $this->postConfigurationLocaleRepository
                     ->getAllByStatus($criteria, $status);
 
-                if (!empty($all)) {
+                if (!$fromCache && !empty($all)) {
                     try {
                         $this->cache->set($key, $all);
                     } catch (InvalidArgumentException $exception) {
@@ -255,9 +264,12 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
 
             /** @var array|PostConfigurationLocale[] $all */
             $all = [];
+            $fromCache = false;
 
             try {
                 $all = $this->cache->get($key, []);
+
+                $fromCache = true;
             } catch (InvalidArgumentException $exception) {
                 $this->logger->error('Unable to get requested value from the cache.', [
                     'criteria' => $criteria,
@@ -272,7 +284,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                 $all = $this->postConfigurationLocaleRepository
                     ->getAllByCategory($criteria, $category);
 
-                if (!empty($all)) {
+                if (!$fromCache && !empty($all)) {
                     try {
                         $this->cache->set($key, $all);
                     } catch (InvalidArgumentException $exception) {
@@ -317,10 +329,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
 
             /** @var array|PostConfigurationLocale[] $all */
             $all = [];
+            $fromCache = false;
 
             try {
                 /** @var array|PostConfigurationLocale[] $all */
                 $all = $this->cache->get($key, []);
+
+                $fromCache = true;
             } catch (InvalidArgumentException $exception) {
                 $this->logger->error('Unable to get requested value from the cache.', [
                     'criteria' => $criteria,
@@ -335,7 +350,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
                 $all = $this->postConfigurationLocaleRepository
                     ->getAllByTag($criteria, $tag);
 
-                if (!empty($all)) {
+                if (!$fromCache && !empty($all)) {
                     try {
                         $this->cache->set($key, $all);
                     } catch (InvalidArgumentException $exception) {
@@ -365,10 +380,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $key = $this->getCacheKeyForLocale($key, $locale);
 
         $one = null;
+        $fromCache = false;
 
         try {
             /** @var null|PostConfigurationLocale $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'locale' => $locale,
@@ -382,7 +400,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             $one = $this->postConfigurationLocaleRepository
                 ->getOneById($locale, $id);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
@@ -410,10 +428,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $key = $this->getCacheKeyForLocale($key, $locale);
 
         $one = null;
+        $fromCache = false;
 
         try {
             /** @var null|PostConfigurationLocale $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'locale' => $locale,
@@ -427,7 +448,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             $one = $this->postConfigurationLocaleRepository
                 ->getOneBySlug($locale, $slug);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
@@ -455,10 +476,13 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
         $key = $this->getCacheKeyForLocale($key, $locale);
 
         $one = null;
+        $fromCache = false;
 
         try {
             /** @var null|PostConfigurationLocale $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'locale' => $locale,
@@ -472,7 +496,7 @@ class CacheProxyPostConfigurationLocaleRepository implements PostConfigurationLo
             $one = $this->postConfigurationLocaleRepository
                 ->getOneBySlugRedirect($locale, $slugRedirect);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {

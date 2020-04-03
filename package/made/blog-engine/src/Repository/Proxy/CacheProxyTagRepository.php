@@ -85,10 +85,13 @@ class CacheProxyTagRepository implements TagRepositoryInterface
         $key = $this->getCacheKeyForCriteria($key, $criteria);
 
         $all = [];
+        $fromCache = false;
 
         try {
             /** @var array|Tag[] $all */
             $all = $this->cache->get($key, []);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'criteria' => $criteria,
@@ -101,7 +104,7 @@ class CacheProxyTagRepository implements TagRepositoryInterface
             $all = $this->tagRepository
                 ->getAll($criteria);
 
-            if (!empty($all)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $all);
                 } catch (InvalidArgumentException $exception) {
@@ -125,10 +128,13 @@ class CacheProxyTagRepository implements TagRepositoryInterface
         $key = static::CACHE_KEY_ONE_BY_ID . '-' . $id;
 
         $one = null;
+        $fromCache = false;
 
         try {
             /** @var null|Tag $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'id' => $id,
@@ -141,7 +147,7 @@ class CacheProxyTagRepository implements TagRepositoryInterface
             $one = $this->tagRepository
                 ->getOneById($id);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
@@ -165,10 +171,13 @@ class CacheProxyTagRepository implements TagRepositoryInterface
         $key = static::CACHE_KEY_ONE_BY_NAME . '-' . $name;
 
         $one = null;
+        $fromCache = false;
 
         try {
             /** @var null|Tag $one */
             $one = $this->cache->get($key, null);
+
+            $fromCache = true;
         } catch (InvalidArgumentException $exception) {
             $this->logger->error('Unable to get requested value from the cache.', [
                 'name' => $name,
@@ -181,7 +190,7 @@ class CacheProxyTagRepository implements TagRepositoryInterface
             $one = $this->tagRepository
                 ->getOneByName($name);
 
-            if (!empty($one)) {
+            if (!$fromCache && !empty($all)) {
                 try {
                     $this->cache->set($key, $one);
                 } catch (InvalidArgumentException $exception) {
