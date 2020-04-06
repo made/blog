@@ -1,7 +1,7 @@
-{% extends '@theme-base/_page-layout.html.twig' %}
+{% extends '@theme-basic/_page-layout.html.twig' %}
 
 {% block feature %}
-    {% include '@theme-base/include/_post-jumbotron.html.twig' with {
+    {% include '@theme-basic/include/_post-jumbotron.html.twig' with {
         'post': post,
         'configuration': configuration
     } %}
@@ -9,11 +9,11 @@
 
 {% block feature_below %}
     <div class="row mb-2">
-        {% include '@theme-base/include/_post-card.html.twig' with {
+        {% include '@theme-basic/include/_post-card.html.twig' with {
             'post': post,
             'configuration': configuration
         } %}
-        {% include '@theme-base/include/_post-card.html.twig' with {
+        {% include '@theme-basic/include/_post-card.html.twig' with {
             'post': post,
             'configuration': configuration
         } %}
@@ -28,7 +28,7 @@
     {% for post in postList %}
         {% set configuration = post.configuration.localeList.current %}
 
-        {% include '@theme-base/include/_post-content.html.twig' with {
+        {% include '@theme-basic/include/_post-content.html.twig' with {
             'post': post,
             'configuration': configuration,
         } %}

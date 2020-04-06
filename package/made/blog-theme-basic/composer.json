@@ -1,6 +1,6 @@
 {
-  "name": "made/blog-theme-base",
-  "description": "The base theme for made/blog.",
+  "name": "made/blog-theme-basic",
+  "description": "The base theme for made/blog. It is called 'basic'.",
   "type": "library",
   "minimum-stability": "stable",
   "license": "GPL-3.0-or-later",
@@ -16,5 +16,10 @@
       "name": "Dennis Barlowe",
       "email": "dennis@dennzo.com"
     }
-  ]
+  ],
+  "autoload": {
+    "psr-4": {
+      "Made\\Blog\\Theme\\Basic\\": "src/"
+    }
+  }
 }

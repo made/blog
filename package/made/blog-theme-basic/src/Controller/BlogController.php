@@ -17,7 +17,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Made\Blog\Engine\Controller;
+namespace Made\Blog\Theme\Basic\Controller;
 
 use Help\Path;
 use Help\Slug;
@@ -40,7 +40,7 @@ use Made\Blog\Engine\Repository\TagRepositoryInterface;
  * - {@link https://matthiasnoback.nl/2014/06/don-t-use-annotations-in-your-controllers/}
  * - {@link https://matthiasnoback.nl/2014/06/framework-independent-controllers-part-3/}
  *
- * @package Made\Blog\Engine\Controller
+ * @package Made\Blog\Theme\Basic\Controller
  */
 class BlogController
 {
@@ -73,32 +73,32 @@ class BlogController
     /**
      * @var array
      */
-    private $pageData;
+    protected $pageData;
 
     /**
      * @var Configuration
      */
-    private $configuration;
+    protected $configuration;
 
     /**
      * @var CategoryRepositoryInterface
      */
-    private $categoryRepository;
+    protected $categoryRepository;
 
     /**
      * @var TagRepositoryInterface
      */
-    private $tagRepository;
+    protected $tagRepository;
 
     /**
      * @var AuthorRepositoryInterface
      */
-    private $authorRepository;
+    protected $authorRepository;
 
     /**
      * @var PostRepositoryInterface
      */
-    private $postRepository;
+    protected $postRepository;
 
     /**
      * BlogController constructor.
@@ -422,7 +422,7 @@ class BlogController
      * @param array $data
      * @return array|null
      */
-    private function createData(string $locale, string $template, array $data): ?array
+    protected function createData(string $locale, string $template, array $data): ?array
     {
         $data = array_replace_recursive($data, [
             static::VARIABLE_LOCALE => $locale,

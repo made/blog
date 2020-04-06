@@ -1,11 +1,11 @@
-{% extends '@theme-base/_page-layout.html.twig' %}
+{% extends '@theme-basic/_page-layout.html.twig' %}
 
 {% set configuration = post.configuration.localeList.current %}
 
 {% block title %}{{ configuration.title }}{% endblock %}
 
 {% block side_left_inner %}
-    {% include '@theme-base/include/_post-content.html.twig' with {
+    {% include '@theme-basic/include/_post-content.html.twig' with {
         'post': post,
         'configuration': configuration,
     } %}

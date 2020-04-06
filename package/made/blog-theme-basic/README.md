@@ -1,6 +1,6 @@
-# made/blog-theme-base
+# made/blog-theme-basic
 
-The base theme for `made/blog`.
+The base theme for `made/blog`. It is called 'basic'.
 
 This one comes pre-installed with every new `made/blog` based installation.
 
@@ -18,25 +18,25 @@ The installation steps require [composer](https://getcomposer.org/) and [npm](ht
 ### The package
 
 If you want to use the theme as is, you can install the theme as if it were a composer package. Then link it to to the 
-theme directory using a symbolic link.
+theme directory using a symbolic link. This is the recommended way of installing themes.
 
 #### On Linux/Mac
 
 ```bash
-composer require made/blog-theme-base
-ln -s ./vendor/made/blog-theme-base ./theme/blog-theme-base
+composer require made/blog-theme-basic
+ln -s ./vendor/made/blog-theme-basic ./theme/blog-theme-basic
 ```
 
 Tip:    Use `composer setup` to avoid typing the link command.
 
 #### On Windows
 
-> By default windows does not support `ln` for link creation. You'l have to use `mklink` for that. Notice that the order
-> of arguments is flipped compared to `ln`.
+> By default windows does not support `ln` for link creation. You'll have to use `mklink` for that. Notice that the
+> order of arguments is flipped compared to `ln`.
 
 ```bash
-composer require made/blog-theme-base
-mklink /D .\theme\blog-theme-base .\vendor\made\blog-theme-base
+composer require made/blog-theme-basic
+mklink /D .\theme\blog-theme-basic .\vendor\made\blog-theme-basic
 ```
 
 Tip:    Use `composer setup` to avoid typing the link command. But note that windows requires you to run that command with
@@ -50,6 +50,21 @@ are inside a sub-folder, otherwise the theme will not be recognized.
 You can also put the downloaded theme anywhere and only register it through a custom `theme.json` file, which has to be
 placed inside a sub-folder of the `theme` directory. Please refer to the official documentation for details on how this
 works.
+
+Be aware, that by not installing the theme though composer, you loose the advantage of its autoloading feature, which 
+will cause more manual effort than the other methods. The most sophisticated solution would be to add the following to 
+the autoload section of `composer.json`:
+
+```json
+{
+  // ...
+  "autoload": {
+    "psr-4": {
+      "Made\\Blog\\Theme\\Basic\\": "theme/theme-basic/src/"
+    }
+  }
+}
+```
 
 ### The assets
 
@@ -78,7 +93,7 @@ its operations. That include:
 | Image         | File minification             |
 |               | Responsive format generation  |
 
-To get a list of all available tasks, run `gulp tasks` inside of the `blog-theme-base` folder, which is located inside
+To get a list of all available tasks, run `gulp tasks` inside of the `blog-theme-basic` folder, which is located inside
 the `theme` directory (as symlink or folder).
 
 If you plan on modifying the source, it is recommended to fork the repository and add it as a
@@ -94,12 +109,13 @@ have give `gulp image:responsive-compile` a call before that.
 To use this theme, there are two steps necessary.
 
 1.  In your post configuration, set the `template` directive (inside of the post configuration locale node) to
-    `@theme-base/` followed by the name of any of the top level template files.
-
-2.  Make sure your controller class extends the controller class provided by this package. As this step is highly 
-    dependent on your individual setup, you will have to figure this out on your own, most of the time.
+    `@theme-basic/` followed by the name of any of the top level template files.
     
-    Alternatively you can simply call through on the provided controller from your own customized one.
+    The template namespace can be omitted, when using the framework independent controller provided as part of this
+    theme, as it will automatically try to complete the template path expression based on the loaded configuration.
+
+2.  Make sure your controller class calls the framework independent controller class provided by this package. As this
+    step is highly dependent on your individual setup, you will have to figure this out on your own, most of the time.
 
 ## License
 

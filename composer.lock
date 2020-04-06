@@ -348,8 +348,7 @@
             "dist": {
                 "type": "path",
                 "url": "package/made/blog-engine",
-                "reference": "9059823423b384e8ffa521afc549b1abc3ae1dc8",
-                "shasum": null
+                "reference": "9059823423b384e8ffa521afc549b1abc3ae1dc8"
             },
             "require": {
                 "erusev/parsedown-extra": "^0.8.1",
@@ -390,8 +389,7 @@
             "dist": {
                 "type": "path",
                 "url": "package/made/blog-theme-base",
-                "reference": "948ace658400ebd4cbcb1fcf40d9c40272c080bd",
-                "shasum": null
+                "reference": "baf4aab63a3d3b5740a722f5a6a48d6bdd82c072"
             },
             "require": {
                 "php": ">=7.1"

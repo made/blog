@@ -16,7 +16,7 @@
     "gameplayjdk/pimple-package-utility": "^1.1",
     "gameplayjdk/php-static-help": "^1.0",
     "made/blog-engine": "dev-content-repository",
-    "made/blog-theme-base": "dev-content-repository"
+    "made/blog-theme-basic": "dev-content-repository"
   },
   "authors": [
     {
@@ -34,7 +34,7 @@
     }
   },
   "scripts": {
-    "setup": "php vendor/made/blog-theme-base/setup.php"
+    "setup": "php vendor/made/blog-theme-basic/setup.php"
   },
   "repositories": [
     {
@@ -43,7 +43,7 @@
     },
     {
       "type": "path",
-      "url": "package/made/blog-theme-base"
+      "url": "package/made/blog-theme-basic"
     }
   ]
 }

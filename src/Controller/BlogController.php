@@ -21,7 +21,7 @@ namespace App\Controller;
 
 use App\ControllerInterface;
 use Fig\Http\Message\StatusCodeInterface;
-use Made\Blog\Engine\Controller\BlogController as BlogControllerBase;
+use Made\Blog\Theme\Basic\Controller\BlogController as BlogControllerBasic;
 use Made\Blog\Engine\Exception\FailedOperationException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -98,7 +98,7 @@ class BlogController implements ControllerInterface
     private $twig;
 
     /**
-     * @var BlogControllerBase
+     * @var BlogControllerBasic
      */
     private $controller;
 
@@ -110,10 +110,10 @@ class BlogController implements ControllerInterface
     /**
      * BlogController constructor.
      * @param Twig $twig
-     * @param BlogControllerBase $controller
+     * @param BlogControllerBasic $controller
      * @param LoggerInterface $logger
      */
-    public function __construct(Twig $twig, BlogControllerBase $controller, LoggerInterface $logger)
+    public function __construct(Twig $twig, BlogControllerBasic $controller, LoggerInterface $logger)
     {
         $this->twig = $twig;
         $this->controller = $controller;
@@ -434,7 +434,7 @@ class BlogController implements ControllerInterface
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
-        if (null !== ($redirect = $data[BlogControllerBase::VARIABLE_REDIRECT] ?? null)) {
+        if (null !== ($redirect = $data[BlogControllerBasic::VARIABLE_REDIRECT] ?? null)) {
             // And redirect there permanently.
             return $response
                 ->withHeader('Location', $redirect)
@@ -442,13 +442,13 @@ class BlogController implements ControllerInterface
         }
 
         /** @var string|null $template */
-        $template = $data[BlogControllerBase::VARIABLE_TEMPLATE] ?? null;
+        $template = $data[BlogControllerBasic::VARIABLE_TEMPLATE] ?? null;
 
         if (null === $template) {
             return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
         }
 
-        $data = $data[BlogControllerBase::VARIABLE_DATA] ?? [];
+        $data = $data[BlogControllerBasic::VARIABLE_DATA] ?? [];
 
         try {
             // Use the twig-view helper for that.

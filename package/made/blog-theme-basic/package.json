@@ -1,5 +1,5 @@
 {
-  "name": "@made-blog/blog-theme-base",
+  "name": "@made-blog/blog-theme-basic",
   "version": "1.0.0",
   "description": "Simple blog software for developers.",
   "main": "gulpfile.js",
@@ -13,7 +13,7 @@
     "jquery": "^3.4.1",
     "lazysizes": "^5.2.0",
     "popper.js": "^1.16.1",
-    "small-module-js": "^1.0.1"
+    "small-module-js": "^1.0.2"
   },
   "devDependencies": {
     "autoprefixer": "^9.7.5",

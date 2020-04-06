@@ -19,7 +19,6 @@
 
 namespace Made\Blog\Engine;
 
-use Made\Blog\Engine\Controller\BlogController;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
@@ -124,8 +123,6 @@ class Package extends PackageAbstract
         $this->registerDataLayerPost();
 
         $this->registerThemeService();
-
-        $this->registerController();
     }
 
     /**
@@ -638,36 +635,6 @@ class Package extends PackageAbstract
             $themeRepository = $container[ThemeRepositoryInterface::class];
 
             return new ThemeService($configuration, $pathService, $themeRepository);
-        });
-    }
-
-    /**
-     * @throws PackageException
-     */
-    private function registerController(): void
-    {
-        $this->registerConfiguration(BlogController::class, [
-        ]);
-
-        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
-
-        $this->registerService(BlogController::class, function (Container $container) use ($configuration): BlogController {
-            $settings = $configuration[BlogController::class];
-
-            unset($configuration);
-
-            /** @var Configuration $configuration */
-            $configuration = $container[Configuration::class];
-            /** @var CategoryRepositoryInterface $categoryRepository */
-            $categoryRepository = $container[CategoryRepositoryInterface::class];
-            /** @var TagRepositoryInterface $tagRepository */
-            $tagRepository = $container[TagRepositoryInterface::class];
-            /** @var AuthorRepositoryInterface $authorRepository */
-            $authorRepository = $container[AuthorRepositoryInterface::class];
-            /** @var PostRepositoryInterface $postRepository */
-            $postRepository = $container[PostRepositoryInterface::class];
-
-            return new BlogController($settings, $configuration, $categoryRepository, $tagRepository, $authorRepository, $postRepository);
         });
     }
 }

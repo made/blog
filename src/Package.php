@@ -24,7 +24,12 @@ use App\Controller\BlogController;
 use App\Middleware\TrailingSlashMiddleware;
 use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
-use Made\Blog\Engine\Controller\BlogController as BlogControllerBase;
+use Made\Blog\Theme\Basic\Controller\BlogController as BlogControllerBasic;
+use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
+use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
+use Made\Blog\Engine\Repository\PostRepositoryInterface;
+use Made\Blog\Engine\Repository\TagRepositoryInterface;
 use Made\Blog\Engine\Service\ThemeService;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
@@ -202,13 +207,40 @@ class Package extends PackageAbstract
         $this->registerServiceAlias(CacheInterface::class, Psr16Cache::class);
     }
 
+    /**
+     * @throws PackageException
+     */
     private function registerController(): void
     {
+        $this->registerConfiguration(BlogControllerBasic::class, [
+        ]);
+
+        $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];
+
+        $this->registerService(BlogControllerBasic::class, function (Container $container) use ($configuration): BlogControllerBasic {
+            $settings = $configuration[BlogControllerBasic::class];
+
+            unset($configuration);
+
+            /** @var Configuration $configuration */
+            $configuration = $container[Configuration::class];
+            /** @var CategoryRepositoryInterface $categoryRepository */
+            $categoryRepository = $container[CategoryRepositoryInterface::class];
+            /** @var TagRepositoryInterface $tagRepository */
+            $tagRepository = $container[TagRepositoryInterface::class];
+            /** @var AuthorRepositoryInterface $authorRepository */
+            $authorRepository = $container[AuthorRepositoryInterface::class];
+            /** @var PostRepositoryInterface $postRepository */
+            $postRepository = $container[PostRepositoryInterface::class];
+
+            return new BlogControllerBasic($settings, $configuration, $categoryRepository, $tagRepository, $authorRepository, $postRepository);
+        });
+
         $this->registerService(BlogController::class, function (Container $container): BlogController {
             /** @var Twig $twig */
             $twig = $container[Twig::class];
-            /** @var BlogControllerBase $blogController */
-            $blogController = $container[BlogControllerBase::class];
+            /** @var BlogControllerBasic $blogController */
+            $blogController = $container[BlogControllerBasic::class];
             /** @var Logger $logger */
             $logger = $container[Logger::class];
 
