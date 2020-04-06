@@ -1,8 +1,9 @@
 {#
 
+target: any
+
 required:
 - post
-- configuration
 
 todo:
 optional:
@@ -11,7 +12,9 @@ optional:
 
 #}
 
-{% if post is defined and configuration is defined %}
+{% if post is defined %}
+    {% set configuration = post.configuration.localeList.current %}
+
     {# TODO: border-bottom #}
     <div class="blog-post">
         <h2 class="blog-post-title">{{ configuration.title }}</h2>

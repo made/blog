@@ -44,8 +44,8 @@ trait CriteriaHelperTrait
     {
         if (!empty($all)) {
             $all = $this->applyCriteriaFilter($criteria, $all, $className);
-            $all = $this->applyCriteriaSlice($criteria, $all);
             $all = $this->orderCriteriaOrder($criteria, $all, $className);
+            $all = $this->applyCriteriaSlice($criteria, $all);
         }
 
         return $all;

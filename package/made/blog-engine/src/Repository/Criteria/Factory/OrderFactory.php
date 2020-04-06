@@ -19,9 +19,12 @@
 
 namespace Made\Blog\Engine\Repository\Criteria\Factory;
 
-use Closure;
 use Made\Blog\Engine\Exception\FailedOperationException;
+use Made\Blog\Engine\Model\Author;
+use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Model\Tag;
+use Made\Blog\Engine\Repository\Criteria\Order;
 
 /**
  * Class OrderFactory
@@ -34,31 +37,27 @@ final class OrderFactory
     const ORDER_ASC /*----*/ = 'ASC';
 
     /**
-     * @return Closure|null
+     * @return Order|null
      */
-    public function none(): ?Closure
+    public static function none(): ?Order
     {
         return null;
     }
 
     /**
-     * Target: PostConfigurationLocale
+     * Target: {@link PostConfigurationLocale}
      *
      * @param string|null $order
-     * @return Closure
+     * @return Order
      * @throws FailedOperationException
      */
-    public function byDate(?string $order = null): Closure
+    public static function byDate_PostConfigurationLocale(?string $order = null): Order
     {
-        if (null === $order) {
-            $order = static::ORDER_DESC;
-        } else {
-            $order = strtoupper($order);
-            $order = trim($order);
-        }
+        $order = static::normalizeOrder($order);
+        $comparator = null;
 
         if (static::ORDER_DESC === $order) {
-            return function (PostConfigurationLocale $a, PostConfigurationLocale $b) {
+            $comparator = function (PostConfigurationLocale $a, PostConfigurationLocale $b): int {
                 if ($a->getDate() === $b->getDate()) {
                     return 0;
                 }
@@ -68,7 +67,7 @@ final class OrderFactory
         }
 
         if (static::ORDER_ASC === $order) {
-            return function (PostConfigurationLocale $a, PostConfigurationLocale $b) {
+            $comparator = function (PostConfigurationLocale $a, PostConfigurationLocale $b): int {
                 if ($a->getDate() === $b->getDate()) {
                     return 0;
                 }
@@ -77,6 +76,212 @@ final class OrderFactory
             };
         }
 
-        throw new FailedOperationException('Unable to match requested order: ' . $order);
+        if (null === $comparator) {
+            throw new FailedOperationException('Unable to match requested order: ' . $order);
+        }
+
+        return new Order(__METHOD__, $comparator);
+    }
+
+    /**
+     * Target: {@link Category}
+     *
+     * @param string|null $order
+     * @return Order
+     * @throws FailedOperationException
+     */
+    public static function byId_Category(?string $order = null): Order
+    {
+        $order = static::normalizeOrder($order);
+        $comparator = null;
+
+        if (static::ORDER_DESC === $order) {
+            $comparator = function (Category $a, Category $b): int {
+                return strcmp($a->getId(), $b->getId()) * -1;
+            };
+        }
+
+        if (static::ORDER_ASC === $order) {
+            $comparator = function (Category $a, Category $b): int {
+                return strcmp($a->getId(), $b->getId()) * +1;
+            };
+        }
+
+        if (null === $comparator) {
+            throw new FailedOperationException('Unable to match requested order: ' . $order);
+        }
+
+        return new Order(__METHOD__, $comparator);
+    }
+
+    /**
+     * Target: {@link Category}
+     *
+     * @param string|null $order
+     * @return Order
+     * @throws FailedOperationException
+     */
+    public static function byName_Category(?string $order = null): Order
+    {
+        $order = static::normalizeOrder($order);
+        $comparator = null;
+
+        if (static::ORDER_DESC === $order) {
+            $comparator = function (Category $a, Category $b): int {
+                return strcmp($a->getName(), $b->getName()) * -1;
+            };
+        }
+
+        if (static::ORDER_ASC === $order) {
+            $comparator = function (Category $a, Category $b): int {
+                return strcmp($a->getName(), $b->getName()) * +1;
+            };
+        }
+
+        if (null === $comparator) {
+            throw new FailedOperationException('Unable to match requested order: ' . $order);
+        }
+
+        return new Order(__METHOD__, $comparator);
+    }
+
+    /**
+     * Target: {@link Tag}
+     *
+     * @param string|null $order
+     * @return Order
+     * @throws FailedOperationException
+     */
+    public static function byId_Tag(?string $order = null): Order
+    {
+        $order = static::normalizeOrder($order);
+        $comparator = null;
+
+        if (static::ORDER_DESC === $order) {
+            $comparator = function (Tag $a, Tag $b): int {
+                return strcmp($a->getId(), $b->getId()) * -1;
+            };
+        }
+
+        if (static::ORDER_ASC === $order) {
+            $comparator = function (Tag $a, Tag $b): int {
+                return strcmp($a->getId(), $b->getId()) * +1;
+            };
+        }
+
+        if (null === $comparator) {
+            throw new FailedOperationException('Unable to match requested order: ' . $order);
+        }
+
+        return new Order(__METHOD__, $comparator);
+    }
+
+    /**
+     * Target: {@link Tag}
+     *
+     * @param string|null $order
+     * @return Order
+     * @throws FailedOperationException
+     */
+    public static function byName_Tag(?string $order = null): Order
+    {
+        $order = static::normalizeOrder($order);
+        $comparator = null;
+
+        if (static::ORDER_DESC === $order) {
+            $comparator = function (Tag $a, Tag $b): int {
+                return strcmp($a->getName(), $b->getName()) * -1;
+            };
+        }
+
+        if (static::ORDER_ASC === $order) {
+            $comparator = function (Tag $a, Tag $b): int {
+                return strcmp($a->getName(), $b->getName()) * +1;
+            };
+        }
+
+        if (null === $comparator) {
+            throw new FailedOperationException('Unable to match requested order: ' . $order);
+        }
+
+        return new Order(__METHOD__, $comparator);
+    }
+
+    /**
+     * Target: {@link Author}
+     *
+     * @param string|null $order
+     * @return Order
+     * @throws FailedOperationException
+     */
+    public static function byName_Author(?string $order = null): Order
+    {
+        $order = static::normalizeOrder($order);
+        $comparator = null;
+
+        if (static::ORDER_DESC === $order) {
+            $comparator = function (Author $a, Author $b): int {
+                return strcmp($a->getName(), $b->getName()) * -1;
+            };
+        }
+
+        if (static::ORDER_ASC === $order) {
+            $comparator = function (Author $a, Author $b): int {
+                return strcmp($a->getName(), $b->getName()) * +1;
+            };
+        }
+
+        if (null === $comparator) {
+            throw new FailedOperationException('Unable to match requested order: ' . $order);
+        }
+
+        return new Order(__METHOD__, $comparator);
+    }
+
+    /**
+     * Target: {@link Author}
+     *
+     * @param string|null $order
+     * @return Order
+     * @throws FailedOperationException
+     */
+    public static function byNameDisplay_Author(?string $order = null): Order
+    {
+        $order = static::normalizeOrder($order);
+        $comparator = null;
+
+        if (static::ORDER_DESC === $order) {
+            $comparator = function (Author $a, Author $b): int {
+                return strcmp($a->getNameDisplay(), $b->getNameDisplay()) * -1;
+            };
+        }
+
+        if (static::ORDER_ASC === $order) {
+            $comparator = function (Author $a, Author $b): int {
+                return strcmp($a->getNameDisplay(), $b->getNameDisplay()) * +1;
+            };
+        }
+
+        if (null === $comparator) {
+            throw new FailedOperationException('Unable to match requested order: ' . $order);
+        }
+
+        return new Order(__METHOD__, $comparator);
+    }
+
+    /**
+     * @param string|null $order
+     * @return string
+     */
+    public static function normalizeOrder(?string $order): string
+    {
+        if (null === $order) {
+            $order = static::ORDER_DESC;
+        } else {
+            $order = strtoupper($order);
+            $order = trim($order);
+        }
+
+        return $order;
     }
 }

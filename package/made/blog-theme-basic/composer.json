@@ -5,7 +5,8 @@
   "minimum-stability": "stable",
   "license": "GPL-3.0-or-later",
   "require": {
-    "php": ">=7.1"
+    "php": ">=7.1",
+    "made/blog-engine": "dev-content-repository"
   },
   "authors": [
     {
@@ -21,5 +22,11 @@
     "psr-4": {
       "Made\\Blog\\Theme\\Basic\\": "src/"
     }
-  }
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../../../package/made/blog-engine"
+    }
+  ]
 }

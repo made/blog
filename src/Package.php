@@ -24,6 +24,7 @@ use App\Controller\BlogController;
 use App\Middleware\TrailingSlashMiddleware;
 use Cache\Cache;
 use Cache\Psr16\Cache as Psr16Cache;
+use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Made\Blog\Theme\Basic\Controller\BlogController as BlogControllerBasic;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
@@ -230,10 +231,12 @@ class Package extends PackageAbstract
             $tagRepository = $container[TagRepositoryInterface::class];
             /** @var AuthorRepositoryInterface $authorRepository */
             $authorRepository = $container[AuthorRepositoryInterface::class];
+            /** @var PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository */
+            $postConfigurationLocaleRepository = $container[PostConfigurationLocaleRepositoryInterface::class];
             /** @var PostRepositoryInterface $postRepository */
             $postRepository = $container[PostRepositoryInterface::class];
 
-            return new BlogControllerBasic($settings, $configuration, $categoryRepository, $tagRepository, $authorRepository, $postRepository);
+            return new BlogControllerBasic($settings, $configuration, $categoryRepository, $tagRepository, $authorRepository, $postConfigurationLocaleRepository, $postRepository);
         });
 
         $this->registerService(BlogController::class, function (Container $container): BlogController {

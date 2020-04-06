@@ -150,7 +150,7 @@ class Package extends PackageAbstract
         $this->registerConfiguration(Configuration::class, [
             Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__, 4),
             Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE => 'en',
-            Configuration::CONFIGURATION_NAME_THEME_NAME => 'theme-base',
+            Configuration::CONFIGURATION_NAME_THEME_NAME => 'theme-basic',
         ]);
 
         $configuration = $this->container[static::SERVICE_NAME_CONFIGURATION];

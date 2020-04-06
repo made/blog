@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4ff0c55aa6b64694298a668b39ad09f3",
+    "content-hash": "ea03a0d9db823de595b729a9177bf8d1",
     "packages": [
         {
             "name": "brick/varexporter",
@@ -191,16 +191,16 @@
         },
         {
             "name": "gameplayjdk/php-file-cache",
-            "version": "v1.2.2",
+            "version": "v1.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/GameplayJDK/php-file-cache.git",
-                "reference": "e3c4e21fc64265c8970107b2c5fd663e49239c66"
+                "reference": "596d4a86da606f6adf9984c20aa1f35922cea91f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/GameplayJDK/php-file-cache/zipball/e3c4e21fc64265c8970107b2c5fd663e49239c66",
-                "reference": "e3c4e21fc64265c8970107b2c5fd663e49239c66",
+                "url": "https://api.github.com/repos/GameplayJDK/php-file-cache/zipball/596d4a86da606f6adf9984c20aa1f35922cea91f",
+                "reference": "596d4a86da606f6adf9984c20aa1f35922cea91f",
                 "shasum": ""
             },
             "require": {
@@ -230,7 +230,7 @@
                 }
             ],
             "description": "Low-level, file based cache using var_export() and some magic. Optionally PSR-16 compliant.",
-            "time": "2020-03-27T10:01:43+00:00"
+            "time": "2020-04-03T18:59:26+00:00"
         },
         {
             "name": "gameplayjdk/php-static-help",
@@ -348,7 +348,8 @@
             "dist": {
                 "type": "path",
                 "url": "package/made/blog-engine",
-                "reference": "9059823423b384e8ffa521afc549b1abc3ae1dc8"
+                "reference": "9059823423b384e8ffa521afc549b1abc3ae1dc8",
+                "shasum": null
             },
             "require": {
                 "erusev/parsedown-extra": "^0.8.1",
@@ -384,17 +385,23 @@
             "description": "The Made Blog Engine library."
         },
         {
-            "name": "made/blog-theme-base",
+            "name": "made/blog-theme-basic",
             "version": "dev-content-repository",
             "dist": {
                 "type": "path",
-                "url": "package/made/blog-theme-base",
-                "reference": "baf4aab63a3d3b5740a722f5a6a48d6bdd82c072"
+                "url": "package/made/blog-theme-basic",
+                "reference": "a51d2ff2097150058153d425edbe60906b65c56f",
+                "shasum": null
             },
             "require": {
                 "php": ">=7.1"
             },
             "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Made\\Blog\\Theme\\Basic\\": "src/"
+                }
+            },
             "license": [
                 "GPL-3.0-or-later"
             ],
@@ -408,7 +415,7 @@
                     "email": "dennis@dennzo.com"
                 }
             ],
-            "description": "The base theme for made/blog."
+            "description": "The base theme for made/blog. It is called 'basic'."
         },
         {
             "name": "monolog/monolog",
@@ -1490,7 +1497,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "made/blog-engine": 20,
-        "made/blog-theme-base": 20
+        "made/blog-theme-basic": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

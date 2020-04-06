@@ -21,6 +21,7 @@ namespace Made\Blog\Theme\Basic\Controller;
 
 use Help\Path;
 use Help\Slug;
+use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Model\PostConfiguration;
@@ -28,6 +29,8 @@ use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
+use Made\Blog\Engine\Repository\Criteria\Factory\OrderFactory;
+use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
 use Made\Blog\Engine\Repository\TagRepositoryInterface;
 
@@ -50,9 +53,11 @@ class BlogController
     const VARIABLE_TEMPLATE = 'template';
     const VARIABLE_DATA = 'data';
 
+    const VARIABLE_DATA_LOCALE = 'locale';
     const VARIABLE_DATA_POST = 'post';
     const VARIABLE_DATA_POST_LIST = 'postList';
     const VARIABLE_DATA_CATEGORY_LIST = 'categoryList';
+    const VARIABLE_DATA_CATEGORY_LIST_ALL = 'categoryListAll';
     const VARIABLE_DATA_CATEGORY = 'category';
     const VARIABLE_DATA_TAG_LIST = 'tagList';
     const VARIABLE_DATA_TAG = 'tag';
@@ -69,6 +74,12 @@ class BlogController
     const TEMPLATE_NAME_AUTHOR_OVERVIEW = 'author-overview';
 
     const TEMPLATE_EXTENSION = '.html.twig';
+
+    const PAGE_SIZE_POST_LIST = 10;
+    const PAGE_SIZE_POST_LIST_ALL = 3;
+    const PAGE_SIZE_CATEGORY_LIST = 10;
+    const PAGE_SIZE_TAG_LIST = 10;
+    const PAGE_SIZE_AUTHOR_LIST = 10;
 
     /**
      * @var array
@@ -96,6 +107,11 @@ class BlogController
     protected $authorRepository;
 
     /**
+     * @var PostConfigurationLocaleRepositoryInterface
+     */
+    protected $postConfigurationLocaleRepository;
+
+    /**
      * @var PostRepositoryInterface
      */
     protected $postRepository;
@@ -107,15 +123,17 @@ class BlogController
      * @param CategoryRepositoryInterface $categoryRepository
      * @param TagRepositoryInterface $tagRepository
      * @param AuthorRepositoryInterface $authorRepository
+     * @param PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository
      * @param PostRepositoryInterface $postRepository
      */
-    public function __construct(array $pageData, Configuration $configuration, CategoryRepositoryInterface $categoryRepository, TagRepositoryInterface $tagRepository, AuthorRepositoryInterface $authorRepository, PostRepositoryInterface $postRepository)
+    public function __construct(array $pageData, Configuration $configuration, CategoryRepositoryInterface $categoryRepository, TagRepositoryInterface $tagRepository, AuthorRepositoryInterface $authorRepository, PostConfigurationLocaleRepositoryInterface $postConfigurationLocaleRepository, PostRepositoryInterface $postRepository)
     {
         $this->pageData = $pageData;
         $this->configuration = $configuration;
         $this->categoryRepository = $categoryRepository;
         $this->tagRepository = $tagRepository;
         $this->authorRepository = $authorRepository;
+        $this->postConfigurationLocaleRepository = $postConfigurationLocaleRepository;
         $this->postRepository = $postRepository;
     }
 
@@ -126,6 +144,10 @@ class BlogController
     {
         $locale = $this->configuration
             ->getFallbackLocale();
+
+        $slug = Path::join(...[
+            $locale,
+        ]);
         $slug = Slug::sanitize($locale);
 
         return $this->createRedirect($slug);
@@ -134,45 +156,51 @@ class BlogController
     /**
      * @param string $locale
      * @return array|null
+     * @throws FailedOperationException
      */
     public function homeAction(string $locale): ?array
     {
-        $categoryListCriteria = new Criteria();
-        $categoryList = $this->categoryRepository
-            ->getAll($categoryListCriteria);
-
-        $tagListCriteria = new Criteria();
+        $tagListCriteria = (new Criteria())
+            ->setOrder(OrderFactory::byName_Tag());
         $tagList = $this->tagRepository
             ->getAll($tagListCriteria);
 
-        $postListCriteria = new CriteriaLocale($locale);
+        // TODO: Get the configured promoted posts instead of the most recent ones.
+        $postListCriteria = (new CriteriaLocale($locale))
+            ->setLimit(static::PAGE_SIZE_POST_LIST_ALL)
+            ->setOrder(OrderFactory::byDate_PostConfigurationLocale());
+
         $postList = $this->postRepository
             ->getAll($postListCriteria);
 
         $template = $this->getTemplate(static::TEMPLATE_NAME_HOME);
 
         return $this->createData($locale, $template, [
-            static::VARIABLE_DATA_CATEGORY_LIST => $categoryList,
-            static::VARIABLE_DATA_TAG_LIST => $tagList,
+            static::VARIABLE_DATA_TAG_LIST => $tagList, // TODO
             static::VARIABLE_DATA_POST_LIST => $postList,
         ]);
     }
 
     /**
      * @param string $locale
-     * @param int $page TODO
+     * @param int $page
      * @return array|null
+     * @throws FailedOperationException
      */
     public function postListAction(string $locale, int $page = 0): ?array
     {
-        $categoryListCriteria = new Criteria();
-        $categoryList = $this->categoryRepository
-            ->getAll($categoryListCriteria);
+        /** @var CriteriaLocale $postListCriteria */
+        $postListCriteria = (new CriteriaLocale($locale))
+            ->setOrder(OrderFactory::byDate_PostConfigurationLocale());
+        $postListCriteria = $this->setPage($postListCriteria, $page, static::PAGE_SIZE_POST_LIST);
+
+        $postList = $this->postRepository
+            ->getAll($postListCriteria);
 
         $template = $this->getTemplate(static::TEMPLATE_NAME_POST_OVERVIEW);
 
         return $this->createData($locale, $template, [
-            static::VARIABLE_DATA_CATEGORY_LIST => $categoryList,
+            static::VARIABLE_DATA_POST_LIST => $postList,
         ]);
     }
 
@@ -180,6 +208,7 @@ class BlogController
      * @param string $locale
      * @param string $slug
      * @return array|null
+     * @throws FailedOperationException
      */
     public function postAction(string $locale, string $slug): ?array
     {
@@ -212,12 +241,17 @@ class BlogController
 
     /**
      * @param string $locale
-     * @param int $page TODO
+     * @param int $page
      * @return array|null
+     * @throws FailedOperationException
      */
     public function categoryListAction(string $locale, int $page = 0): ?array
     {
-        $categoryListCriteria = new Criteria();
+        /** @var Criteria $categoryListCriteria */
+        $categoryListCriteria = (new Criteria())
+            ->setOrder(OrderFactory::byName_Category());
+        $categoryListCriteria = $this->setPage($categoryListCriteria, $page, static::PAGE_SIZE_CATEGORY_LIST);
+
         $categoryList = $this->categoryRepository
             ->getAll($categoryListCriteria);
 
@@ -232,6 +266,7 @@ class BlogController
      * @param string $locale
      * @param string|null $id
      * @return array|null
+     * @throws FailedOperationException
      */
     public function categoryAction(string $locale, ?string $id = null): ?array
     {
@@ -255,12 +290,17 @@ class BlogController
 
     /**
      * @param string $locale
-     * @param int $page TODO
+     * @param int $page
      * @return array|null
+     * @throws FailedOperationException
      */
     public function tagListAction(string $locale, int $page = 0): ?array
     {
-        $tagListCriteria = new Criteria();
+        /** @var Criteria $tagListCriteria */
+        $tagListCriteria = (new Criteria())
+            ->setOrder(OrderFactory::byName_Tag());
+        $tagListCriteria = $this->setPage($tagListCriteria, $page, static::PAGE_SIZE_TAG_LIST);
+
         $tagList = $this->tagRepository
             ->getAll($tagListCriteria);
 
@@ -275,6 +315,7 @@ class BlogController
      * @param string $locale
      * @param string|null $id
      * @return array|null
+     * @throws FailedOperationException
      */
     public function tagAction(string $locale, ?string $id = null): ?array
     {
@@ -298,12 +339,17 @@ class BlogController
 
     /**
      * @param string $locale
-     * @param int $page TODO
+     * @param int $page
      * @return array|null
+     * @throws FailedOperationException
      */
     public function authorListAction(string $locale, int $page = 0): ?array
     {
-        $authorListCriteria = new Criteria();
+        /** @var Criteria $authorListCriteria */
+        $authorListCriteria = (new Criteria())
+            ->setOrder(OrderFactory::byName_Author());
+        $authorListCriteria = $this->setPage($authorListCriteria, $page, static::PAGE_SIZE_AUTHOR_LIST);
+
         $authorList = $this->authorRepository
             ->getAll($authorListCriteria);
 
@@ -318,6 +364,7 @@ class BlogController
      * @param string $locale
      * @param string|null $name
      * @return array|null
+     * @throws FailedOperationException
      */
     public function authorAction(string $locale, ?string $name = null): ?array
     {
@@ -344,7 +391,7 @@ class BlogController
      *
      * @param string $locale
      * @param string|null $search
-     * @param int $page TODO
+     * @param int $page
      * @return array|null
      */
     public function searchAction(string $locale, ?string $search = null, int $page = 0): ?array
@@ -421,17 +468,47 @@ class BlogController
      * @param string $template
      * @param array $data
      * @return array|null
+     * @throws FailedOperationException
      */
     protected function createData(string $locale, string $template, array $data): ?array
     {
-        $data = array_replace_recursive($data, [
-            static::VARIABLE_LOCALE => $locale,
-        ]);
+        $categoryListAllCriteria = (new Criteria())
+            ->setOrder(OrderFactory::byName_Category());
+        $categoryListAll = $this->categoryRepository
+            ->getAll($categoryListAllCriteria);
+
+        // Data has to be merged/replaced in the defaults, so it can be overridden. But that has to be non-recursive.
+        // Also put the page data (settings) before that. That ways reserved keys are not taken by configuration.
+        $data = array_replace($this->pageData, [
+            static::VARIABLE_DATA_LOCALE => $locale,
+            static::VARIABLE_DATA_CATEGORY_LIST_ALL => $categoryListAll,
+        ], $data);
 
         return [
             static::VARIABLE_LOCALE => $locale,
             static::VARIABLE_TEMPLATE => $template,
             static::VARIABLE_DATA => $data,
         ];
+    }
+
+    /**
+     * @param Criteria $criteria
+     * @param int $page
+     * @param int $pageSize
+     * @return Criteria
+     */
+    protected function setPage(Criteria $criteria, int $page, int $pageSize): Criteria
+    {
+        if ($page < 0) {
+            return $criteria;
+        }
+
+        if ($pageSize < 1) {
+            return $criteria;
+        }
+
+        return $criteria
+            ->setOffset($page * $pageSize)
+            ->setLimit($pageSize);
     }
 }

@@ -1,8 +1,9 @@
 {#
 
+target: row
+
 required:
 - post
-- configuration
 
 optional:
 - style
@@ -15,7 +16,8 @@ optional:
     'col': 6,
 }|merge(style) %}
 
-{% if post is defined and configuration is defined %}
+{% if post is defined %}
+    {% set configuration = post.configuration.localeList.current %}
     {% set category = configuration.categoryList|first %}
 
     <div class="col-md-{{ style.col }}">
@@ -27,14 +29,16 @@ optional:
                     </strong>
                 {% endif %}
 
-                <h3 class="mb-0">{{ configuration.title }}</h3>
+                <h3 class="mb-0">
+                    {{ configuration.title }}
+                </h3>
 
                 <div class="mb-1 text-muted">
                     {{ configuration.date|date('F d, Y') }}
                 </div>
 
                 <p class="card-text mb-auto">
-                    This is a wider card with supporting text below as a natural lead-in to additional content.
+                    {{ post.content.content|striptags|slice(0, 100) }}...
                 </p>
 
                 <a href="#" class="stretched-link">Continue reading</a>

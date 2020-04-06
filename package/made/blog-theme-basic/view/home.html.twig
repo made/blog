@@ -1,22 +1,20 @@
 {% extends '@theme-basic/_page-layout.html.twig' %}
 
 {% block feature %}
+    {% set post = postList|first %}
+
     {% include '@theme-basic/include/_post-jumbotron.html.twig' with {
         'post': post,
-        'configuration': configuration
     } %}
 {% endblock %}
 
 {% block feature_below %}
     <div class="row mb-2">
-        {% include '@theme-basic/include/_post-card.html.twig' with {
-            'post': post,
-            'configuration': configuration
-        } %}
-        {% include '@theme-basic/include/_post-card.html.twig' with {
-            'post': post,
-            'configuration': configuration
-        } %}
+        {% for post in postList %}
+            {% include '@theme-basic/include/_post-card.html.twig' with {
+                'post': post,
+            } %}
+        {% endfor %}
     </div>
 {% endblock %}
 
@@ -26,20 +24,19 @@
     </h3>
 
     {% for post in postList %}
-        {% set configuration = post.configuration.localeList.current %}
-
         {% include '@theme-basic/include/_post-content.html.twig' with {
             'post': post,
-            'configuration': configuration,
         } %}
     {% endfor %}
 
     {# TODO: Move to post overview template and use as pagination. #}
+    {#
     <nav class="blog-pagination">
         <a class="btn btn-outline-primary" href="#">Older</a>
         <a class="btn btn-outline-secondary disabled" href="#" tabindex="-1"
            aria-disabled="true">Newer</a>
     </nav>
+    #}
 
     <nav class="blog-pagination">
         <a class="btn btn-outline-primary" href="{{ url_for('blog.post.list', {
@@ -80,10 +77,19 @@
 
     <div class="p-4">
         <h4 class="font-italic">Elsewhere</h4>
-        <ol class="list-unstyled">
-            <li><a href="#">GitHub</a></li>
-            <li><a href="#">Twitter</a></li>
-            <li><a href="#">Facebook</a></li>
-        </ol>
+        <ul class="fa-ul">
+            <li>
+                <span class="fa-li"><i class="fab fa-github-alt"></i></span>
+                <a href="#">GitHub</a>
+            </li>
+            <li>
+                <span class="fa-li"><i class="fab fa-twitter"></i></span>
+                <a href="#">Twitter</a>
+            </li>
+            <li>
+                <span class="fa-li"><i class="fab fa-facebook-f"></i></span>
+                <a href="#">Facebook</a>
+            </li>
+        </ul>
     </div>
 {% endblock %}
