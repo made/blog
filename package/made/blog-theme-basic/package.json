@@ -1,12 +1,21 @@
 {
-  "name": "@made-blog/blog-theme-basic",
+  "name": "@made/blog-theme-basic",
   "version": "1.0.0",
-  "description": "Simple blog software for developers.",
+  "description": "The base theme for made/blog. It is called 'basic'.",
   "main": "gulpfile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/made/blog-theme-basic.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/made/blog-theme-basic/issues"
+  },
+  "homepage": "https://github.com/made/blog-theme-basic#readme",
+  "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.13.0",
     "bootstrap": "^4.4.1",
@@ -30,6 +39,5 @@
     "gulp-sourcemaps": "^2.6.5",
     "minimist": "^1.2.5",
     "node-sass": "^4.13.1"
-  },
-  "private": true
+  }
 }

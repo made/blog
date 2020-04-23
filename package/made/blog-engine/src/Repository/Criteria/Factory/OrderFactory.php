@@ -33,6 +33,8 @@ use Made\Blog\Engine\Repository\Criteria\Order;
  */
 final class OrderFactory
 {
+    // TODO: Refactor so, the scope is only the class as argument calling private static functions.
+
     const ORDER_DESC /*---*/ = 'DESC';
     const ORDER_ASC /*----*/ = 'ASC';
 

@@ -19,16 +19,19 @@
 
 namespace Made\Blog\Theme\Basic\Controller;
 
+use DateTime;
 use Help\Path;
 use Help\Slug;
 use Made\Blog\Engine\Exception\FailedOperationException;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Model\PostConfiguration;
+use Made\Blog\Engine\Model\PostConfigurationLocale;
 use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\Criteria\CriteriaLocale;
+use Made\Blog\Engine\Repository\Criteria\Factory\FilterFactory;
 use Made\Blog\Engine\Repository\Criteria\Factory\OrderFactory;
 use Made\Blog\Engine\Repository\PostConfigurationLocaleRepositoryInterface;
 use Made\Blog\Engine\Repository\PostRepositoryInterface;
@@ -56,6 +59,7 @@ class BlogController
     const VARIABLE_DATA_LOCALE = 'locale';
     const VARIABLE_DATA_POST = 'post';
     const VARIABLE_DATA_POST_LIST = 'postList';
+    const VARIABLE_DATA_POST_LIST_DATE = 'postListDate';
     const VARIABLE_DATA_CATEGORY_LIST = 'categoryList';
     const VARIABLE_DATA_CATEGORY_LIST_ALL = 'categoryListAll';
     const VARIABLE_DATA_CATEGORY = 'category';
@@ -193,6 +197,33 @@ class BlogController
         $postListCriteria = (new CriteriaLocale($locale))
             ->setOrder(OrderFactory::byDate_PostConfigurationLocale());
         $postListCriteria = $this->setPage($postListCriteria, $page, static::PAGE_SIZE_POST_LIST);
+
+        $postList = $this->postRepository
+            ->getAll($postListCriteria);
+
+        $template = $this->getTemplate(static::TEMPLATE_NAME_POST_OVERVIEW);
+
+        return $this->createData($locale, $template, [
+            static::VARIABLE_DATA_POST_LIST => $postList,
+        ]);
+    }
+
+    /**
+     * @param string $locale
+     * @param DateTime $dateTime
+     * @return array|null
+     * @throws FailedOperationException
+     */
+    public function postListDateAction(string $locale, DateTime $dateTime): ?array
+    {
+        /** @var CriteriaLocale $postListCriteria */
+        $postListCriteria = (new CriteriaLocale($locale))
+            ->setFilter(
+                FilterFactory::byDate($dateTime, PostConfigurationLocale::class, 'Y-m', null)
+            )
+            ->setOrder(
+                OrderFactory::byDate_PostConfigurationLocale()
+            );
 
         $postList = $this->postRepository
             ->getAll($postListCriteria);
@@ -477,11 +508,31 @@ class BlogController
         $categoryListAll = $this->categoryRepository
             ->getAll($categoryListAllCriteria);
 
+        $postConfigurationLocaleListCriteria = (new CriteriaLocale($locale))
+            ->setOrder(OrderFactory::byDate_PostConfigurationLocale());
+        $postConfigurationLocaleList = $this->postConfigurationLocaleRepository
+            ->getAll($postConfigurationLocaleListCriteria);
+
+        $postListDate = array_map(function (PostConfigurationLocale $postConfigurationLocale): DateTime {
+            return $postConfigurationLocale->getDate();
+        }, $postConfigurationLocaleList);
+        $postListDate = array_reduce($postListDate, function (array $carry, DateTime $dateTime): array {
+            $key = $dateTime->format('Y-m');
+
+            if (!array_key_exists($key, $carry)) {
+                $carry[$key] = $dateTime;
+            }
+
+            return $carry;
+        }, []);
+        $postListDate = array_values($postListDate);
+
         // Data has to be merged/replaced in the defaults, so it can be overridden. But that has to be non-recursive.
         // Also put the page data (settings) before that. That ways reserved keys are not taken by configuration.
         $data = array_replace($this->pageData, [
             static::VARIABLE_DATA_LOCALE => $locale,
             static::VARIABLE_DATA_CATEGORY_LIST_ALL => $categoryListAll,
+            static::VARIABLE_DATA_POST_LIST_DATE => $postListDate,
         ], $data);
 
         return [

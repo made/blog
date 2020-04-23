@@ -19,6 +19,10 @@
 
 namespace Made\Blog\Engine\Repository\Criteria\Factory;
 
+use DateTime;
+use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Repository\Criteria\Filter;
+
 /**
  * Class FilterFactory
  *
@@ -26,5 +30,25 @@ namespace Made\Blog\Engine\Repository\Criteria\Factory;
  */
 final class FilterFactory
 {
-    // TODO: Add some basic filter methods.
+    /**
+     * @param DateTime $dateTime
+     * @param string $key
+     * @param string $format
+     * @param Filter|null $filter
+     * @return Filter
+     */
+    public static function byDate(DateTime $dateTime, string $key, string $format = 'Y-m', ?Filter $filter = null): Filter
+    {
+        $filter = $filter ?: new Filter(__METHOD__ . $key, []);
+
+        if (PostConfigurationLocale::class === $key) {
+            $filter->setCallback($key, function (PostConfigurationLocale $postConfigurationLocale) use ($dateTime, $format): bool {
+                $dateTimeLocale = $postConfigurationLocale->getDate();
+
+                return $dateTimeLocale->format($format) === $dateTime->format($format);
+            });
+        }
+
+        return $filter;
+    }
 }

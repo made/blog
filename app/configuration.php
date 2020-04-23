@@ -18,10 +18,11 @@
  */
 
 use Cache\Cache;
+use Cache\Psr16\Cache as Psr16Cache;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Repository\Implementation\File\PostConfigurationRepository as PostConfigurationRepositoryFile;
+use Made\Blog\Theme\Basic\Controller\BlogController as BlogControllerBasic;
 use Monolog\Logger;
-use Cache\Psr16\Cache as Psr16Cache;
 use Slim\Views\Twig;
 
 return [
@@ -50,5 +51,28 @@ return [
 
     PostConfigurationRepositoryFile::class => [
         'default' => require dirname(__DIR__) . '/app/configuration.post.php',
+    ],
+
+    BlogControllerBasic::class => [
+        'aboutText' => <<<HTML
+Some small text about this blog. <em>I like trains.</em>
+HTML,
+        'aboutLink' => [
+            [
+                'icon' => 'fab fa-github-alt',
+                'name' => 'GitHub',
+                'link' => 'https://github.com/made',
+            ],
+            [
+                'icon' => 'fab fa-twitter',
+                'name' => 'Twitter',
+                'link' => 'https://twitter.com/made_dot_dev',
+            ],
+            [
+                'icon' => null,
+                'name' => 'made.dev',
+                'link' => 'https://made.dev/',
+            ],
+        ],
     ],
 ];

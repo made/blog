@@ -1,5 +1,26 @@
 {% extends '@theme-basic/_page.html.twig' %}
 
+{#
+
+todo:
+target: page
+
+required:
+- post
+
+optional:
+- style
+  - col_left
+  - col_right
+
+#}
+
+{% set style = style is defined ? style : {} %}
+{% set style = {
+    'col_left': 8,
+    'col_right': 4,
+}|merge(style) %}
+
 {% block content %}
     {% block content_header %}
         <div class="container">
@@ -31,10 +52,10 @@
             {% endblock %}
 
             {% block navigation %}
-                {% if categoryList is defined and categoryList is not empty %}
+                {% if categoryListAll is defined and categoryListAll is not empty %}
                     <div class="nav-scroller py-1 mb-2">
                         <nav class="nav d-flex justify-content-between">
-                            {% for category in categoryList %}
+                            {% for category in categoryListAll %}
                                 <a class="p-2 text-muted" href="{{ url_for('blog.category', {
                                     'locale': locale,
                                     'id': category.id,
@@ -59,14 +80,14 @@
         <main role="main" class="container">
             <div class="row mt-4">
                 {% block side_left %}
-                    <div class="col-md-8 blog-main">
+                    <div class="col-md-{{ style.col_left }} blog-main">
                         {% block side_left_inner %}
                         {% endblock %}
                     </div>
                 {% endblock %}
 
                 {% block side_right %}
-                    <aside class="col-md-4 blog-sidebar">
+                    <aside class="col-md-{{ style.col_right }} blog-sidebar">
                         {% block side_right_inner %}
                         {% endblock %}
                     </aside>
@@ -84,7 +105,9 @@
                 </p>
 
                 <p>
-                    <a href="#">Back to top</a>
+                    <a href="#">
+                        Back to top
+                    </a>
                 </p>
             </footer>
         {% endblock %}

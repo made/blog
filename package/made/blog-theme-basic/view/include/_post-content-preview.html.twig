@@ -1,0 +1,30 @@
+{#
+
+target: any
+
+required:
+- post
+
+todo:
+optional:
+- style
+  - ?
+
+#}
+
+{% if post is defined %}
+    {% set configuration = post.configuration.localeList.current %}
+
+    <div class="blog-post border-">
+        <h2 class="blog-post-title">{{ configuration.title }}</h2>
+        <p class="blog-post-meta">
+            {{ configuration.date|date('F d, Y') }} by
+            <a href="{{ url_for('blog.author', {
+                'locale': locale,
+                'name': configuration.author.name,
+            }) }}">{{ configuration.author.nameDisplay }}</a>
+        </p>
+
+        {{ post.content.content|striptags|slice(0, 250) }}...
+    </div>
+{% endif %}

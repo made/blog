@@ -1,4 +1,4 @@
-{% extends '@theme-basic/_page-layout.html.twig' %}
+{% extends '@theme-basic/_page-layout-side.html.twig' %}
 
 {% block feature %}
     {% set post = postList|first %}
@@ -10,7 +10,7 @@
 
 {% block feature_below %}
     <div class="row mb-2">
-        {% for post in postList %}
+        {% for post in postList[1:2] %}
             {% include '@theme-basic/include/_post-card.html.twig' with {
                 'post': post,
             } %}
@@ -24,7 +24,7 @@
     </h3>
 
     {% for post in postList %}
-        {% include '@theme-basic/include/_post-content.html.twig' with {
+        {% include '@theme-basic/include/_post-content-preview.html.twig' with {
             'post': post,
         } %}
     {% endfor %}
@@ -49,47 +49,48 @@
 
 {# TODO: Move to normal layout template. #}
 {% block side_right_inner %}
-    <div class="p-4 mb-3 bg-light rounded">
-        <h4 class="font-italic">About</h4>
-        <p class="mb-0">
-            Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur
-            purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.
-        </p>
-    </div>
+    {% if aboutText is defined and aboutText is not empty %}
+        <div class="p-4 mb-3 bg-light rounded">
+            <h4 class="font-italic">About</h4>
+            <p class="mb-0">
+                {{ aboutText|raw }}
+            </p>
+        </div>
+    {% endif %}
 
-    <div class="p-4">
-        <h4 class="font-italic">Archives</h4>
-        <ol class="list-unstyled mb-0">
-            <li><a href="#">March 2014</a></li>
-            <li><a href="#">February 2014</a></li>
-            <li><a href="#">January 2014</a></li>
-            <li><a href="#">December 2013</a></li>
-            <li><a href="#">November 2013</a></li>
-            <li><a href="#">October 2013</a></li>
-            <li><a href="#">September 2013</a></li>
-            <li><a href="#">August 2013</a></li>
-            <li><a href="#">July 2013</a></li>
-            <li><a href="#">June 2013</a></li>
-            <li><a href="#">May 2013</a></li>
-            <li><a href="#">April 2013</a></li>
-        </ol>
-    </div>
+    {% if postListDate is defined and postListDate is not empty %}
+        <div class="p-4">
+            <h4 class="font-italic">Archive</h4>
+            <ol class="list-unstyled mb-0">
+                {% for postDate in postListDate %}
+                    <li>
+                        <a href="{{ url_for('blog.post.list.date', {
+                            'locale': locale,
+                            'date': postDate|date('Y-m'),
+                        }) }}">
+                            {{ postDate|date('F Y') }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ol>
+        </div>
+    {% endif %}
 
-    <div class="p-4">
-        <h4 class="font-italic">Elsewhere</h4>
-        <ul class="fa-ul">
-            <li>
-                <span class="fa-li"><i class="fab fa-github-alt"></i></span>
-                <a href="#">GitHub</a>
-            </li>
-            <li>
-                <span class="fa-li"><i class="fab fa-twitter"></i></span>
-                <a href="#">Twitter</a>
-            </li>
-            <li>
-                <span class="fa-li"><i class="fab fa-facebook-f"></i></span>
-                <a href="#">Facebook</a>
-            </li>
-        </ul>
-    </div>
+    {% if aboutLink is defined and aboutLink is not empty %}
+        <div class="p-4">
+            <h4 class="font-italic">Elsewhere</h4>
+            <ul class="fa-ul">
+                {% for item in aboutLink %}
+                    <li>
+                        {% if item.icon is not empty %}
+                            <span class="fa-li">
+                                <i class="{{ item.icon }}"></i>
+                            </span>
+                        {% endif %}
+                        <a href="{{ item.link }}">{{ item.name }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 {% endblock %}

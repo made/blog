@@ -20,6 +20,7 @@
 namespace App\Controller;
 
 use App\ControllerInterface;
+use DateTime;
 use Fig\Http\Message\StatusCodeInterface;
 use Made\Blog\Theme\Basic\Controller\BlogController as BlogControllerBasic;
 use Made\Blog\Engine\Exception\FailedOperationException;
@@ -43,6 +44,7 @@ class BlogController implements ControllerInterface
     const ROUTE_ROOT = 'blog.root';
     const ROUTE_HOME = 'blog.home';
     const ROUTE_POST_LIST = 'blog.post.list';
+    const ROUTE_POST_LIST_DATE = 'blog.post.list.date';
     const ROUTE_POST = 'blog.post';
     const ROUTE_CATEGORY_LIST = 'blog.category.list';
     const ROUTE_CATEGORY = 'blog.category';
@@ -65,6 +67,9 @@ class BlogController implements ControllerInterface
 
         $app->get('/{locale:[a-z]{2}}/feed', static::class . ':postListAction')
             ->setName(static::ROUTE_POST_LIST);
+
+        $app->get('/{locale:[a-z]{2}}/feed/{date:\d{4}-\d{2}}', static::class . ':postListDateAction')
+            ->setName(static::ROUTE_POST_LIST_DATE);
 
         $app->get('/{locale:[a-z]{2}}/category', static::class . ':categoryListAction')
             ->setName(static::ROUTE_CATEGORY_LIST);
@@ -183,6 +188,39 @@ class BlogController implements ControllerInterface
 
             $data = $this->controller
                 ->postListAction($locale);
+
+            return $this->handle($request, $response, $data);
+        } catch (Throwable $throwable) {
+            // Log everything that might fail.
+            $this->logger->error('Error on request in "' . __METHOD__ . '": ' . $throwable->getMessage(), [
+                'throwable', $throwable,
+            ]);
+        }
+
+        return $response->withStatus(StatusCodeInterface::STATUS_INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param array $args
+     * @return ResponseInterface
+     */
+    public function postListDateAction(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    {
+        try {
+            /** @var string $locale */
+            $locale = $args['locale'];
+            /** @var  $date */
+            $date = $args['date'];
+
+            $dateTime = DateTime::createFromFormat('Y-m', $date);
+            if (false === $dateTime) {
+                return $response->withStatus(StatusCodeInterface::STATUS_NOT_FOUND);
+            }
+
+            $data = $this->controller
+                ->postListDateAction($locale, $dateTime);
 
             return $this->handle($request, $response, $data);
         } catch (Throwable $throwable) {
