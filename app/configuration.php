@@ -55,6 +55,7 @@ return [
     ],
 
     BlogControllerBasic::class => [
+        'title' => 'Made Blog',
         'postPromoteId' => 'test-post-6',
         'postPromoteIdList' => [
             'test-post-5',

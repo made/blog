@@ -35,7 +35,7 @@ optional:
                             <a class="blog-header-logo text-dark" href="{{ url_for('blog.home', {
                                 'locale': locale,
                             }) }}">
-                                Large
+                                {{ title|default('Blog') }}
                             </a>
                         </div>
                         <div class="col-4 py-1 d-flex justify-content-end align-items-center">
