@@ -9,7 +9,7 @@
   "license": "MIT",
   "dependencies": {
     "bootstrap": "^4.3.1",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "lazysizes": "^5.2.0-beta1",
     "popper.js": "^1.16.1",
     "small-module-js": "^1.0.0"
