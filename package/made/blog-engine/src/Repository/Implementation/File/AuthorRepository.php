@@ -146,7 +146,7 @@ class AuthorRepository implements AuthorRepositoryInterface
      */
     public function getOneByName(string $name): ?Author
     {
-        $all = $this->getAll(new Criteria());
+        $all = $this->getAll(new Criteria(Author::class));
 
         return array_reduce($all, function (?Author $carry, Author $one) use ($name): ?Author {
             if (null === $carry && strtolower($name) === strtolower($one->getName())) {
@@ -162,7 +162,7 @@ class AuthorRepository implements AuthorRepositoryInterface
      */
     public function getOneByNameDisplay(string $nameDisplay): ?Author
     {
-        $all = $this->getAll(new Criteria());
+        $all = $this->getAll(new Criteria(Author::class));
 
         return array_reduce($all, function (?Author $carry, Author $one) use ($nameDisplay): ?Author {
             if (null === $carry && strtolower($nameDisplay) === strtolower($one->getNameDisplay())) {

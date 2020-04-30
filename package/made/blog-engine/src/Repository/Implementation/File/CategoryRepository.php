@@ -131,7 +131,7 @@ class CategoryRepository implements CategoryRepositoryInterface
      */
     public function getOneById(string $id): ?Category
     {
-        $all = $this->getAll(new Criteria());
+        $all = $this->getAll(new Criteria(Category::class));
 
         return array_reduce($all, function (?Category $carry, Category $one) use ($id): ?Category {
             if (null === $carry && strtolower($id) === strtolower($one->getId())) {
@@ -147,7 +147,7 @@ class CategoryRepository implements CategoryRepositoryInterface
      */
     public function getOneByName(string $name): ?Category
     {
-        $all = $this->getAll(new Criteria());
+        $all = $this->getAll(new Criteria(Category::class));
 
         return array_reduce($all, function (?Category $carry, Category $one) use ($name): ?Category {
             if (null === $carry && strtolower($name) === strtolower($one->getName())) {

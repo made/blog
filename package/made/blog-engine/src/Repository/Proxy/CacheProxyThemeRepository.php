@@ -94,16 +94,18 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
             $all = $this->themeRepository
                 ->getAll($criteria);
 
-            if (!$fromCache && !empty($all)) {
-                try {
-                    $this->cache->set($key, $all);
-                } catch (InvalidArgumentException $exception) {
-                    $this->logger->error('Unable to set requested value to the cache.', [
-                        'criteria' => $criteria,
-                        'key' => $key,
-                        'exception' => $exception,
-                    ]);
-                }
+            $fromCache = false;
+        }
+
+        if (!$fromCache && !empty($all)) {
+            try {
+                $this->cache->set($key, $all);
+            } catch (InvalidArgumentException $exception) {
+                $this->logger->error('Unable to set requested value to the cache.', [
+                    'criteria' => $criteria,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
         }
 
@@ -137,16 +139,18 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
             $one = $this->themeRepository
                 ->getOneByName($name);
 
-            if (!$fromCache && !empty($all)) {
-                try {
-                    $this->cache->set($key, $one);
-                } catch (InvalidArgumentException $exception) {
-                    $this->logger->error('Unable to set requested value to the cache.', [
-                        'name' => $name,
-                        'key' => $key,
-                        'exception' => $exception,
-                    ]);
-                }
+            $fromCache = false;
+        }
+
+        if (!$fromCache && !empty($one)) {
+            try {
+                $this->cache->set($key, $one);
+            } catch (InvalidArgumentException $exception) {
+                $this->logger->error('Unable to set requested value to the cache.', [
+                    'name' => $name,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
         }
 
@@ -160,6 +164,11 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
      */
     private function getCacheKeyForCriteria(string $format, Criteria $criteria): string
     {
+        $scope = $criteria->getScope();
+        if (null === $scope) {
+            $scope = 'null';
+        }
+
         $offset = $criteria->getOffset();
         if (-1 === $offset) {
             $offset = 'null';
@@ -173,9 +182,6 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
         $filterName = 'null';
         if (null !== ($filter = $criteria->getFilter())) {
             $filterName = $filter->getName();
-
-            $callbackMap = $filter->getCallbackMap();
-            $filterName = $filterName . '_' . implode('_', array_keys($callbackMap));
         }
 
         $orderName = 'null';
@@ -184,7 +190,8 @@ class CacheProxyThemeRepository implements ThemeRepositoryInterface
         }
 
         $identity = $this->getIdentity([
-            'class' => get_class(),
+            'class' /*---*/ => get_class(),
+            'scope' /*---*/ => $scope,
             'offset' /*--*/ => $offset,
             'limit' /*---*/ => $limit,
             'filter' /*--*/ => $filterName,

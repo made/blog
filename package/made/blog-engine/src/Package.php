@@ -245,7 +245,6 @@ class Package extends PackageAbstract
             /** @var array $settings */
             $settings = $configuration[ParsedownExtra::class];
 
-            /** @var ParsedownExtra $parsedown */
             $parsedown = new ParsedownExtra();
             $parsedown->setBreaksEnabled($settings['breaks_enabled']);
             $parsedown->setMarkupEscaped($settings['markup_escaped']);

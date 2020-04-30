@@ -22,6 +22,7 @@ namespace Made\Blog\Engine\Service;
 use Help\Path;
 use Made\Blog\Engine\Exception\InvalidArgumentException;
 use Made\Blog\Engine\Model\Configuration;
+use Made\Blog\Engine\Model\Theme;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
 use Made\Blog\Engine\Repository\ThemeRepositoryInterface;
 use Twig\Loader\FilesystemLoader;
@@ -93,7 +94,7 @@ class ThemeService
         /** @var FilesystemLoader $twigLoader */
 
         // TODO: Add order.
-        $themeListCriteria = new Criteria();
+        $themeListCriteria = new Criteria(Theme::class);
         $themeList = $this->themeRepository
             ->getAll($themeListCriteria);
 

@@ -121,7 +121,13 @@ final class ClosureInspection
     {
         $parameter = $this->getParameter($index);
 
-        return null !== $parameter ? $parameter->getClass() : null;
+        if (null !== $parameter) {
+            $parameterClass = $parameter->getClass();
+
+            return null !== $parameterClass ? $parameterClass->getName() : null;
+        }
+
+        return null;
     }
 
     /**

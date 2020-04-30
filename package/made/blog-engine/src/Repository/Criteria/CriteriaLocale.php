@@ -24,6 +24,7 @@ namespace Made\Blog\Engine\Repository\Criteria;
  *
  * @package Made\Blog\Engine\Repository\Criteria
  *
+ * @method CriteriaLocale setScope(?string $scope)
  * @method CriteriaLocale setOffset(int $offset)
  * @method CriteriaLocale setLimit(int $limit)
  * @method CriteriaLocale setOrder(?Order $order)
@@ -39,9 +40,12 @@ class CriteriaLocale extends Criteria
     /**
      * CriteriaLocale constructor.
      * @param string $locale
+     * @param string|null $scope
      */
-    public function __construct(string $locale)
+    public function __construct(string $locale, ?string $scope = null)
     {
+        parent::__construct($scope);
+
         $this->locale = $locale;
     }
 

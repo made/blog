@@ -44,6 +44,7 @@ use Psr\Http\Message\ServerRequestInterface;
  *
  * TODO: Use the provided request object more extensively.
  *
+ * @deprecated
  * @package Made\Blog\Engine\Service\PageDataProvider\Implementation\Basic
  */
 class PageDataProvider implements PageDataProviderInterface

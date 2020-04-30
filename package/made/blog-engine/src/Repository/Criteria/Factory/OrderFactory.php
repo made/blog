@@ -33,8 +33,6 @@ use Made\Blog\Engine\Repository\Criteria\Order;
  */
 final class OrderFactory
 {
-    // TODO: Refactor so, the scope is only the class as argument calling private static functions.
-
     const ORDER_DESC /*---*/ = 'DESC';
     const ORDER_ASC /*----*/ = 'ASC';
 
@@ -47,13 +45,28 @@ final class OrderFactory
     }
 
     /**
+     * @param string $key
+     * @param string|null $order
+     * @return Order
+     */
+    public static function byDate(string $key, ?string $order = null): ?Order
+    {
+        $key = static::normalizeKey($key);
+        $methodName = __FUNCTION__ . $key;
+
+        return method_exists(static::class, $methodName)
+            ? static::$methodName($order)
+            : null;
+    }
+
+    /**
      * Target: {@link PostConfigurationLocale}
      *
      * @param string|null $order
      * @return Order
      * @throws FailedOperationException
      */
-    public static function byDate_PostConfigurationLocale(?string $order = null): Order
+    public static function byDatePostConfigurationLocale(?string $order = null): Order
     {
         $order = static::normalizeOrder($order);
         $comparator = null;
@@ -82,7 +95,7 @@ final class OrderFactory
             throw new FailedOperationException('Unable to match requested order: ' . $order);
         }
 
-        return new Order(__METHOD__, $comparator);
+        return new Order(__FUNCTION__, $comparator);
     }
 
     /**
@@ -92,7 +105,7 @@ final class OrderFactory
      * @return Order
      * @throws FailedOperationException
      */
-    public static function byId_Category(?string $order = null): Order
+    public static function byIdCategory(?string $order = null): Order
     {
         $order = static::normalizeOrder($order);
         $comparator = null;
@@ -113,7 +126,7 @@ final class OrderFactory
             throw new FailedOperationException('Unable to match requested order: ' . $order);
         }
 
-        return new Order(__METHOD__, $comparator);
+        return new Order(__FUNCTION__, $comparator);
     }
 
     /**
@@ -123,7 +136,7 @@ final class OrderFactory
      * @return Order
      * @throws FailedOperationException
      */
-    public static function byName_Category(?string $order = null): Order
+    public static function byNameCategory(?string $order = null): Order
     {
         $order = static::normalizeOrder($order);
         $comparator = null;
@@ -144,7 +157,7 @@ final class OrderFactory
             throw new FailedOperationException('Unable to match requested order: ' . $order);
         }
 
-        return new Order(__METHOD__, $comparator);
+        return new Order(__FUNCTION__, $comparator);
     }
 
     /**
@@ -154,7 +167,7 @@ final class OrderFactory
      * @return Order
      * @throws FailedOperationException
      */
-    public static function byId_Tag(?string $order = null): Order
+    public static function byIdTag(?string $order = null): Order
     {
         $order = static::normalizeOrder($order);
         $comparator = null;
@@ -175,7 +188,7 @@ final class OrderFactory
             throw new FailedOperationException('Unable to match requested order: ' . $order);
         }
 
-        return new Order(__METHOD__, $comparator);
+        return new Order(__FUNCTION__, $comparator);
     }
 
     /**
@@ -185,7 +198,7 @@ final class OrderFactory
      * @return Order
      * @throws FailedOperationException
      */
-    public static function byName_Tag(?string $order = null): Order
+    public static function byNameTag(?string $order = null): Order
     {
         $order = static::normalizeOrder($order);
         $comparator = null;
@@ -206,7 +219,7 @@ final class OrderFactory
             throw new FailedOperationException('Unable to match requested order: ' . $order);
         }
 
-        return new Order(__METHOD__, $comparator);
+        return new Order(__FUNCTION__, $comparator);
     }
 
     /**
@@ -216,7 +229,7 @@ final class OrderFactory
      * @return Order
      * @throws FailedOperationException
      */
-    public static function byName_Author(?string $order = null): Order
+    public static function byNameAuthor(?string $order = null): Order
     {
         $order = static::normalizeOrder($order);
         $comparator = null;
@@ -237,7 +250,7 @@ final class OrderFactory
             throw new FailedOperationException('Unable to match requested order: ' . $order);
         }
 
-        return new Order(__METHOD__, $comparator);
+        return new Order(__FUNCTION__, $comparator);
     }
 
     /**
@@ -247,7 +260,7 @@ final class OrderFactory
      * @return Order
      * @throws FailedOperationException
      */
-    public static function byNameDisplay_Author(?string $order = null): Order
+    public static function byNameDisplayAuthor(?string $order = null): Order
     {
         $order = static::normalizeOrder($order);
         $comparator = null;
@@ -268,7 +281,18 @@ final class OrderFactory
             throw new FailedOperationException('Unable to match requested order: ' . $order);
         }
 
-        return new Order(__METHOD__, $comparator);
+        return new Order(__FUNCTION__, $comparator);
+    }
+
+    /**
+     * @param string $key
+     * @return string
+     */
+    public static function normalizeKey(string $key): string
+    {
+        $segment = explode('\\', $key);
+
+        return end($segment) ?: $key;
     }
 
     /**

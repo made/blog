@@ -39,6 +39,7 @@ return [
     Configuration::class => [
         Configuration::CONFIGURATION_NAME_ROOT_DIRECTORY => dirname(__DIR__),
         Configuration::CONFIGURATION_NAME_FALLBACK_LOCALE => 'en',
+        Configuration::CONFIGURATION_NAME_THEME_NAME => 'theme-basic',
     ],
 
     Cache::class => [
@@ -54,25 +55,36 @@ return [
     ],
 
     BlogControllerBasic::class => [
+        'postPromoteId' => 'test-post-6',
+        'postPromoteIdList' => [
+            'test-post-5',
+            'test-post-4',
+        ],
         'aboutText' => <<<HTML
 Some small text about this blog. <em>I like trains.</em>
 HTML,
-        'aboutLink' => [
+        'aboutLinkList' => [
             [
                 'icon' => 'fab fa-github-alt',
                 'name' => 'GitHub',
                 'link' => 'https://github.com/made',
+                'target' => '_blank',
             ],
             [
                 'icon' => 'fab fa-twitter',
                 'name' => 'Twitter',
                 'link' => 'https://twitter.com/made_dot_dev',
+                'target' => '_blank',
             ],
             [
                 'icon' => null,
                 'name' => 'made.dev',
                 'link' => 'https://made.dev/',
+                'target' => '_blank',
             ],
         ],
+        'footerText' => <<<HTML
+Made Blog - Copyright &copy; 2019-2020 Made
+HTML,
     ],
 ];

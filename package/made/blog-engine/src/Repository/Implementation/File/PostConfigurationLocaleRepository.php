@@ -175,7 +175,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
      */
     public function getOneBySlug(string $locale, string $slug): ?PostConfigurationLocale
     {
-        $allLocale = $this->getAll(new CriteriaLocale($locale));
+        $allLocale = $this->getAll(new CriteriaLocale($locale, PostConfigurationLocale::class));
 
         return array_reduce($allLocale, function (?PostConfigurationLocale $carry, PostConfigurationLocale $oneLocale) use ($slug): ?PostConfigurationLocale {
             if (null === $carry && $this->matchSlug($slug, $oneLocale->getSlug())) {
@@ -191,7 +191,7 @@ class PostConfigurationLocaleRepository implements PostConfigurationLocaleReposi
      */
     public function getOneBySlugRedirect(string $locale, string $slugRedirect): ?PostConfigurationLocale
     {
-        $allLocale = $this->getAll(new CriteriaLocale($locale));
+        $allLocale = $this->getAll(new CriteriaLocale($locale, PostConfigurationLocale::class));
 
         return array_reduce($allLocale, function (?PostConfigurationLocale $carry, PostConfigurationLocale $oneLocale) use ($slugRedirect): ?PostConfigurationLocale {
             // TODO: Unpacking on null!

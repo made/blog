@@ -22,7 +22,6 @@ namespace Made\Blog\Engine\Repository\Proxy;
 use Made\Blog\Engine\Model\Author;
 use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
-use Made\Blog\Engine\Repository\Mapper\PostConfigurationLocaleMapper;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
@@ -106,16 +105,18 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
             $all = $this->authorRepository
                 ->getAll($criteria);
 
-            if (!$fromCache && !empty($all)) {
-                try {
-                    $this->cache->set($key, $all);
-                } catch (InvalidArgumentException $exception) {
-                    $this->logger->error('Unable to set requested value to the cache.', [
-                        'criteria' => $criteria,
-                        'key' => $key,
-                        'exception' => $exception,
-                    ]);
-                }
+            $fromCache = false;
+        }
+
+        if (!$fromCache && !empty($all)) {
+            try {
+                $this->cache->set($key, $all);
+            } catch (InvalidArgumentException $exception) {
+                $this->logger->error('Unable to set requested value to the cache.', [
+                    'criteria' => $criteria,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
         }
 
@@ -151,17 +152,19 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
             $all = $this->authorRepository
                 ->getAll($criteria);
 
-            if (!$fromCache && !empty($all)) {
-                try {
-                    $this->cache->set($key, $all);
-                } catch (InvalidArgumentException $exception) {
-                    $this->logger->error('Unable to set requested value to the cache.', [
-                        'criteria' => $criteria,
-                        'location' => $location,
-                        'key' => $key,
-                        'exception' => $exception,
-                    ]);
-                }
+            $fromCache = false;
+        }
+
+        if (!$fromCache && !empty($all)) {
+            try {
+                $this->cache->set($key, $all);
+            } catch (InvalidArgumentException $exception) {
+                $this->logger->error('Unable to set requested value to the cache.', [
+                    'criteria' => $criteria,
+                    'location' => $location,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
         }
 
@@ -195,16 +198,18 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
             $one = $this->authorRepository
                 ->getOneByName($name);
 
-            if (!$fromCache && !empty($all)) {
-                try {
-                    $this->cache->set($key, $one);
-                } catch (InvalidArgumentException $exception) {
-                    $this->logger->error('Unable to set requested value to the cache.', [
-                        'name' => $name,
-                        'key' => $key,
-                        'exception' => $exception,
-                    ]);
-                }
+            $fromCache = false;
+        }
+
+        if (!$fromCache && !empty($one)) {
+            try {
+                $this->cache->set($key, $one);
+            } catch (InvalidArgumentException $exception) {
+                $this->logger->error('Unable to set requested value to the cache.', [
+                    'name' => $name,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
         }
 
@@ -238,16 +243,18 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
             $one = $this->authorRepository
                 ->getOneByNameDisplay($nameDisplay);
 
-            if (!$fromCache && !empty($all)) {
-                try {
-                    $this->cache->set($key, $one);
-                } catch (InvalidArgumentException $exception) {
-                    $this->logger->error('Unable to set requested value to the cache.', [
-                        'nameDisplay' => $nameDisplay,
-                        'key' => $key,
-                        'exception' => $exception,
-                    ]);
-                }
+            $fromCache = false;
+        }
+
+        if (!$fromCache && !empty($one)) {
+            try {
+                $this->cache->set($key, $one);
+            } catch (InvalidArgumentException $exception) {
+                $this->logger->error('Unable to set requested value to the cache.', [
+                    'nameDisplay' => $nameDisplay,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
         }
 
@@ -279,6 +286,11 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
      */
     private function getCacheKeyForCriteria(string $format, Criteria $criteria): string
     {
+        $scope = $criteria->getScope();
+        if (null === $scope) {
+            $scope = 'null';
+        }
+
         $offset = $criteria->getOffset();
         if (-1 === $offset) {
             $offset = 'null';
@@ -292,9 +304,6 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
         $filterName = 'null';
         if (null !== ($filter = $criteria->getFilter())) {
             $filterName = $filter->getName();
-
-            $callbackMap = $filter->getCallbackMap();
-            $filterName = $filterName . '_' . implode('_', array_keys($callbackMap));
         }
 
         $orderName = 'null';
@@ -303,7 +312,8 @@ class CacheProxyAuthorRepository implements AuthorRepositoryInterface
         }
 
         $identity = $this->getIdentity([
-            'class' => get_class(),
+            'class' /*---*/ => get_class(),
+            'scope' /*---*/ => $scope,
             'offset' /*--*/ => $offset,
             'limit' /*---*/ => $limit,
             'filter' /*--*/ => $filterName,

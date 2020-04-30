@@ -27,6 +27,11 @@ namespace Made\Blog\Engine\Repository\Criteria;
 class Criteria
 {
     /**
+     * @var string|null
+     */
+    private $scope;
+
+    /**
      * @var int
      */
     private $offset = -1;
@@ -45,6 +50,33 @@ class Criteria
      * @var Filter|null
      */
     private $filter;
+
+    /**
+     * Criteria constructor.
+     * @param string|null $scope
+     */
+    public function __construct(?string $scope = null)
+    {
+        $this->scope = $scope;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getScope(): ?string
+    {
+        return $this->scope;
+    }
+
+    /**
+     * @param string|null $scope
+     * @return Criteria
+     */
+    public function setScope(?string $scope): Criteria
+    {
+        $this->scope = $scope;
+        return $this;
+    }
 
     /**
      * @return int

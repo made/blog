@@ -28,7 +28,7 @@ optional:
                 <header class="blog-header py-3">
                     <div class="row flex-nowrap justify-content-between align-items-stretch">
                         <div class="col-4 py-1 d-flex justify-content-start align-items-center">
-                            {# TODO: What to link here? #}
+                            {# TODO: Locale switcher. #}
                             <a class="text-muted" href="#">Subscribe</a>
                         </div>
                         <div class="col-4 text-center">
@@ -99,10 +99,9 @@ optional:
     {% block content_footer %}
         {% block footer %}
             <footer class="blog-footer">
-                <p>
-                    Blog template built for <a href="https://getbootstrap.com/">Bootstrap</a> by <a
-                            href="https://twitter.com/mdo">@mdo</a>.
-                </p>
+                {% if footerText is defined and footerText is not empty %}
+                    <p>{{ footerText|raw }}</p>
+                {% endif %}
 
                 <p>
                     <a href="#">

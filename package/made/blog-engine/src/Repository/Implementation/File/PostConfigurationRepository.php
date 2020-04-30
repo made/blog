@@ -215,7 +215,7 @@ class PostConfigurationRepository implements PostConfigurationRepositoryInterfac
      */
     public function getOneById(string $id): ?PostConfiguration
     {
-        $all = $this->getAll(new Criteria());
+        $all = $this->getAll(new Criteria(PostConfiguration::class));
 
         return array_reduce($all, function (?PostConfiguration $carry, PostConfiguration $one) use ($id): ?PostConfiguration {
             if (null === $carry && strtolower($id) === strtolower($one->getId())) {

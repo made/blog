@@ -34,21 +34,72 @@ final class FilterFactory
      * @param DateTime $dateTime
      * @param string $key
      * @param string $format
-     * @param Filter|null $filter
+     * @return Filter|null
+     */
+    public static function byDate(DateTime $dateTime, string $key, string $format = 'Y-m'): ?Filter
+    {
+        $key = static::normalizeKey($key);
+        $methodName = __FUNCTION__ . $key;
+
+        return method_exists(static::class, $methodName)
+            ? static::$methodName($dateTime, $format)
+            : null;
+    }
+
+    /**
+     * @param DateTime $dateTime
+     * @param string $format
      * @return Filter
      */
-    public static function byDate(DateTime $dateTime, string $key, string $format = 'Y-m', ?Filter $filter = null): Filter
+    public static function byDatePostConfigurationLocale(DateTime $dateTime, string $format = 'Y-m'): Filter
     {
-        $filter = $filter ?: new Filter(__METHOD__ . $key, []);
+        $callback = function (PostConfigurationLocale $postConfigurationLocale) use ($dateTime, $format): bool {
+            $dateTimeLocale = $postConfigurationLocale->getDate();
 
-        if (PostConfigurationLocale::class === $key) {
-            $filter->setCallback($key, function (PostConfigurationLocale $postConfigurationLocale) use ($dateTime, $format): bool {
-                $dateTimeLocale = $postConfigurationLocale->getDate();
+            return $dateTimeLocale->format($format) === $dateTime->format($format);
+        };
 
-                return $dateTimeLocale->format($format) === $dateTime->format($format);
-            });
-        }
+        return new Filter(__FUNCTION__, $callback);
+    }
 
-        return $filter;
+    /**
+     * @param array $list
+     * @param string $key
+     * @return Filter
+     */
+    public static function byIdInList(array $list, string $key): ?Filter
+    {
+        $key = static::normalizeKey($key);
+        $methodName = __FUNCTION__ . $key;
+
+        return method_exists(static::class, $methodName)
+            ? static::$methodName($list)
+            : null;
+    }
+
+    /**
+     * @param array $list
+     * @return Filter
+     */
+    public static function byIdInListPostConfigurationLocale(array $list): Filter
+    {
+        $callback = function (PostConfigurationLocale $postConfigurationLocale) use ($list): bool {
+            $idLocale = $postConfigurationLocale->getId();
+
+            return in_array($idLocale, $list);
+        };
+
+        return new Filter(__FUNCTION__, $callback);
+    }
+
+    /**
+     * @param string $key
+     * @return string
+     */
+    public static function normalizeKey(string $key): string
+    {
+        $segment = explode('\\', $key);
+
+        return end($segment) ?: $key;
     }
 }

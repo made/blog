@@ -23,10 +23,13 @@ use DateTime;
 use Help\Path;
 use Help\Slug;
 use Made\Blog\Engine\Exception\FailedOperationException;
+use Made\Blog\Engine\Model\Author;
+use Made\Blog\Engine\Model\Category;
 use Made\Blog\Engine\Model\Configuration;
 use Made\Blog\Engine\Model\Post;
 use Made\Blog\Engine\Model\PostConfiguration;
 use Made\Blog\Engine\Model\PostConfigurationLocale;
+use Made\Blog\Engine\Model\Tag;
 use Made\Blog\Engine\Repository\AuthorRepositoryInterface;
 use Made\Blog\Engine\Repository\CategoryRepositoryInterface;
 use Made\Blog\Engine\Repository\Criteria\Criteria;
@@ -58,6 +61,8 @@ class BlogController
 
     const VARIABLE_DATA_LOCALE = 'locale';
     const VARIABLE_DATA_POST = 'post';
+    const VARIABLE_DATA_POST_PROMOTE = 'postPromote';
+    const VARIABLE_DATA_POST_PROMOTE_LIST = 'postPromoteList';
     const VARIABLE_DATA_POST_LIST = 'postList';
     const VARIABLE_DATA_POST_LIST_DATE = 'postListDate';
     const VARIABLE_DATA_CATEGORY_LIST = 'categoryList';
@@ -80,7 +85,7 @@ class BlogController
     const TEMPLATE_EXTENSION = '.html.twig';
 
     const PAGE_SIZE_POST_LIST = 10;
-    const PAGE_SIZE_POST_LIST_ALL = 3;
+    const PAGE_SIZE_POST_LIST_HOME = 2;
     const PAGE_SIZE_CATEGORY_LIST = 10;
     const PAGE_SIZE_TAG_LIST = 10;
     const PAGE_SIZE_AUTHOR_LIST = 10;
@@ -164,24 +169,49 @@ class BlogController
      */
     public function homeAction(string $locale): ?array
     {
-        $tagListCriteria = (new Criteria())
-            ->setOrder(OrderFactory::byName_Tag());
-        $tagList = $this->tagRepository
-            ->getAll($tagListCriteria);
+//        $tagListCriteria = (new Criteria(Tag::class))
+//            ->setOrder(OrderFactory::byNameTag());
+//        $tagList = $this->tagRepository
+//            ->getAll($tagListCriteria);
 
-        // TODO: Get the configured promoted posts instead of the most recent ones.
-        $postListCriteria = (new CriteriaLocale($locale))
-            ->setLimit(static::PAGE_SIZE_POST_LIST_ALL)
-            ->setOrder(OrderFactory::byDate_PostConfigurationLocale());
+        $postListCriteria = (new CriteriaLocale($locale, PostConfigurationLocale::class))
+            ->setLimit(static::PAGE_SIZE_POST_LIST_HOME)
+            ->setOrder(OrderFactory::byDate(PostConfigurationLocale::class));
 
         $postList = $this->postRepository
             ->getAll($postListCriteria);
 
+        $postPromoteId = $this->pageData['postPromoteId'] ?? null;
+        $postPromote = null;
+
+        if (null !== $postPromoteId) {
+            $postPromote = $this->postRepository
+                ->getOneById($locale, $postPromoteId);
+        }
+
+        $postPromoteIdList = $this->pageData['postPromoteIdList'] ?? null;
+        $postPromoteList = null;
+
+        if (null !== $postPromoteIdList) {
+            $postPromoteListCriteria = (new CriteriaLocale($locale, PostConfigurationLocale::class))
+                ->setLimit(static::PAGE_SIZE_POST_LIST_HOME)
+                ->setOrder(OrderFactory::byDate(PostConfigurationLocale::class))
+                ->setFilter(FilterFactory::byIdInList($postPromoteIdList, PostConfigurationLocale::class));
+
+            $postPromoteList = $this->postRepository
+                ->getAll($postPromoteListCriteria);
+        }
+
+        $postListDate = $this->getPostListDate($locale);
+
         $template = $this->getTemplate(static::TEMPLATE_NAME_HOME);
 
         return $this->createData($locale, $template, [
-            static::VARIABLE_DATA_TAG_LIST => $tagList, // TODO
+//            static::VARIABLE_DATA_TAG_LIST => $tagList,
             static::VARIABLE_DATA_POST_LIST => $postList,
+            static::VARIABLE_DATA_POST_PROMOTE => $postPromote,
+            static::VARIABLE_DATA_POST_PROMOTE_LIST => $postPromoteList,
+            static::VARIABLE_DATA_POST_LIST_DATE => $postListDate,
         ]);
     }
 
@@ -193,9 +223,9 @@ class BlogController
      */
     public function postListAction(string $locale, int $page = 0): ?array
     {
+        $postListCriteria = (new CriteriaLocale($locale, PostConfigurationLocale::class))
+            ->setOrder(OrderFactory::byDate(PostConfigurationLocale::class));
         /** @var CriteriaLocale $postListCriteria */
-        $postListCriteria = (new CriteriaLocale($locale))
-            ->setOrder(OrderFactory::byDate_PostConfigurationLocale());
         $postListCriteria = $this->setPage($postListCriteria, $page, static::PAGE_SIZE_POST_LIST);
 
         $postList = $this->postRepository
@@ -216,15 +246,9 @@ class BlogController
      */
     public function postListDateAction(string $locale, DateTime $dateTime): ?array
     {
-        /** @var CriteriaLocale $postListCriteria */
-        $postListCriteria = (new CriteriaLocale($locale))
-            ->setFilter(
-                FilterFactory::byDate($dateTime, PostConfigurationLocale::class, 'Y-m', null)
-            )
-            ->setOrder(
-                OrderFactory::byDate_PostConfigurationLocale()
-            );
-
+        $postListCriteria = (new CriteriaLocale($locale, PostConfigurationLocale::class))
+            ->setFilter(FilterFactory::byDate($dateTime, PostConfigurationLocale::class, 'Y-m'))
+            ->setOrder(OrderFactory::byDate(PostConfigurationLocale::class));
         $postList = $this->postRepository
             ->getAll($postListCriteria);
 
@@ -278,9 +302,9 @@ class BlogController
      */
     public function categoryListAction(string $locale, int $page = 0): ?array
     {
+        $categoryListCriteria = (new Criteria(Category::class))
+            ->setOrder(OrderFactory::byNameCategory());
         /** @var Criteria $categoryListCriteria */
-        $categoryListCriteria = (new Criteria())
-            ->setOrder(OrderFactory::byName_Category());
         $categoryListCriteria = $this->setPage($categoryListCriteria, $page, static::PAGE_SIZE_CATEGORY_LIST);
 
         $categoryList = $this->categoryRepository
@@ -327,9 +351,9 @@ class BlogController
      */
     public function tagListAction(string $locale, int $page = 0): ?array
     {
+        $tagListCriteria = (new Criteria(Tag::class))
+            ->setOrder(OrderFactory::byNameTag());
         /** @var Criteria $tagListCriteria */
-        $tagListCriteria = (new Criteria())
-            ->setOrder(OrderFactory::byName_Tag());
         $tagListCriteria = $this->setPage($tagListCriteria, $page, static::PAGE_SIZE_TAG_LIST);
 
         $tagList = $this->tagRepository
@@ -376,9 +400,9 @@ class BlogController
      */
     public function authorListAction(string $locale, int $page = 0): ?array
     {
+        $authorListCriteria = (new Criteria(Author::class))
+            ->setOrder(OrderFactory::byNameAuthor());
         /** @var Criteria $authorListCriteria */
-        $authorListCriteria = (new Criteria())
-            ->setOrder(OrderFactory::byName_Author());
         $authorListCriteria = $this->setPage($authorListCriteria, $page, static::PAGE_SIZE_AUTHOR_LIST);
 
         $authorList = $this->authorRepository
@@ -503,36 +527,16 @@ class BlogController
      */
     protected function createData(string $locale, string $template, array $data): ?array
     {
-        $categoryListAllCriteria = (new Criteria())
-            ->setOrder(OrderFactory::byName_Category());
+        $categoryListAllCriteria = (new Criteria(Category::class))
+            ->setOrder(OrderFactory::byNameCategory());
         $categoryListAll = $this->categoryRepository
             ->getAll($categoryListAllCriteria);
-
-        $postConfigurationLocaleListCriteria = (new CriteriaLocale($locale))
-            ->setOrder(OrderFactory::byDate_PostConfigurationLocale());
-        $postConfigurationLocaleList = $this->postConfigurationLocaleRepository
-            ->getAll($postConfigurationLocaleListCriteria);
-
-        $postListDate = array_map(function (PostConfigurationLocale $postConfigurationLocale): DateTime {
-            return $postConfigurationLocale->getDate();
-        }, $postConfigurationLocaleList);
-        $postListDate = array_reduce($postListDate, function (array $carry, DateTime $dateTime): array {
-            $key = $dateTime->format('Y-m');
-
-            if (!array_key_exists($key, $carry)) {
-                $carry[$key] = $dateTime;
-            }
-
-            return $carry;
-        }, []);
-        $postListDate = array_values($postListDate);
 
         // Data has to be merged/replaced in the defaults, so it can be overridden. But that has to be non-recursive.
         // Also put the page data (settings) before that. That ways reserved keys are not taken by configuration.
         $data = array_replace($this->pageData, [
             static::VARIABLE_DATA_LOCALE => $locale,
             static::VARIABLE_DATA_CATEGORY_LIST_ALL => $categoryListAll,
-            static::VARIABLE_DATA_POST_LIST_DATE => $postListDate,
         ], $data);
 
         return [
@@ -561,5 +565,34 @@ class BlogController
         return $criteria
             ->setOffset($page * $pageSize)
             ->setLimit($pageSize);
+    }
+
+    /**
+     * @param string $locale
+     * @return array|DateTime[]
+     * @throws FailedOperationException
+     */
+    private function getPostListDate(string $locale): array
+    {
+        $postConfigurationLocaleListCriteria = (new CriteriaLocale($locale, PostConfigurationLocale::class))
+            ->setOrder(OrderFactory::byDate(PostConfigurationLocale::class));
+        $postConfigurationLocaleList = $this->postConfigurationLocaleRepository
+            ->getAll($postConfigurationLocaleListCriteria);
+
+        /** @var array|DateTime[] $postListDate */
+        $postListDate = array_map(function (PostConfigurationLocale $postConfigurationLocale): DateTime {
+            return $postConfigurationLocale->getDate();
+        }, $postConfigurationLocaleList);
+        $postListDate = array_reduce($postListDate, function (array $carry, DateTime $dateTime): array {
+            $key = $dateTime->format('Y-m');
+
+            if (!array_key_exists($key, $carry)) {
+                $carry[$key] = $dateTime;
+            }
+
+            return $carry;
+        }, []);
+
+        return array_values($postListDate);
     }
 }

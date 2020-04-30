@@ -148,7 +148,7 @@ class ThemeRepository implements ThemeRepositoryInterface
      */
     public function getOneByName(string $name): ?Theme
     {
-        $all = $this->getAll(new Criteria());
+        $all = $this->getAll(new Criteria(Theme::class));
 
         return array_reduce($all, function (?Theme $carry, Theme $theme) use ($name): ?Theme {
             if (null === $carry && $theme->getName() === $name) {

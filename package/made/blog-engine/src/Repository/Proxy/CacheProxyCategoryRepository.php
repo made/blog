@@ -103,16 +103,18 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
             $all = $this->categoryRepository
                 ->getAll($criteria);
 
-            if (!$fromCache && !empty($all)) {
-                try {
-                    $this->cache->set($key, $all);
-                } catch (InvalidArgumentException $exception) {
-                    $this->logger->error('Unable to set requested value to the cache.', [
-                        'criteria' => $criteria,
-                        'key' => $key,
-                        'exception' => $exception,
-                    ]);
-                }
+            $fromCache = false;
+        }
+
+        if (!$fromCache && !empty($all)) {
+            try {
+                $this->cache->set($key, $all);
+            } catch (InvalidArgumentException $exception) {
+                $this->logger->error('Unable to set requested value to the cache.', [
+                    'criteria' => $criteria,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
         }
 
@@ -146,16 +148,18 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
             $one = $this->categoryRepository
                 ->getOneById($id);
 
-            if (!$fromCache && !empty($all)) {
-                try {
-                    $this->cache->set($key, $one);
-                } catch (InvalidArgumentException $exception) {
-                    $this->logger->error('Unable to set requested value to the cache.', [
-                        'id' => $id,
-                        'key' => $key,
-                        'exception' => $exception,
-                    ]);
-                }
+            $fromCache = false;
+        }
+
+        if (!$fromCache && !empty($one)) {
+            try {
+                $this->cache->set($key, $one);
+            } catch (InvalidArgumentException $exception) {
+                $this->logger->error('Unable to set requested value to the cache.', [
+                    'id' => $id,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
         }
 
@@ -189,16 +193,18 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
             $one = $this->categoryRepository
                 ->getOneByName($name);
 
-            if (!$fromCache && !empty($all)) {
-                try {
-                    $this->cache->set($key, $one);
-                } catch (InvalidArgumentException $exception) {
-                    $this->logger->error('Unable to set requested value to the cache.', [
-                        'name' => $name,
-                        'key' => $key,
-                        'exception' => $exception,
-                    ]);
-                }
+            $fromCache = false;
+        }
+
+        if (!$fromCache && !empty($one)) {
+            try {
+                $this->cache->set($key, $one);
+            } catch (InvalidArgumentException $exception) {
+                $this->logger->error('Unable to set requested value to the cache.', [
+                    'name' => $name,
+                    'key' => $key,
+                    'exception' => $exception,
+                ]);
             }
         }
 
@@ -230,6 +236,11 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
      */
     private function getCacheKeyForCriteria(string $format, Criteria $criteria): string
     {
+        $scope = $criteria->getScope();
+        if (null === $scope) {
+            $scope = 'null';
+        }
+
         $offset = $criteria->getOffset();
         if (-1 === $offset) {
             $offset = 'null';
@@ -243,9 +254,6 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
         $filterName = 'null';
         if (null !== ($filter = $criteria->getFilter())) {
             $filterName = $filter->getName();
-
-            $callbackMap = $filter->getCallbackMap();
-            $filterName = $filterName . '_' . implode('_', array_keys($callbackMap));
         }
 
         $orderName = 'null';
@@ -254,7 +262,8 @@ class CacheProxyCategoryRepository implements CategoryRepositoryInterface
         }
 
         $identity = $this->getIdentity([
-            'class' => get_class(),
+            'class' /*---*/ => get_class(),
+            'scope' /*---*/ => $scope,
             'offset' /*--*/ => $offset,
             'limit' /*---*/ => $limit,
             'filter' /*--*/ => $filterName,

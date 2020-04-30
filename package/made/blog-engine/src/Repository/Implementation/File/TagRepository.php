@@ -131,7 +131,7 @@ class TagRepository implements TagRepositoryInterface
      */
     public function getOneById(string $id): ?Tag
     {
-        $all = $this->getAll(new Criteria());
+        $all = $this->getAll(new Criteria(Tag::class));
 
         return array_reduce($all, function (?Tag $carry, Tag $one) use ($id): ?Tag {
             if (null === $carry && strtolower($id) === strtolower($one->getId())) {
@@ -147,7 +147,7 @@ class TagRepository implements TagRepositoryInterface
      */
     public function getOneByName(string $name): ?Tag
     {
-        $all = $this->getAll(new Criteria());
+        $all = $this->getAll(new Criteria(Tag::class));
 
         return array_reduce($all, function (?Tag $carry, Tag $one) use ($name): ?Tag {
             if (null === $carry && strtolower($name) === strtolower($one->getName())) {

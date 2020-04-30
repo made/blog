@@ -45,7 +45,7 @@ trait CriteriaHelperTrait
         if (!empty($all)) {
             $all = $this->applyCriteriaFilter($criteria, $all, $className);
             $all = $this->orderCriteriaOrder($criteria, $all, $className);
-            $all = $this->applyCriteriaSlice($criteria, $all);
+            $all = $this->applyCriteriaSlice($criteria, $all, $className);
         }
 
         return $all;
@@ -59,12 +59,10 @@ trait CriteriaHelperTrait
      */
     private function applyCriteriaFilter(Criteria $criteria, array $all, string $className): array
     {
-        if (null !== ($filter = $criteria->getFilter())) {
-            /** @var Closure $callback */
-            $callback = $filter->getCallback($className);
+        if ($criteria->getScope() === $className && null !== ($filter = $criteria->getFilter())) {
+            $callback = $filter->getCallback();
 
             if (null !== $callback) {
-                /** @var ClosureInspection|null $callbackInspection */
                 $callbackInspection = $this->createInspection($callback);
 
                 if (null !== $callbackInspection && $callbackInspection->isParameterTypeClass(0, $className)) {
@@ -77,28 +75,6 @@ trait CriteriaHelperTrait
     }
 
     /**
-     * TODO: Further testing is needed.
-     *
-     * @param Criteria $criteria
-     * @param array $all
-     * @return array
-     */
-    private function applyCriteriaSlice(Criteria $criteria, array $all): array
-    {
-        $offset = $criteria->getOffset();
-        if (-1 === $offset) {
-            $offset = null;
-        }
-
-        $limit = $criteria->getLimit();
-        if (-1 === $limit) {
-            $limit = null;
-        }
-
-        return array_slice($all, $offset, $limit);
-    }
-
-    /**
      * @param Criteria $criteria
      * @param array $all
      * @param string $className
@@ -106,10 +82,8 @@ trait CriteriaHelperTrait
      */
     private function orderCriteriaOrder(Criteria $criteria, array $all, string $className): array
     {
-        if (null !== ($order = $criteria->getOrder())) {
-            /** @var Closure $comparator */
+        if ($criteria->getScope() === $className && null !== ($order = $criteria->getOrder())) {
             $comparator = $order->getComparator();
-            /** @var ClosureInspection|null $comparatorInspection */
             $comparatorInspection = $this->createInspection($comparator);
 
             if (null !== $comparatorInspection
@@ -117,6 +91,34 @@ trait CriteriaHelperTrait
                 && $comparatorInspection->isParameterTypeClass(1, $className)) {
                 usort($all, $comparator);
             }
+        }
+
+        return $all;
+    }
+
+    /**
+     * TODO: Further testing is needed.
+     *
+     * @param Criteria $criteria
+     * @param array $all
+     * @param string $className
+     * @return array
+     */
+    private function applyCriteriaSlice(Criteria $criteria, array $all, string $className): array
+    {
+        if ($criteria->getScope() === $className) {
+            $offset = $criteria->getOffset();
+            if (-1 === $offset) {
+                $offset = null;
+            }
+
+            $limit = $criteria->getLimit();
+            if (-1 === $limit) {
+                $limit = null;
+            }
+
+            /** @var array $slice Fix for broken type hint. */
+            $all = $slice = array_slice($all, $offset, $limit);
         }
 
         return $all;

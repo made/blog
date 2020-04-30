@@ -86,6 +86,8 @@ its operations. That include:
 | Asset Unit    | Feature                       |
 | ------------- | ----------------------------- |
 | Style         | Scss compilation              |
+|               | Source minification           |
+|               | Sourcemap generation          |
 | Script        | Source concatenation          |
 |               | Source minification           |
 |               | Sourcemap generation          |
